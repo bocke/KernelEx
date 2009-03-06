@@ -59,46 +59,37 @@ int count(const string& s, char c, size_t pos, size_t epos)
 
 FileFinder::FileFinder()
 {
-	h = NULL;
 }
 
 FileFinder::FileFinder(const string& fn)
 {
-	file_name = fn;
-	h = NULL;
+	search_for(fn);
 }
 	
 FileFinder::~FileFinder()
 {
-	if (h)
-		FindClose(h);
 }
 
 void FileFinder::search_for(const string& fn)
 {
-	file_name = fn;
-	if (h)
-	{
-		FindClose(h);
-		h = NULL;
-	}
+	WIN32_FIND_DATA find_data;
+	files.clear();
+	pos = 0;
+	HANDLE h = FindFirstFile(fn.c_str(), &find_data);
+	if (h == INVALID_HANDLE_VALUE)
+		return;
+	do 
+		files.push_back(find_data.cFileName);
+	while (FindNextFile(h, &find_data));
+	CloseHandle(h);
+	stable_sort(files.begin(), files.end());
 }
 	
 string FileFinder::get_next_file()
 {
-	if (!h)
-	{
-		HANDLE t = FindFirstFile(file_name.c_str(), &find_data);
-		if (t == INVALID_HANDLE_VALUE)
-			return "";
-		h = t;
-	}
-	else
-	{
-		if (!FindNextFile(h, &find_data))
-			return "";
-	}
-	return find_data.cFileName;
+	if (files.empty() || pos >= files.size())
+		return "";
+	return files[pos++];
 }
 
 //////////////////////////////////////////////////////////////////////////
