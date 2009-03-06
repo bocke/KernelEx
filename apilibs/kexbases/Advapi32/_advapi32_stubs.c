@@ -42,3 +42,5 @@ UNIMPL_FUNC(ConvertStringSecurityDescriptorToSecurityDescriptorW, 4);
 
 UNIMPL_FUNC(ConvertSecurityDescriptorToStringSecurityDescriptorA, 5);
 UNIMPL_FUNC(ConvertSecurityDescriptorToStringSecurityDescriptorW, 5);
+
+UNIMPL_FUNC(QueryServiceStatusEx, 5);

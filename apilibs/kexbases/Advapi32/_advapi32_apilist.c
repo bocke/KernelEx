@@ -91,6 +91,7 @@ static const apilib_named_api advapi32_named_apis[] =
 	DECL_API("OpenProcessToken", OpenProcessToken_new),
 	DECL_API("OpenThreadToken", OpenThreadToken_new),
 	DECL_API("PrivilegeCheck", PrivilegeCheck_new),
+	DECL_API("QueryServiceStatusEx", QueryServiceStatusEx_stub),
 	DECL_API("RegDisablePredefinedCache", RegDisablePredefinedCache_new),
 	DECL_API("RegOpenCurrentUser", RegOpenCurrentUser_new),
 	DECL_API("RegOverridePredefKey", RegOverridePredefKey_stub),
