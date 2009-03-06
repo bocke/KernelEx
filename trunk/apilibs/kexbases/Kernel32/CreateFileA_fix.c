@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2008-2009, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -38,6 +38,7 @@ HANDLE WINAPI CreateFileA_fix(LPCSTR lpFileName, DWORD dwDesiredAccess,
 		if (oldaccess & FILE_EXECUTE)
 			dwDesiredAccess |= GENERIC_EXECUTE;
 	}
+	// hTemplate has to be NULL on 9x
 	return CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
-		dwCreationDistribution, dwFlagsAndAttributes, hTemplateFile);
+		dwCreationDistribution, dwFlagsAndAttributes, NULL);
 }
