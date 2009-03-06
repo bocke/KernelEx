@@ -51,9 +51,8 @@ public:
 	string get_next_file();
 
 private:
-	HANDLE h;
-	WIN32_FIND_DATA find_data;
-	string file_name;
+	int pos;
+	vector<string> files;
 };
 
 //////////////////////////////////////////////////////////////////////////
