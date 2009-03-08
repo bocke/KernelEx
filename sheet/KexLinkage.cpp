@@ -34,6 +34,8 @@ KexLinkage::KexLinkage()
 
 KexLinkage::~KexLinkage()
 {
+	if (hKernelEx)
+		FreeLibrary(hKernelEx);
 }
 
 
@@ -43,6 +45,20 @@ bool KexLinkage::Prepare()
 	HKEY key;
 	DWORD type;
 	DWORD len = sizeof(core_conf_file);
+
+	hKernelEx = LoadLibrary("KERNELEX.DLL");
+	if (!hKernelEx)
+		return false;
+
+	m_kexGetModuleSettings = (kexGetModuleSettings_t) GetProcAddress(hKernelEx,
+			"kexGetModuleSettings");
+	m_kexSetModuleSettings = (kexSetModuleSettings_t) GetProcAddress(hKernelEx,
+			"kexSetModuleSettings");
+	m_kexGetKEXVersion = (kexGetKEXVersion_t) GetProcAddress(hKernelEx,
+			"kexGetKEXVersion");
+
+	if (!m_kexGetModuleSettings || !m_kexSetModuleSettings || !m_kexGetKEXVersion)
+		return false;
 
 	//read config file location from registry
 	long result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\KernelEx", 

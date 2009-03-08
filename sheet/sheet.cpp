@@ -336,7 +336,7 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 	else
 		SendMessage(GetDlgItem(hwnd, IDC_SYSTEM), CB_SETCURSEL, 0, 0);
 
-	kexGetModuleSettings(ms->file, ms->conf, &ms->flags);
+	KexLinkage::instance.m_kexGetModuleSettings(ms->file, ms->conf, &ms->flags);
 	
 	for (int i = 0 ; i < KexLinkage::instance.confs.size() ; i++)
 		if (!strcmp(ms->conf, KexLinkage::instance.confs[i].name.get()))
@@ -354,7 +354,7 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 	}
 
 	//set KernelEx version
-	unsigned long ver = kexGetKEXVersion();
+	unsigned long ver = KexLinkage::instance.m_kexGetKEXVersion();
 	char ver_s[32];
 	sprintf(ver_s, "KernelEx Core v%d.%d.%d", ver>>24, (ver>>16) & 0xff, ver & 0xffff);
 	SendMessage(GetDlgItem(hwnd, IDC_KEXVER), WM_SETTEXT, 0, (LPARAM) ver_s);
@@ -373,7 +373,7 @@ void KexShlExt::OnApply(HWND hwnd)
 				GetDlgItem(hwnd, IDC_SYSTEM), CB_GETCURSEL, 0, 0)].name.get();
 
 	if (flags != ms->flags || strcmp(conf, ms->conf) != 0)
-		kexSetModuleSettings(ms->file, conf, flags);
+		KexLinkage::instance.m_kexSetModuleSettings(ms->file, conf, flags);
 }
 
 

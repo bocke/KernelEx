@@ -32,6 +32,12 @@ using namespace std;
 
 class KexLinkage  
 {
+	typedef void (*kexGetModuleSettings_t)(const char* module, 
+			char* conf_name, BYTE* ldr_flags);
+	typedef void (*kexSetModuleSettings_t)(const char* module, 
+			const char* conf_name, BYTE ldr_flags);
+	typedef unsigned long (*kexGetKEXVersion_t)(void);
+
 	struct conf
 	{
 		conf(const char* n, const char* d) : name(n), desc(d) {}
@@ -46,11 +52,15 @@ public:
 	static KexLinkage instance;
 	vector<conf> confs;
 	int default_index;
+	kexGetModuleSettings_t m_kexGetModuleSettings;
+	kexSetModuleSettings_t m_kexSetModuleSettings;
+	kexGetKEXVersion_t m_kexGetKEXVersion;
 
 protected:
 	KexLinkage();
 	bool Prepare();
 	
+	HMODULE hKernelEx;
 	bool m_ready;
 };
 
