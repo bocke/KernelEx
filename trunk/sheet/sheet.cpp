@@ -258,6 +258,25 @@ BOOL CALLBACK KexShlExt::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		}
 		break;
 
+	case WM_SIZE:
+		{
+			WORD h = HIWORD(lParam);
+			WORD w = LOWORD(lParam);
+
+			RECT r;
+			POINT p;
+			GetWindowRect(GetDlgItem(hwnd, IDC_GCOMPAT), &r);
+			p.x = r.left;
+			p.y = r.top;
+			ScreenToClient(hwnd, &p);
+
+			//reposition horizontal spacer and version text
+			MoveWindow(GetDlgItem(hwnd, IDC_GCOMPAT), p.x, p.y, w - 2 * p.x, r.bottom - r.top, TRUE);
+			MoveWindow(GetDlgItem(hwnd, IDC_HORIZ1), p.x, h - 14 - p.x, w -  2 * p.x, 1, TRUE);
+			MoveWindow(GetDlgItem(hwnd, IDC_KEXVER), p.x, h - 12 - p.x, w - 2 * p.x, 12, TRUE);
+		}
+		break;
+
 	case WM_NOTIFY:
 		{
 			NMHDR* phdr = (NMHDR*) lParam;
@@ -317,28 +336,28 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 	else
 		SendMessage(GetDlgItem(hwnd, IDC_SYSTEM), CB_SETCURSEL, 0, 0);
 
-	if (KexLinkage::instance.m_kexGetModuleSettings(ms->file, ms->conf, &ms->flags))
-	{
-		for (int i = 0 ; i < KexLinkage::instance.confs.size() ; i++)
-			if (!strcmp(ms->conf, KexLinkage::instance.confs[i].name.get()))
-			{
-				CheckDlgButton(hwnd, IDC_COMPAT, BST_CHECKED);
-				EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), TRUE);
-				SendMessage(GetDlgItem(hwnd, IDC_SYSTEM), CB_SETCURSEL, i, 0);
-				break;
-			}
-		if (ms->flags & 1)
+	kexGetModuleSettings(ms->file, ms->conf, &ms->flags);
+	
+	for (int i = 0 ; i < KexLinkage::instance.confs.size() ; i++)
+		if (!strcmp(ms->conf, KexLinkage::instance.confs[i].name.get()))
 		{
-			CheckDlgButton(hwnd, IDC_DISABLE, BST_CHECKED);
-			EnableWindow(GetDlgItem(hwnd, IDC_COMPAT), FALSE);
-			EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), FALSE);
+			CheckDlgButton(hwnd, IDC_COMPAT, BST_CHECKED);
+			EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), TRUE);
+			SendMessage(GetDlgItem(hwnd, IDC_SYSTEM), CB_SETCURSEL, i, 0);
+			break;
 		}
-	}
-	else
+	if (ms->flags & 1)
 	{
-		strcpy(ms->conf, "default");
-		ms->flags = 0;
+		CheckDlgButton(hwnd, IDC_DISABLE, BST_CHECKED);
+		EnableWindow(GetDlgItem(hwnd, IDC_COMPAT), FALSE);
+		EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), FALSE);
 	}
+
+	//set KernelEx version
+	unsigned long ver = kexGetKEXVersion();
+	char ver_s[32];
+	sprintf(ver_s, "KernelEx Core v%d.%d.%d", ver>>24, (ver>>16) & 0xff, ver & 0xffff);
+	SendMessage(GetDlgItem(hwnd, IDC_KEXVER), WM_SETTEXT, 0, (LPARAM) ver_s);
 }
 
 
@@ -354,7 +373,7 @@ void KexShlExt::OnApply(HWND hwnd)
 				GetDlgItem(hwnd, IDC_SYSTEM), CB_GETCURSEL, 0, 0)].name.get();
 
 	if (flags != ms->flags || strcmp(conf, ms->conf) != 0)
-		KexLinkage::instance.m_kexSetModuleSettings(ms->file, conf, flags);
+		kexSetModuleSettings(ms->file, conf, flags);
 }
 
 
