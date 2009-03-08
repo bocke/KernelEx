@@ -164,6 +164,10 @@ _KEXCOREIMP void kexSetModuleSettings(const char* module,
                                       const char* conf_name, BYTE ldr_flags);
 
 
+/** kexFlushAppSettings - Reloads all module settings from registy. */
+_KEXCOREIMP void kexFlushAppSettings(void);
+
+
 #ifdef __cplusplus
 }; /* extern "C" */
 #endif
