@@ -27,5 +27,5 @@
 void WINAPI KEXVersion(char* out)
 {
 	unsigned long ver = kexGetKEXVersion();
-	sprintf(out, "%d.%d.%d", ver & 0xff000000, ver & 0xff0000, ver & 0xffff);
+	sprintf(out, "%d.%d.%d", (ver>>24) & 0xff, (ver>>16) & 0xff, ver & 0xffff);
 }
