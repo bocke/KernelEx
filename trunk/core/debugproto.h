@@ -33,9 +33,11 @@ extern "C" {
 #endif
 
 
+_KEXCOREIMP int kexInit(void);
+_KEXCOREIMP int kexUninit(void);
 _KEXCOREIMP void kexDbgDumpConfigurations(void);
 _KEXCOREIMP void kexDbgDumpImtes(void);
-_KEXCOREIMP void kexDbgDumpAppSettings(int flush);
+_KEXCOREIMP void kexDbgDumpAppSettings(void);
 
 
 #ifdef __cplusplus

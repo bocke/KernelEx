@@ -35,9 +35,7 @@ void kexDbgDumpImtes(void)
 	dump_imtes();
 }
 
-void kexDbgDumpAppSettings(int flush)
+void kexDbgDumpAppSettings(void)
 {
 	SettingsDB::instance.dump_db();
-	if (flush)
-		SettingsDB::instance.flush_all();
 }

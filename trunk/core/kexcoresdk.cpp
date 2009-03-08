@@ -80,3 +80,8 @@ void kexSetModuleSettings(const char* module,
 {
 	SettingsDB::instance.write_single(module, conf_name, ldr_flags);
 }
+
+void kexFlushAppSettings(void)
+{
+	SettingsDB::instance.flush_all();
+}
