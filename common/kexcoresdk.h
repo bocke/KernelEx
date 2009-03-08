@@ -149,12 +149,9 @@ _KEXCOREIMP void* kexTIDtoTDB(DWORD tid);
  * @param module Module path.
  * @param conf_name Receives configuration name, has to be at least 256 bytes long.
  * @param ldr_flags Receives flags.
- * @return non-zero on success, zero if module not in database.
  */
-_KEXCOREIMP int kexGetModuleSettings(const char* module, 
+_KEXCOREIMP void kexGetModuleSettings(const char* module, 
                                       char* conf_name, BYTE* ldr_flags);
-typedef int (*kexGetModuleSettings_t)(const char* module, 
-                                       char* conf_name, BYTE* ldr_flags);
 
 
 /** kexSetModuleSettings - Set per module settings.
@@ -165,8 +162,6 @@ typedef int (*kexGetModuleSettings_t)(const char* module,
  */
 _KEXCOREIMP void kexSetModuleSettings(const char* module, 
                                       const char* conf_name, BYTE ldr_flags);
-typedef void (*kexSetModuleSettings_t)(const char* module, 
-                                       const char* conf_name, BYTE ldr_flags);
 
 
 #ifdef __cplusplus

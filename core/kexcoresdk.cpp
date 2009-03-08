@@ -63,16 +63,16 @@ void* kexTIDtoTDB(DWORD tid)
 	return TIDtoTDB(tid);
 }
 
-int kexGetModuleSettings(const char* module, 
+void kexGetModuleSettings(const char* module, 
                           char* conf_name, BYTE* ldr_flags)
 {
 	appsetting as = SettingsDB::instance.get_appsetting(module);
 	if (!as.conf)
-		return 0;
-	strncpy(conf_name, as.conf->get_name(), 256);
+		strcpy(conf_name, "default");
+	else
+		strncpy(conf_name, as.conf->get_name(), 256);
 	*ldr_flags = as.flags;
 	conf_name[255] = '\0';
-	return 1;
 }
 
 void kexSetModuleSettings(const char* module,
