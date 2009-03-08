@@ -57,6 +57,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "kexcontrol"=.\kexcontrol\kexcontrol.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "kexcrt"=.\kexcrt\kexcrt.dsp - Package Owner=<4>
 
 Package=<5>
