@@ -25,14 +25,7 @@
 BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     if (fdwReason == DLL_PROCESS_ATTACH)
-    {
-		OSVERSIONINFO osv;
-		osv.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		GetVersionEx(&osv);
-		if (osv.dwPlatformId != VER_PLATFORM_WIN32_NT)
-			return FALSE;
 		DisableThreadLibraryCalls(hinstDLL);
-	}
     return TRUE;
 }
 
