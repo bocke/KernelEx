@@ -406,6 +406,8 @@ inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* call
 
 PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal)
 {
+	PROC ret;
+	
 	//if caller is unknown - assume it is process's exe
 	if (!caller)
 		caller = (*pppdbCur)->pExeMODREF;
@@ -422,15 +424,26 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 		mod_index--;
 
 		if (!apiconf->is_table_empty(mod_index))
-			return decode_address(apiconf->get(mod_index, ordinal), 
+			ret = decode_address(apiconf->get(mod_index, ordinal), 
 					target->pNTHdr, caller, refmod);
+		else 
+			ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
 	}
+	else 
+		ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
 
-	return OriExportFromOrdinal(target->pNTHdr, ordinal);
+	if (!ret && refmod)
+		DBGPRINTF(("%s: unresolved export %s:%d\n", 
+				((*ppmteModTable)[caller->mteIndex])->pszModName,
+				target->pszModName, ordinal));
+
+	return ret;
 }
 
 PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD hint, LPCSTR name)
 {
+	PROC ret;
+
 	//if caller is unknown - assume it is process's exe
 	if (!caller)
 		caller = (*pppdbCur)->pExeMODREF;
@@ -447,11 +460,20 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 		mod_index--;
 
 		if (!apiconf->is_table_empty(mod_index))
-			return decode_address(apiconf->get(mod_index, hint, name), 
+			ret = decode_address(apiconf->get(mod_index, hint, name), 
 					target->pNTHdr, caller, refmod);
+		else 
+			ret = OriExportFromName(target->pNTHdr, hint, name);
 	}
+	else 
+		ret = OriExportFromName(target->pNTHdr, hint, name);
 
-	return OriExportFromName(target->pNTHdr, hint, name);
+	if (!ret && refmod)
+		DBGPRINTF(("%s: unresolved export %s:%s\n", 
+				((*ppmteModTable)[caller->mteIndex])->pszModName,
+				target->pszModName, name));
+
+	return ret;
 }
 
 #if 0
