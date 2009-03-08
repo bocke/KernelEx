@@ -46,15 +46,12 @@ public:
 	static KexLinkage instance;
 	vector<conf> confs;
 	int default_index;
-	kexGetModuleSettings_t m_kexGetModuleSettings;
-	kexSetModuleSettings_t m_kexSetModuleSettings;
 
 protected:
 	KexLinkage();
 	bool Prepare();
 	
 	bool m_ready;
-	HMODULE hKernelEx;
 };
 
 #endif

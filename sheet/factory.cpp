@@ -93,4 +93,4 @@ STDMETHODIMP Factory::CreateInstance(IUnknown *pUnkOuter,REFIID riid, LPVOID *pp
 		return E_NOINTERFACE;
 	}
 	return S_OK;
-};
+}

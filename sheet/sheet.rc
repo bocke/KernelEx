@@ -110,19 +110,23 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Dialog
 //
 
-IDD_PROPPAGE DIALOG DISCARDABLE  0, 0, 222, 127
+IDD_PROPPAGE DIALOG DISCARDABLE  0, 0, 190, 127
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Compatibility"
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Compatibility mode",IDC_STATIC,7,7,208,64
+    GROUPBOX        "Compatibility mode",IDC_GCOMPAT,7,30,176,64
     CONTROL         "Run this program in compatibility mode for:",IDC_COMPAT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,34,170,10
-    COMBOBOX        IDC_SYSTEM,15,47,157,60,CBS_DROPDOWNLIST | WS_DISABLED | 
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,57,164,10
+    COMBOBOX        IDC_SYSTEM,15,70,157,60,CBS_DROPDOWNLIST | WS_DISABLED | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Disable KernelEx extensions for this program",
-                    IDC_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,
-                    180,10
+                    IDC_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,43,
+                    165,10
+    GROUPBOX        "",IDC_HORIZ1,7,108,172,9
+    LTEXT           "kexver here",IDC_KEXVER,7,111,71,9,WS_DISABLED
+    LTEXT           "If you have problems with this program, try selecting\na different compatibility mode.",
+                    IDC_TCOMPAT,7,7,175,22
 END
 
 
@@ -137,7 +141,7 @@ BEGIN
     IDD_PROPPAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 215
+        RIGHTMARGIN, 183
         TOPMARGIN, 7
         BOTTOMMARGIN, 120
     END
