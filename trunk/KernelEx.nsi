@@ -193,30 +193,35 @@ Section "Install"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\msimg32.dll
+  Delete "$INSTDIR\msimg32.dll"
   Rename /REBOOTOK $0  "$INSTDIR\msimg32.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" \
     "MSIMG32" "..\KernelEx\msimg32.dll"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\pdh.dll
+  Delete "$INSTDIR\pdh.dll"
   Rename /REBOOTOK $0  "$INSTDIR\pdh.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" \
     "PDH" "..\KernelEx\pdh.dll"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\psapi.dll
+  Delete "$INSTDIR\psapi.dll"
   Rename /REBOOTOK $0  "$INSTDIR\psapi.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" \
     "PSAPI" "..\KernelEx\psapi.dll"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\uxtheme.dll
+  Delete "$INSTDIR\uxtheme.dll"
   Rename /REBOOTOK $0  "$INSTDIR\uxtheme.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" \
     "UXTHEME" "..\KernelEx\uxtheme.dll"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\wtsapi32.dll
+  Delete "$INSTDIR\wtsapi32.dll"
   Rename /REBOOTOK $0  "$INSTDIR\wtsapi32.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" \
     "WTSAPI32" "..\KernelEx\wtsapi32.dll"
