@@ -27,6 +27,8 @@
 #include "debug.h"
 #include "pemanip.h"
 
+static bool is_winme;
+
 IMTE*** ppmteModTable = NULL;
 HMODULE h_kernel32;
 CRITICAL_SECTION* krnl32lock = NULL;
@@ -103,6 +105,11 @@ void FullCritUnlock()
 
 	_LeaveSysLevel(krnl32lock);
 	DBGPRINTF(("FullCritUnlock\n"));
+}
+
+bool isWinMe()
+{
+	return is_winme;
 }
 
 void ShowError(UINT id, ...)
@@ -483,6 +490,7 @@ int internals_init()
 	FLoadTreeNotify = find_FLoadTreeNotify();
 	FreeLibRemove = find_FreeLibRemove();
 	bool instdir_rslt = find_kernelex_install_dir();
+	is_winme = (GetVersion() == 0xc0005a04);
 
 	if (!h_kernel32 || !ppmteModTable || !krnl32lock || !pppdbCur || !MRFromHLib
 			|| !pimteMax || !TIDtoTDB || !PIDtoPDB || !MRLoadTree || !FreeLibTree 

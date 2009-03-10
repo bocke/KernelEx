@@ -230,11 +230,29 @@ bool ApiConfigurationManager::parse_overrides(ApiConfiguration* apiconf)
 	//parse names and ordinal overrides
 	char buf[MAX_PATH];
 	char section_data[32767];
+	DWORD res;
 
+	//first try [conf.names.xx]
 	strcpy(buf, apiconf->get_name());
 	strcat(buf, ".names");
-	if (GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
-			core_conf_file))
+	if (isWinMe())
+		strcat(buf, ".me");
+	else
+		strcat(buf, ".98");
+
+	res = GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
+			core_conf_file);
+
+	//else try [conf.names]
+	if (!res)
+	{
+		strcpy(buf, apiconf->get_name());
+		strcat(buf, ".names");
+		res = GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
+				core_conf_file);
+	}
+
+	if (res)
 	{
 		DBGPRINTF(("Parsing named api overrides\n"));
 
@@ -304,10 +322,28 @@ bool ApiConfigurationManager::parse_overrides(ApiConfiguration* apiconf)
 		}
 	}
 
+	//first try [conf.ordinals.xx]
 	strcpy(buf, apiconf->get_name());
 	strcat(buf, ".ordinals");
-	if (GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
-			core_conf_file))
+
+	if (isWinMe())
+		strcat(buf, ".me");
+	else
+		strcat(buf, ".98");
+
+	//else try [conf.ordinals]
+	res = GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
+			core_conf_file);
+	
+	if (!res)
+	{
+		strcpy(buf, apiconf->get_name());
+		strcat(buf, ".ordinals");
+		res = GetPrivateProfileSection(buf, section_data, sizeof(section_data), 
+				core_conf_file);		
+	}
+
+	if (res)
 	{
 		DBGPRINTF(("Parsing ordinal api overrides\n"));
 
