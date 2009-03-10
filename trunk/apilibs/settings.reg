@@ -3,7 +3,9 @@ REGEDIT4
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings]
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Configs]
+"*\\UNICOWS.DLL"="DCFG1"
 "*\\FIREFOX SETUP 3*.EXE"="WINXP"
+"*\\FIREFOX*PRE*.INSTALLER.EXE"="WINXP"
 "*\\XUL.DLL"="WINXP"
 "*\\INSTALL_FLASH_PLAYER.EXE"="WINXP"
 "*\\MFC*U.DLL"="WINXP"
@@ -14,7 +16,6 @@ REGEDIT4
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:
 ;-system files
-"*\\UNICOWS.DLL"=dword:00000001
 "*\\KERNEL32.DLL"=dword:00000001
 "*\\SHFOLDER.DLL"=dword:00000001
 "*\\ICMP.DLL"=dword:00000001
@@ -31,5 +32,9 @@ REGEDIT4
 "*\\NVOPENGL.DLL"=dword:00000001
 ;-PunkBuster
 "*\\PBCL.DLL"=dword:00000001
+"*\\PBCLS.DLL"=dword:00000001
+"*\\PBAG.DLL"=dword:00000001
+"*\\PBAGS.DLL"=dword:00000001
 "*\\PBSV.DLL"=dword:00000001
+"*\\PBSVS.DLL"=dword:00000001
 
