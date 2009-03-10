@@ -46,6 +46,7 @@ extern sstring own_path;
 void FullCritLock();
 void FullCritUnlock();
 void ShowError(UINT id, ...);
+bool isWinMe();
 
 typedef MODREF* (__stdcall *MRFromHLib_t)(HMODULE);
 typedef TDB98* (__stdcall *TIDtoTDB_t)(DWORD);
