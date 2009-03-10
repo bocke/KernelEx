@@ -274,6 +274,8 @@ BOOL CALLBACK KexShlExt::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			MoveWindow(GetDlgItem(hwnd, IDC_GCOMPAT), p.x, p.y, w - 2 * p.x, r.bottom - r.top, TRUE);
 			MoveWindow(GetDlgItem(hwnd, IDC_HORIZ1), p.x, h - 14 - p.x, w -  2 * p.x, 1, TRUE);
 			MoveWindow(GetDlgItem(hwnd, IDC_KEXVER), p.x, h - 12 - p.x, w - 2 * p.x, 12, TRUE);
+			GetWindowRect(GetDlgItem(hwnd, IDC_TCOMPAT), &r);
+			MoveWindow(GetDlgItem(hwnd, IDC_TCOMPAT), p.x, p.x, w - 2 * p.x, r.bottom - r.top, TRUE);
 		}
 		break;
 
