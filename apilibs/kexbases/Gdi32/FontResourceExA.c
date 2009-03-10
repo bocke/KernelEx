@@ -1,7 +1,7 @@
 /*
  *  KernelEx
- *  Copyright (C) 2009, Xeno86
  *
+ *  Copyright (C) 2009, Xeno86
  *  This file is part of KernelEx source code.
  *
  *  KernelEx is free software; you can redistribute it and/or modify
@@ -19,9 +19,16 @@
  *
  */
 
-#include "common.h"
+#include <windows.h>
 
-UNIMPL_FUNC(SetDCBrushColor, 2);
-UNIMPL_FUNC(SetDCPenColor, 2);
-UNIMPL_FUNC(AddFontMemResourceEx, 4);
-UNIMPL_FUNC(RemoveFontMemResourceEx, 1);
+/* MAKE_EXPORT AddFontResourceExA_new=AddFontResourceExA */
+INT WINAPI AddFontResourceExA_new(LPCSTR str, DWORD fl, PVOID pdv)
+{
+	return AddFontResourceA(str);
+}
+
+/* MAKE_EXPORT RemoveFontResourceExA_new=RemoveFontResourceExA */
+BOOL WINAPI RemoveFontResourceExA_new(LPCSTR str, DWORD fl, PVOID pdv)
+{
+	return RemoveFontResourceA(str);
+}
