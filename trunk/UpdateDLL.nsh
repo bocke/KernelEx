@@ -110,7 +110,7 @@ Function UpgradeDLL_Func
   IfErrors upgradedll.upgrade
  
   IntCmpU $R0 $R2 0 upgradedll.dontupgrade upgradedll.upgrade
-  IntCmpU $R1 $R3 upgradedll.dontupgrade upgradedll.dontupgrade upgradedll.upgrade
+  IntCmpU $R1 $R3 upgradedll.upgrade upgradedll.dontupgrade upgradedll.upgrade
  
   ;------------------------
   ;Let's upgrade the DLL!
@@ -138,7 +138,7 @@ Function UpgradeDLL_Func
   IntCmp $R6 0 upgradedll.done
  
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunOnce" \
-    "Register $R4" '"$SYSDIR\rundll32.exe" "$R4",DllRegisterServer'
+    "Register $R4" '"$SYSDIR\regsvr32.exe" /s "$R4"'
   Goto upgradedll.done
  
   ;------------------------
