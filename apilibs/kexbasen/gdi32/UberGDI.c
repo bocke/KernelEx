@@ -315,3 +315,21 @@ BOOL WINAPI GetCharWidthI_new(
 	ScriptFreeCache_pfn(&cache);
 	return TRUE;
 }
+
+/* MAKE_EXPORT GetGlyphOutlineW_new=GetGlyphOutlineW */
+DWORD WINAPI GetGlyphOutlineW_new(
+  HDC hdc,             // handle to DC
+  UINT uChar,          // character to query
+  UINT uFormat,        // data format
+  LPGLYPHMETRICS lpgm, // glyph metrics
+  DWORD cbBuffer,      // size of data buffer
+  LPVOID lpvBuffer,    // data buffer
+  CONST MAT2 *lpmat2   // transformation matrix
+)
+{
+	UINT glyph = 0;
+	if (uFormat & GGO_GLYPH_INDEX)
+		return GetGlyphOutlineA( hdc, uChar, uFormat, lpgm, cbBuffer, lpvBuffer, lpmat2 );
+	GetGlyphIndicesW_new( hdc, (LPWSTR)&uChar, 1, (LPWORD)&glyph, 0 );
+	return GetGlyphOutlineA( hdc, glyph, uFormat | GGO_GLYPH_INDEX, lpgm, cbBuffer, lpvBuffer, lpmat2 );
+}
