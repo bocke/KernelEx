@@ -20,8 +20,12 @@
  */
 
 #include "common.h"
+#include "_user32_apilist.h"
 
-UNIMPL_FUNC(SetDCBrushColor, 2);
-UNIMPL_FUNC(SetDCPenColor, 2);
-UNIMPL_FUNC(AddFontMemResourceEx, 4);
-UNIMPL_FUNC(RemoveFontMemResourceEx, 1);
+GetMouseMovePoints_t GetMouseMovePoints_pfn;
+
+/* MAKE_EXPORT GetMouseMovePointsEx_98=GetMouseMovePointsEx */
+int WINAPI GetMouseMovePointsEx_98(UINT size, LPMOUSEMOVEPOINT ptin, LPMOUSEMOVEPOINT ptout, int count, DWORD res)
+{
+	return GetMouseMovePoints_pfn(size, ptin, ptout, count, res);
+}

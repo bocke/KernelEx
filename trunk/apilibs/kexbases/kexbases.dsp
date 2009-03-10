@@ -225,7 +225,15 @@ SOURCE=.\User32\EnableWindow.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\User32\ForegroundWindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\User32\GetAncestor.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\GetMouseMovePointsEx.c
 # End Source File
 # Begin Source File
 
@@ -273,11 +281,19 @@ SOURCE=.\Gdi32\_gdi32_stubs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Gdi32\FontResourceExA.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Gdi32\GetGlyphOutlineA_fix.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\Gdi32\TextOut.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Gdi32\unigdi32.c
 # End Source File
 # End Group
 # Begin Group "advapi32"

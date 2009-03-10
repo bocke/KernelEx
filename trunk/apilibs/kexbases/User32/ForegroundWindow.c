@@ -19,9 +19,16 @@
  *
  */
 
-#include "common.h"
+#include <windows.h>
 
-UNIMPL_FUNC(SetDCBrushColor, 2);
-UNIMPL_FUNC(SetDCPenColor, 2);
-UNIMPL_FUNC(AddFontMemResourceEx, 4);
-UNIMPL_FUNC(RemoveFontMemResourceEx, 1);
+/* MAKE_EXPORT AllowSetForegroundWindow_98=AllowSetForegroundWindow */
+BOOL WINAPI AllowSetForegroundWindow_98(DWORD procid)
+{
+    return TRUE;
+}
+
+/* MAKE_EXPORT LockSetForegroundWindow_98=LockSetForegroundWindow */
+BOOL WINAPI LockSetForegroundWindow_98(UINT lockcode)
+{
+    return TRUE;
+}

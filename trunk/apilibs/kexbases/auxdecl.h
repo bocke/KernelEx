@@ -104,6 +104,7 @@ typedef enum {
 #define     GA_ROOT         2
 
 typedef void *LPPRINTDLGEX;
+typedef void *LPMOUSEMOVEPOINT;
 
 EXTERN_C int WINAPI GetRandomRgn(HDC hdc, HRGN hrgn, INT iNum);
 EXTERN_C HRESULT WINAPI SHGetFolderPathA(HWND hwnd, int csidl, HANDLE hToken, DWORD dwFlags, LPSTR pszPath);
