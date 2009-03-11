@@ -125,10 +125,10 @@ static int load_count(DWORD addr)
 	return pmteModTable[MRfromCallerAddr(addr)->mteIndex]->cUsage;
 }
 
-static void get_own_path(HMODULE base)
+static void get_own_path()
 {
 	char path[MAX_PATH];
-	GetModuleFileName(base, path, sizeof(path));
+	GetModuleFileName(hInstance, path, sizeof(path));
 	own_path = path;
 }
 
@@ -170,6 +170,8 @@ BOOL APIENTRY PreDllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 		if (load_count((DWORD) instance) == 1)
 		{
+			hInstance = instance;
+
 			if (detect_old_version())
 				return FALSE;
 
@@ -181,7 +183,7 @@ BOOL APIENTRY PreDllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 			//globally (by default it would be called on every process attach)
 			ret = _DllMainCRTStartup(instance, reason, reserved);
 
-			get_own_path(instance);
+			get_own_path();
 		}
 	}
 	else if (reason == DLL_PROCESS_DETACH)
