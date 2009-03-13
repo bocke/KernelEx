@@ -477,6 +477,7 @@ static bool find_kernelex_install_dir()
 
 int internals_init()
 {
+	DBGPRINTF(("KernelEx loaded @ %08x\n", hInstance));
 	DBGPRINTF(("internals_init()\n"));
 	h_kernel32 = GetModuleHandle("kernel32");
 	ppmteModTable = find_mod_table();
