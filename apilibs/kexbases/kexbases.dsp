@@ -141,6 +141,10 @@ SOURCE=.\Kernel32\InitializeCriticalSectionAndSpinCount.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\IsProcessorFeaturePresent.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\Jobs.c
 # End Source File
 # Begin Source File

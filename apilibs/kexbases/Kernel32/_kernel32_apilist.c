@@ -28,11 +28,13 @@ http://17slon.com/blogs/gabr/2007/02/four-ways-to-detect-vista.html
 #include "kexcoresdk.h"
 #include "_kernel32_apilist.h"
 
+void get_cpuinfo();
 BOOL init_tryentercritsec();
 BOOL init_openthread();
 
 BOOL init_kernel32()
 {
+	get_cpuinfo();
 	return init_tryentercritsec() && init_openthread();
 }
 
@@ -130,6 +132,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("HeapUnlock", HeapUnlock_new),
 	DECL_API("InitializeCriticalSectionAndSpinCount", InitializeCriticalSectionAndSpinCount_new),
 	DECL_API("IsProcessInJob", IsProcessInJob_new),
+	DECL_API("IsProcessorFeaturePresent", IsProcessorFeaturePresent_new),
 	DECL_API("IsValidLanguageGroup", IsValidLanguageGroup_stub),
 	DECL_API("KEXVersion", KEXVersion),
 	DECL_API("LockFileEx", LockFileEx_new),

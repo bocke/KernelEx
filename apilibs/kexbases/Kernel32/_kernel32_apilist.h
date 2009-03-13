@@ -39,6 +39,7 @@ BOOL WINAPI GlobalMemoryStatusEx_new(LPMEMORYSTATUSEX lpmemex);
 BOOL WINAPI HeapLock_new(HANDLE hHeap);
 BOOL WINAPI HeapUnlock_new(HANDLE hHeap);
 BOOL WINAPI InitializeCriticalSectionAndSpinCount_new(LPCRITICAL_SECTION lpCriticalSection, DWORD dwSpinCount);
+BOOL WINAPI IsProcessorFeaturePresent_new(DWORD feature);
 HANDLE WINAPI CreateJobObjectA_new(LPSECURITY_ATTRIBUTES sa, LPCSTR name);
 HANDLE WINAPI CreateJobObjectW_new(LPSECURITY_ATTRIBUTES sa, LPCWSTR name);
 BOOL WINAPI TerminateJobObject_new(HANDLE job, UINT exit_code);
