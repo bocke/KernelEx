@@ -10,6 +10,8 @@
 ;--------------------------------
 ;General
 
+  SetCompressor /SOLID lzma
+  
   ;Name and file
   Name "KernelEx"
   Caption "KernelEx ${VERSION} Setup"
