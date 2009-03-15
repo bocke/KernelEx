@@ -91,9 +91,38 @@ int kexUninit()
 	return --init_count;
 }
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message) 
+	{
+	case WM_ENDSESSION:
+		if (!(lParam & ENDSESSION_LOGOFF) && wParam)
+			kexUninit();
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
+}
+
+void CreateMainWindow()
+{
+	WNDCLASS wc;
+	memset(&wc, 0, sizeof(wc));
+	wc.hInstance = hInstance;
+	wc.lpfnWndProc = WndProc;
+	wc.lpszClassName = "KernelEx dummy window";
+ 	RegisterClass(&wc);
+	CreateWindow("KernelEx dummy window", "", WS_DISABLED, 0, 0, 0, 0, 0, 0, hInstance, 0);
+}
+
 extern "C" _KEXCOREIMP
 DWORD WINAPI MprStart(LPVOID)
 {
+	MSG msg;
+	CreateMainWindow();
+	while (GetMessage(&msg, NULL, 0, 0))
+		DispatchMessage(&msg);
 	return 0;
 }
 
