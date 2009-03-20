@@ -126,6 +126,33 @@ DWORD WINAPI MprStart(LPVOID)
 	return 0;
 }
 
+void load_MPRServices()
+{    
+    char subkey[200];
+    char dllname[MAX_PATH];
+    HKEY hk_serv;
+    HKEY hk_this;
+    DWORD size;
+    DWORD index = 0;
+    
+    if (RegOpenKey(HKEY_LOCAL_MACHINE, "System\\CurrentControlSet\\Control\\MPRServices",
+            &hk_serv) != ERROR_SUCCESS)
+        return;
+    while (RegEnumKey(hk_serv, index, subkey, sizeof(subkey)) == ERROR_SUCCESS)
+    {
+        RegOpenKey(hk_serv, subkey, &hk_this);
+        size = sizeof(dllname);
+        if (RegQueryValueEx(hk_this, "DllName", NULL, NULL, (BYTE*)dllname, &size) 
+                == ERROR_SUCCESS && strcmpi(dllname, own_path.get()) != 0)
+        {         
+            LoadLibrary(dllname);
+        }
+        RegCloseKey(hk_this);
+        index++;
+    }
+    RegCloseKey(hk_serv);
+}
+
 /** Check if loaded into shared memory area.
  * @param addr Address to which loaded.
  * @return TRUE if loaded to shared memory, FALSE otherwise.
@@ -233,6 +260,7 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 {
 	if (reason == DLL_PROCESS_ATTACH && GetModuleHandle("MPREXE.EXE"))
 	{
+		load_MPRServices();
 		return kexInit();
 	}
 

@@ -19,11 +19,29 @@
  *
  */
 
-#ifndef __VERSION_H
-#define __VERSION_H
+#include <windows.h>
 
-#define VERSION_STR      "4.0 RC 2"
-#define VERSION_CODE     0x0400000C
-#define RCVERSION        4, 0, 1, 2
+BOOL CALLBACK GetConsoleWindowEnum(HWND hwnd, LPARAM lparam)
+{
+	char name[5];
+	if (GetClassName(hwnd, name, sizeof(name)) == (sizeof("tty")-1) 
+			&& !strcmp(name, "tty"))
+	{
+		DWORD pid;
+		GetWindowThreadProcessId(hwnd, &pid);
+		if (pid == GetCurrentProcessId())
+		{
+			*(HWND*) lparam = hwnd;
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
 
-#endif
+/* MAKE_EXPORT GetConsoleWindow_new=GetConsoleWindow */
+HWND WINAPI GetConsoleWindow_new()
+{
+	HWND window = NULL;
+	EnumWindows(GetConsoleWindowEnum, (LPARAM) &window);
+	return window;
+}

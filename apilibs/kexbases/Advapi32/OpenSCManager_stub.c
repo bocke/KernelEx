@@ -19,11 +19,18 @@
  *
  */
 
-#ifndef __VERSION_H
-#define __VERSION_H
+#include <windows.h>
 
-#define VERSION_STR      "4.0 RC 2"
-#define VERSION_CODE     0x0400000C
-#define RCVERSION        4, 0, 1, 2
+/* MAKE_EXPORT OpenSCManagerA_stub=OpenSCManagerA */
+SC_HANDLE WINAPI OpenSCManagerA_stub(LPCSTR lpMachineName, LPCSTR lpDatabaseName,
+	DWORD dwDesiredAccess)
+{
+	return (SC_HANDLE) 0xCAFE;
+}
 
-#endif
+/* MAKE_EXPORT OpenSCManagerW_stub=OpenSCManagerW */
+SC_HANDLE WINAPI OpenSCManagerW_stub(LPCWSTR lpMachineName, LPCWSTR lpDatabaseName,
+	DWORD dwDesiredAccess)
+{
+	return (SC_HANDLE) 0xCAFE;
+}
