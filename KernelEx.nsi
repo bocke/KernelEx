@@ -1,4 +1,4 @@
-  !define VERSION '4.0 RC 1'
+  !define VERSION '4.0 RC 2'
 
 ;--------------------------------
 ;Includes
