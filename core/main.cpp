@@ -244,7 +244,7 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 		
 		//we don't want to unload the api libraries as well
 		ApiLibrary* apilib;
-		for (int i = 0 ; apilib = ApiLibraryManager::get_apilib(i) ; i++)
+		for (int i = 1 ; apilib = ApiLibraryManager::get_apilib(i) ; i++)
 			pmteModTable[MRFromHLib(apilib->mod_handle)->mteIndex]->cUsage++;
 
 		return TRUE;
