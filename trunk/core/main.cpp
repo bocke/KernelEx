@@ -91,38 +91,9 @@ int kexUninit()
 	return --init_count;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message) 
-	{
-	case WM_ENDSESSION:
-		if (!(lParam & ENDSESSION_LOGOFF) && wParam)
-			kexUninit();
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
-}
-
-void CreateMainWindow()
-{
-	WNDCLASS wc;
-	memset(&wc, 0, sizeof(wc));
-	wc.hInstance = hInstance;
-	wc.lpfnWndProc = WndProc;
-	wc.lpszClassName = "KernelEx dummy window";
- 	RegisterClass(&wc);
-	CreateWindow("KernelEx dummy window", "", WS_DISABLED, 0, 0, 0, 0, 0, 0, hInstance, 0);
-}
-
 extern "C" _KEXCOREIMP
 DWORD WINAPI MprStart(LPVOID)
 {
-	MSG msg;
-	CreateMainWindow();
-	while (GetMessage(&msg, NULL, 0, 0))
-		DispatchMessage(&msg);
 	return 0;
 }
 
@@ -260,8 +231,23 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 {
 	if (reason == DLL_PROCESS_ATTACH && GetModuleHandle("MPREXE.EXE"))
 	{
+		//load all other MPR services before further execution
 		load_MPRServices();
-		return kexInit();
+
+		//initialize
+		if (!kexInit())
+			return FALSE;
+
+		//in case KernelEx was loaded globally we don't want to unload it ever
+		IMTE** pmteModTable = *ppmteModTable;
+		pmteModTable[MRFromHLib(hInstance)->mteIndex]->cUsage++;
+		
+		//we don't want to unload the api libraries as well
+		ApiLibrary* apilib;
+		for (int i = 0 ; apilib = ApiLibraryManager::get_apilib(i) ; i++)
+			pmteModTable[MRFromHLib(apilib->mod_handle)->mteIndex]->cUsage++;
+
+		return TRUE;
 	}
 
 	//for additional safety - auto uninit on core unload

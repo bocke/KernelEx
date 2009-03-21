@@ -246,9 +246,6 @@ bool ApiConfiguration::merge(const ApiLibrary* apilib)
 					else if (cmp_result == 0)
 					{
 						//same apis => update address
-						DBGPRINTF(("merge: updating export %s:%s with %s\n", 
-								psrc->target_library, sfirst->name, 
-								apilib->apilib_name));
 						(dfirst++)->address = encode_address((sfirst++)->addr, apilib);
 						while (sfirst != slast && !strcmp(sfirst->name, (sfirst - 1)->name))
 							sfirst++;
