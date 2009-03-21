@@ -387,7 +387,11 @@ void Setup::install()
 	
 	pefile.OpenFile(upgrade ? backup_file.c_str() : kernel32path, 0x10000);
 	if (!pefile.HasTarget())
+	{
+		if (version == KEX_STUB_VER)
+			return;
 		ShowError(IDS_FAILOPEN, upgrade ? backup_file.c_str() : kernel32path);
+	}
 
 	find_ExportFromX();
 	disable_platform_check();
