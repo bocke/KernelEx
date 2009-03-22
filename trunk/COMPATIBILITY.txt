@@ -8,6 +8,7 @@ Now working on Windows 98/Me:
 
 Fixed regressions:
 ------------------
+* fixed Adobe Acrobat Reader 7.0 not working with RC 1
 * .Net framework was broken in RC 1 now should work correctly
 * input issue in Firefox 3 affecting special characters
 * eMule couldn't complete downloads in RC 1, now fixed
