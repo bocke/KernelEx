@@ -201,6 +201,10 @@ SOURCE=.\Kernel32\version.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\widecharconv.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\VirtualAllocEx.c
 # End Source File
 # End Group
