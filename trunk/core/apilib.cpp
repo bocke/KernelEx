@@ -56,7 +56,7 @@ ApiLibraryManager::~ApiLibraryManager()
 
 bool ApiLibraryManager::initialize()
 {
-	ApiLibrary* std_apilib;
+	ApiLibrary* std_apilib = NULL;
 
 	new_apilib_cnt = 0;
 	new_apilib_ptrs = (ApiLibrary**) malloc(ALLOC_CAPACITY * sizeof(ApiLibrary*));
@@ -136,7 +136,7 @@ bool ApiLibraryManager::load_apilib(const char* apilib_name)
 		if (!strcmp(new_apilib_ptrs[i]->apilib_name, apilib_name))
 			return true;
 
-	ApiLibrary* apilib;
+	ApiLibrary* apilib = NULL;
 	bool already_loaded = false;
 
 	DBGPRINTF(("Loading api library: %s... ", apilib_name));

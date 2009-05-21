@@ -25,5 +25,6 @@
 #define VERSION_STR      "4.0 RC 2"
 #define VERSION_CODE     0x0400000C
 #define RCVERSION        4, 0, 1, 2
+#define _RCVERSION_      "4, 0, 1, 2"
 
 #endif
