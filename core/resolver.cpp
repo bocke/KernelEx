@@ -539,7 +539,7 @@ PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	nt_hdr = (IMAGE_NT_HEADERS*)((int)dos_hdr + dos_hdr->e_lfanew);
 
 	if ((DWORD)lpProcName < 0x10000) 
-		return OriExportFromOrdinal(nt_hdr, (WORD)lpProcName);
+		return OriExportFromOrdinal(nt_hdr, LOWORD(lpProcName));
 	return OriExportFromName(nt_hdr, 0, lpProcName);
 }
 

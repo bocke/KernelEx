@@ -233,7 +233,7 @@ static CRITICAL_SECTION* find_krnl32lock()
 	short pat[] = {0x55,0xA1,-2,-2,-2,-2,0x8B,0xEC,0x56,0x57,0x33,0xF6,0x50,0xE8};
 	int pat_len = sizeof(pat) / sizeof(short);
 
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, "VirtualQueryEx"), pat_len, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, "VirtualQueryEx"), pat_len, pat, pat_len, pat_name);
 	if (!res)
 		return NULL;
 
@@ -251,7 +251,7 @@ static PDB98** find_curPDB()
 	short pat[] = {0xA1,-2,-2,-2,-2,0xFF,0x30,0xE8,-1,-1,-1,-1,0xC3};
 	int pat_len = sizeof(pat) / sizeof(short);
 
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, "GetCurrentProcessId"), pat_len, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, "GetCurrentProcessId"), pat_len, pat, pat_len, pat_name);
 	if (!res)
 		return NULL;
 
@@ -269,7 +269,7 @@ static IMTE*** find_mod_table()
 	short pat[] = {0x8B,0x0D,-2,-2,-2,-2};
 	int pat_len = sizeof(pat) / sizeof(short);
 
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, (LPSTR)23), 0x20, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, (LPSTR)23), 0x20, pat, pat_len, pat_name);
 	
 	ret = (IMTE***)*res;
 	DBGPRINTF(("%s @ 0x%08x\n", pat_name, ret));
@@ -284,7 +284,7 @@ static MRFromHLib_t find_MRFromHLib()
 	short pat[] = {0xE8,-2,-2,-2,-2};
 	int pat_len = sizeof(pat) / sizeof(short);
 
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, (LPSTR)23), 0x20, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, (LPSTR)23), 0x20, pat, pat_len, pat_name);
 	if (!res)
 		return NULL;
 
@@ -343,7 +343,7 @@ static PIDtoPDB_t find_PIDtoPDB()
 	short pat[] = {0xFF,0x74,0x24,0x0C,0xE8,-2,-2,-2,-2};
 	int pat_len = sizeof(pat) / sizeof(short);
 	
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, "OpenProcess"), pat_len, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, "OpenProcess"), pat_len, pat, pat_len, pat_name);
 	if (!res)
 		return NULL;
 
@@ -381,7 +381,7 @@ static FreeLibTree_t find_FreeLibTree()
 	short pat[] = {0x75,0x09,0x6A,0x06,0xE8,-1,-1,-1,-1,0xEB,0x08,0x50,0xE8,-2,-2,-2,-2,0x8B,0xF0};
 	int pat_len = sizeof(pat) / sizeof(short);
 	
-	DWORD* res = find_unique_pattern(iGetProcAddress(h_kernel32, "FreeLibrary"), 0x80, pat, pat_len, pat_name);
+	DWORD* res = find_unique_pattern((void*) iGetProcAddress(h_kernel32, "FreeLibrary"), 0x80, pat, pat_len, pat_name);
 	if (!res)
 		return NULL;
 

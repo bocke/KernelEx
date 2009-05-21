@@ -1,7 +1,5 @@
 #include "resource.h"
 #include "version.h"
-#define _QUOTEME(x) #x
-#define QUOTEME(x) _QUOTEME(x)
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -98,7 +96,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Xeno86\0"
             VALUE "FileDescription", "KernelEx Core\0"
-            VALUE "FileVersion", QUOTEME(RCVERSION) "\0"
+            VALUE "FileVersion", _RCVERSION_ "\0"
             VALUE "InternalName", "KernelEx\0"
             VALUE "LegalCopyright", "Copyright © 2009, Xeno86\0"
             VALUE "OriginalFilename", "KernelEx.dll\0"
