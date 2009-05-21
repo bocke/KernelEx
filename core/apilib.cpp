@@ -481,9 +481,21 @@ bool ApiLibraryManager::parse_system_dll(const char* dll_name, apilib_api_table*
 	DWORD* Names = (DWORD*) pemod.RvaToPointer(Exports->AddressOfNames);
 	WORD* OrdinalTable = (WORD*) pemod.RvaToPointer(Exports->AddressOfNameOrdinals);
 	DWORD* FunctionTable = (DWORD*) pemod.RvaToPointer(Exports->AddressOfFunctions);
-
-	unsigned long offset = PEh->OptionalHeader.ImageBase >= 0x80000000
-			? PEh->OptionalHeader.ImageBase : 0;
+	
+	//offset for shared libraries
+	unsigned long offset = 0;
+	
+	if (!mem_dll)
+	{
+		//check if we deal with shared library but it is not loaded yet
+		if (PEh->OptionalHeader.ImageBase >= 0x80000000)
+			offset = (unsigned long) LoadLibrary(dll_name);
+	}
+	else
+	{
+		if ((unsigned long) mem_dll >= 0x80000000)
+			offset = (unsigned long) mem_dll;
+	}
 
 	//calculate required space
 	int space = 0;
