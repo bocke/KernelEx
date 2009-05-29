@@ -2,5 +2,3 @@ kernel32
 user32
 gdi32
 advapi32
-comdlg32
-shell32
