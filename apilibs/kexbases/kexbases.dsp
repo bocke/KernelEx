@@ -157,6 +157,34 @@ SOURCE=.\Kernel32\KEXVersion.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\locale.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_casemap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_collation.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_fold.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_sortkey.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_unicode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\locale_wctype.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\LockFileEx.c
 # End Source File
 # Begin Source File
@@ -201,11 +229,11 @@ SOURCE=.\Kernel32\version.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Kernel32\widecharconv.c
+SOURCE=.\Kernel32\VirtualAllocEx.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Kernel32\VirtualAllocEx.c
+SOURCE=.\Kernel32\widecharconv.c
 # End Source File
 # End Group
 # Begin Group "user32"
@@ -254,6 +282,10 @@ SOURCE=.\User32\IsHungAppWindow.c
 # Begin Source File
 
 SOURCE=.\User32\LockWorkStation.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\lstr.c
 # End Source File
 # Begin Source File
 
