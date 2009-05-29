@@ -40,21 +40,14 @@ __declspec(dllexport)
 const apilib_api_table* get_api_table()
 {
 	fill_apitable();
-	//check if unicows is available
-	if (!unifwd_init())
-	{
-		//force reference comdlg32
-		if (!&api_table)
-		{
-			ChooseColorA(0);
-		}
-		return NULL;
-	}
 	return api_table;
 }
 
 BOOL init()
 {
+	//force reference comdlg32 - this is never called, only to force import
+	if (!&api_table) ChooseColorA(0);
+		
 	return common_init() && init_comdlg32() && init_shell32();
 }
 

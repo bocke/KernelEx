@@ -28,9 +28,11 @@ static HMODULE hUnicows;
 
 int unifwd_init(void)
 {
+	DWORD lasterror = GetLastError();
 	hUnicows = GetModuleHandle("UNICOWS.DLL");
 	if (!hUnicows)
 		hUnicows = LoadLibrary("UNICOWS.DLL");
+	SetLastError(lasterror);
 	return (hUnicows != NULL);
 }
 
