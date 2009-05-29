@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="KernelEx Base NonShared" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="kexshell" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=KernelEx Base NonShared - Win32 Debug
+CFG=kexshell - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "kexbasen.mak".
+!MESSAGE NMAKE /f "kexshell.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "kexbasen.mak" CFG="KernelEx Base NonShared - Win32 Debug"
+!MESSAGE NMAKE /f "kexshell.mak" CFG="kexshell - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "KernelEx Base NonShared - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "KernelEx Base NonShared - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "kexshell - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "kexshell - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -29,7 +29,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
+!IF  "$(CFG)" == "kexshell - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "KEXBASEN_EXPORTS" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "kexshell_EXPORTS" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /O2 /I "." /I "../../common" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D _WIN32_WINNT=0x0500 /YX /FD /TP /GF /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -53,10 +53,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /machine:I386 /nodefaultlib /OPT:NOWIN98
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /machine:I386 /nodefaultlib /OPT:NOWIN98
 # SUBTRACT LINK32 /pdb:none
 
-!ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
+!ELSEIF  "$(CFG)" == "kexshell - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -69,8 +69,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "KEXBASEN_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I "." /I "../../common" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D _WIN32_WINNT=0x0500 /YX /FD /TP /GZ /GF /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "kexshell_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I "." /I "../../common" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D _WIN32_WINNT=0x0500 /YX /FD /GZ /TP /GF /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x415 /d "_DEBUG"
@@ -80,84 +80,64 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /pdbtype:sept /OPT:NOWIN98
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /pdbtype:sept /OPT:NOWIN98
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
 
 # Begin Target
 
-# Name "KernelEx Base NonShared - Win32 Release"
-# Name "KernelEx Base NonShared - Win32 Debug"
+# Name "kexshell - Win32 Release"
+# Name "kexshell - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Group "kernel32"
+# Begin Group "shell32"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\kernel32\_kernel32_apilist.c
+SOURCE=.\shell32\_shell32_apilist.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\kernel32\_kernel32_apilist.h
+SOURCE=.\shell32\_shell32_apilist.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\kernel32\unikernel32.c
+SOURCE=.\shell32\auxshlguid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\pidl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\SHGetFolderLocation.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\SHGetFolderPath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\unishell32.c
 # End Source File
 # End Group
-# Begin Group "user32"
+# Begin Group "comdlg32"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\user32\_user32_apilist.c
+SOURCE=.\comdlg32\_comdlg32_apilist.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\user32\_user32_apilist.h
+SOURCE=.\comdlg32\_comdlg32_apilist.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\user32\uniuser32.c
-# End Source File
-# End Group
-# Begin Group "gdi32"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\gdi32\_gdi32_apilist.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gdi32\_gdi32_apilist.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gdi32\UberGDI.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gdi32\unigdi32.c
-# End Source File
-# End Group
-# Begin Group "advapi32"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\advapi32\_advapi32_apilist.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\advapi32\_advapi32_apilist.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\advapi32\uniadvapi32.c
+SOURCE=.\comdlg32\unicomdlg32.c
 # End Source File
 # End Group
 # Begin Source File
@@ -166,7 +146,48 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\kexbasen.def
+SOURCE=.\kexshell.def
+
+!IF  "$(CFG)" == "kexshell - Win32 Release"
+
+# Begin Custom Build
+OutDir=.\Release
+ProjDir=.
+InputPath=.\kexshell.def
+
+BuildCmds= \
+	link /LIB /NOLOGO /MACHINE:IX86 /DEF:$(ProjDir)\shell32ord.def /OUT:$(OutDir)\shell32ord.lib
+
+"$(OutDir)\shell32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(OutDir)\shell32ord.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "kexshell - Win32 Debug"
+
+# Begin Custom Build
+OutDir=.\Debug
+ProjDir=.
+InputPath=.\kexshell.def
+
+BuildCmds= \
+	link /LIB /NOLOGO /MACHINE:IX86 /DEF:$(ProjDir)\shell32ord.def /OUT:$(OutDir)\shell32ord.lib
+
+"$(OutDir)\shell32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(OutDir)\shell32ord.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\kexshell.rc
 # End Source File
 # Begin Source File
 
@@ -196,10 +217,6 @@ SOURCE=.\unifwd.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# Begin Source File
-
-SOURCE=.\kexbasen.rc
-# End Source File
 # End Group
 # End Target
 # End Project

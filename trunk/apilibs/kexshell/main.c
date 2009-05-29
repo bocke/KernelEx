@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2009, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -22,20 +22,16 @@
 #include "common.h"
 #include "unifwd.h"
 #include "kexcoresdk.h"
-#include "kernel32/_kernel32_apilist.h"
-#include "gdi32/_gdi32_apilist.h"
-#include "user32/_user32_apilist.h"
-#include "advapi32/_advapi32_apilist.h"
+#include "comdlg32/_comdlg32_apilist.h"
+#include "shell32/_shell32_apilist.h"
 //#include "/__apilist.h"
 
-static apilib_api_table api_table[5];
+static apilib_api_table api_table[3];
 
 static void fill_apitable()
 {
-	api_table[0] = apitable_kernel32;
-	api_table[1] = apitable_gdi32;
-	api_table[2] = apitable_user32;
-	api_table[3] = apitable_advapi32;
+	api_table[0] = apitable_comdlg32;
+	api_table[1] = apitable_shell32;
 	//last entry is null terminator
 }
 
@@ -47,10 +43,10 @@ const apilib_api_table* get_api_table()
 	//check if unicows is available
 	if (!unifwd_init())
 	{
-		//force reference advapi32
+		//force reference comdlg32
 		if (!&api_table)
 		{
-			RegOpenKey(0,0,0);
+			ChooseColorA(0);
 		}
 		return NULL;
 	}
@@ -59,7 +55,7 @@ const apilib_api_table* get_api_table()
 
 BOOL init()
 {
-	return common_init() && init_kernel32() && init_gdi32() && init_user32() && init_advapi32();
+	return common_init() && init_comdlg32() && init_shell32();
 }
 
 BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
@@ -67,13 +63,11 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 	switch (reason) 
 	{
 	case DLL_PROCESS_ATTACH:
-//		kexDebugPrint("KernelEx Base Non-shared library reporting in action!\n");
 		DisableThreadLibraryCalls(instance);
 		if (!init())
 			return FALSE;
 		break;
 	case DLL_PROCESS_DETACH:
-//		kexDebugPrint("KernelEx Base Non-shared library signing off!\n");
 		break;
 	}
 	return TRUE;
