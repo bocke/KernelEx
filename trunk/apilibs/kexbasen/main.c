@@ -44,21 +44,14 @@ __declspec(dllexport)
 const apilib_api_table* get_api_table()
 {
 	fill_apitable();
-	//check if unicows is available
-	if (!unifwd_init())
-	{
-		//force reference advapi32
-		if (!&api_table)
-		{
-			RegOpenKey(0,0,0);
-		}
-		return NULL;
-	}
 	return api_table;
 }
 
 BOOL init()
 {
+	//force reference advapi32 - this is never called, only to force import
+	if (!&api_table) RegOpenKey(0,0,0);
+	
 	return common_init() && init_kernel32() && init_gdi32() && init_user32() && init_advapi32();
 }
 
