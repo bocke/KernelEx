@@ -25,13 +25,10 @@
 
 FORWARD_TO_UNICOWS(AppendMenuW);
 FORWARD_TO_UNICOWS(BroadcastSystemMessageW);
-FORWARD_TO_UNICOWS(CallMsgFilterW);
 FORWARD_TO_UNICOWS(CallWindowProcW);
 FORWARD_TO_UNICOWS(ChangeDisplaySettingsExW);
 FORWARD_TO_UNICOWS(ChangeDisplaySettingsW);
 FORWARD_TO_UNICOWS(ChangeMenuW);
-FORWARD_TO_UNICOWS(CopyAcceleratorTableW);
-FORWARD_TO_UNICOWS(CreateAcceleratorTableW);
 FORWARD_TO_UNICOWS(CreateDialogIndirectParamW);
 
 static BOOL CALLBACK SetUnicode(HWND hwnd, LPARAM lParam)
@@ -72,7 +69,6 @@ LRESULT WINAPI DefWindowProcW_new(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPa
 
 FORWARD_TO_UNICOWS(DialogBoxIndirectParamW);
 FORWARD_TO_UNICOWS(DialogBoxParamW);
-FORWARD_TO_UNICOWS(DispatchMessageW);
 FORWARD_TO_UNICOWS(DlgDirListComboBoxW);
 FORWARD_TO_UNICOWS(DlgDirListW);
 FORWARD_TO_UNICOWS(DlgDirSelectComboBoxExW);
@@ -107,7 +103,6 @@ FORWARD_TO_UNICOWS(GetWindowTextW);
 FORWARD_TO_UNICOWS(GrayStringW);
 FORWARD_TO_UNICOWS(InsertMenuItemW);
 FORWARD_TO_UNICOWS(InsertMenuW);
-FORWARD_TO_UNICOWS(IsDialogMessageW);
 FORWARD_TO_UNICOWS(IsWindowUnicode);
 FORWARD_TO_UNICOWS(LoadAcceleratorsW);
 FORWARD_TO_UNICOWS(LoadBitmapW);
@@ -122,7 +117,6 @@ FORWARD_TO_UNICOWS(MapVirtualKeyExW);
 FORWARD_TO_UNICOWS(MapVirtualKeyW);
 FORWARD_TO_UNICOWS(MessageBoxIndirectW);
 FORWARD_TO_UNICOWS(ModifyMenuW);
-FORWARD_TO_UNICOWS(PeekMessageW);
 FORWARD_TO_UNICOWS(PostMessageW);
 FORWARD_TO_UNICOWS(PostThreadMessageW);
 FORWARD_TO_UNICOWS(RegisterClassExW);
@@ -146,7 +140,6 @@ FORWARD_TO_UNICOWS(SetWindowsHookW);
 FORWARD_TO_UNICOWS(SetWindowTextW);
 FORWARD_TO_UNICOWS(SystemParametersInfoW);
 FORWARD_TO_UNICOWS(TabbedTextOutW);
-FORWARD_TO_UNICOWS(TranslateAcceleratorW);
 FORWARD_TO_UNICOWS(UnregisterClassW);
 FORWARD_TO_UNICOWS(VkKeyScanExW);
 FORWARD_TO_UNICOWS(VkKeyScanW);
