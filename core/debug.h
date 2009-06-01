@@ -50,7 +50,7 @@ void dbgvprintf(const char* format, void* _argp);
 void dbgprintf(const char* format, ...);
 
 #ifdef __cplusplus
-}; /* extern "C" */
+} /* extern "C" */
 #endif
 
 
