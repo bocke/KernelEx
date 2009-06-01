@@ -181,6 +181,9 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 
 	//if not - load it
 
+	DBGPRINTF(("Loading non-shared apilib: %s req. by: %s\n", 
+			apilib->apilib_name, pmteModTable[caller->mteIndex]->pszModName));
+
 	strcpy(dllpath, kernelex_dir.get());
 	strcat(dllpath, apilib->apilib_name);
 
@@ -196,16 +199,31 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 
 	if (refmod) //static resolve (implicit)
 	{
-		for (int i = 0 ; i < caller->cImportedModules ; i++)
-			buffer[i] = caller->ImplicitImports[i].pMR;
-
 		//FIXME: this will cause problems if apilib references another non-shared apilib!!
 		//it is okay to use global buffer because static resolve code is protected by k32 lock
-		**refmod = mr;
-		*refmod += buffer - &caller->ImplicitImports[0].pMR;
+
+		//not buffered yet?
+		if (!(*refmod >= buffer && *refmod < buffer + sizeof(buffer)))
+		{
+			//make a copy
+			for (int i = 0 ; i < caller->cImportedModules ; i++)
+				buffer[i] = caller->ImplicitImports[i].pMR;
+
+			//set reference to copy - copy will be seen by continuing resolve process
+			*refmod += buffer - &caller->ImplicitImports[0].pMR;
+		}
+
+		DBGPRINTF(("Implicit load: replacing startup tree %s with %s\n", 
+				pmteModTable[caller->ImplicitImports[*refmod - buffer].pMR->mteIndex]
+				->pszModName, apilib->apilib_name));
+
+		//modify original - modifications will be seen by dll initializer
+		caller->ImplicitImports[*refmod - buffer].pMR = mr;
 	}
 	else //dynamic resolve (GetProcAddress)
 	{
+		DBGPRINTF(("Explicit load: initializing tree of %s\n", apilib->apilib_name));
+
 		if (FLoadTreeNotify(mr, 0))
 		{
 			FreeLibTree(mr);
