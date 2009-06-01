@@ -169,7 +169,7 @@ _KEXCOREIMP void kexFlushAppSettings(void);
 
 
 #ifdef __cplusplus
-}; /* extern "C" */
+} /* extern "C" */
 #endif
 
 

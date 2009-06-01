@@ -38,6 +38,8 @@ class KexLinkage
 			const char* conf_name, BYTE ldr_flags);
 	typedef unsigned long (*kexGetKEXVersion_t)(void);
 
+public:
+
 	struct conf
 	{
 		conf(const char* n, const char* d) : name(n), desc(d) {}
@@ -45,7 +47,6 @@ class KexLinkage
 		sstring desc;
 	};
 
-public:
 	~KexLinkage();
 	bool IsReady();
 	
