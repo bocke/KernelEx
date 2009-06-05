@@ -33,6 +33,8 @@ extern void resolver_uninit();
 extern void resolver_hook();
 extern void resolver_unhook();
 
+extern BOOL resolver_process_attach();
+
 static int init_count = 0;
 
 static void prepare()
@@ -187,17 +189,18 @@ BOOL APIENTRY PreDllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		if (!ensure_shared_memory((DWORD)instance))
-				return FALSE;
-
-		if (is_failsafe_mode())
-				return FALSE;
-
 		DisableThreadLibraryCalls(instance);
 
 		if (load_count((DWORD) instance) == 1)
 		{
+			//first reference => do init
 			hInstance = instance;
+
+			if (!ensure_shared_memory((DWORD)instance))
+				return FALSE;
+
+			if (is_failsafe_mode())
+				return FALSE;
 
 			if (detect_old_version())
 				return FALSE;
@@ -211,6 +214,11 @@ BOOL APIENTRY PreDllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 			ret = _DllMainCRTStartup(instance, reason, reserved);
 
 			get_own_path();
+		}
+		else
+		{
+			//referenced by other module => call resolver
+			ret = resolver_process_attach();
 		}
 	}
 	else if (reason == DLL_PROCESS_DETACH)

@@ -181,13 +181,6 @@ Section "Install"
   Call UpgradeDLL_Func
   
   GetTempFileName $0 "$INSTDIR"
-  File /oname=$0 "apilibs\kexshell\Release\kexshell.dll"
-  StrCpy $R4 "$INSTDIR\kexshell.dll"
-  StrCpy $R6 "0"
-  StrCpy $R7 $0
-  Call UpgradeDLL_Func
-  
-  GetTempFileName $0 "$INSTDIR"
   File /oname=$0 "sheet\Release\sheet.dll"
   StrCpy $R4 "$INSTDIR\sheet.dll"
   StrCpy $R6 "1"
@@ -277,7 +270,6 @@ Section "Uninstall"
   Delete /REBOOTOK "$INSTDIR\KernelEx.dll"
   Delete /REBOOTOK "$INSTDIR\kexbases.dll"
   Delete /REBOOTOK "$INSTDIR\kexbasen.dll"
-  Delete /REBOOTOK "$INSTDIR\kexshell.dll"
   Delete "$INSTDIR\core.ini"
   UnRegDLL "$INSTDIR\sheet.dll"
   Delete /REBOOTOK "$INSTDIR\sheet.dll"
