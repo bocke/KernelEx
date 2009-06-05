@@ -21,6 +21,8 @@
 
 #include <windows.h>
 #include <algorithm>
+#pragma warning(disable:4530) //we don't do exception handling
+#include <list>
 #include "debug.h"
 #include "resolver.h"
 #include "apiconf.h"
@@ -37,6 +39,8 @@ int system_path_len;
 
 static PLONG jtab;
 static LONG old_jtab[4];
+
+static list<PMODREF> swapmr;
 
 
 /** Get API configuration for selected module.
@@ -218,6 +222,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 				->pszModName, apilib->apilib_name));
 
 		//modify original - modifications will be seen by dll initializer
+		swapmr.push_back(caller->ImplicitImports[*refmod - buffer].pMR);
 		caller->ImplicitImports[*refmod - buffer].pMR = mr;
 	}
 	else //dynamic resolve (GetProcAddress)
@@ -241,6 +246,28 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	imte->mod_index = idx;
 
 	return (PROC)(img_base + (addr & 0x00ffffff));
+}
+
+BOOL resolver_process_attach()
+{
+	BOOL ret = TRUE;
+	list<PMODREF>::const_iterator it;
+
+	if (swapmr.empty())
+		return ret;
+
+	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
+	{
+		DBGPRINTF(("Post-Initializing %s\n", (*ppmteModTable)[(*it)->mteIndex]->pszModName));
+		if (FLoadTreeNotify(*it, 1))
+		{
+			ret = FALSE;
+			break;
+		}
+	}
+
+	swapmr.clear();
+	return ret;
 }
 
 static PROC WINAPI OriExportFromOrdinal(IMAGE_NT_HEADERS* PEh, WORD ordinal)

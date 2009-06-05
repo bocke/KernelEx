@@ -62,7 +62,6 @@ SOURCE="$(InputPath)"
 "nope" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexbases 
 	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexbasen 
-	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexshell 
 	
 # End Custom Build
 
@@ -100,7 +99,6 @@ SOURCE="$(InputPath)"
 "nope" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexbases 
 	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexbasen 
-	$(OutDir)\$(TargetName) $(WkspDir)\apilibs\kexshell 
 	
 # End Custom Build
 

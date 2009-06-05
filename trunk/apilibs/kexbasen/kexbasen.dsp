@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /machine:I386 /nodefaultlib /OPT:NOWIN98
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib rpcrt4.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib delayimp.lib $(OutDir)\shell32ord.lib /nologo /dll /map /machine:I386 /nodefaultlib /def:".\kexbasen.def" /OPT:NOWIN98 /DELAYLOAD:shell32.dll /DELAYLOAD:rpcrt4.dll
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /pdbtype:sept /OPT:NOWIN98
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib rpcrt4.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib delayimp.lib $(OutDir)\shell32ord.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /def:".\kexbasen.def" /pdbtype:sept /OPT:NOWIN98 /DELAYLOAD:shell32.dll /DELAYLOAD:rpcrt4.dll
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -160,6 +160,70 @@ SOURCE=.\advapi32\_advapi32_apilist.h
 SOURCE=.\advapi32\uniadvapi32.c
 # End Source File
 # End Group
+# Begin Group "comdlg32"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\comdlg32\_comdlg32_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\comdlg32\_comdlg32_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\comdlg32\unicomdlg32.c
+# End Source File
+# End Group
+# Begin Group "shell32"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\shell32\_shell32_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\_shell32_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\auxshlguid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\pidl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\SHGetFolderLocation.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\SHGetFolderPath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\unishell32.c
+# End Source File
+# End Group
+# Begin Group "rpcrt4"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\rpcrt4\_rpcrt4_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\rpcrt4\_rpcrt4_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\rpcrt4\unirpcrt4.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\common.c
@@ -167,6 +231,17 @@ SOURCE=.\common.c
 # Begin Source File
 
 SOURCE=.\kexbasen.def
+
+!IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
