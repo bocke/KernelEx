@@ -79,9 +79,7 @@ extern FreeLibRemove_t FreeLibRemove;
 
 MODREF* MRfromCallerAddr(DWORD addr);
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 void __stdcall _EnterSysLevel(CRITICAL_SECTION*);
 void __stdcall _LeaveSysLevel(CRITICAL_SECTION*);
@@ -95,8 +93,6 @@ ULONG __stdcall VxDCall6(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
 ULONG __stdcall VxDCall7(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
 ULONG __stdcall VxDCall8(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
 
-#ifdef __cplusplus
-};
-#endif
+}
 
 #endif
