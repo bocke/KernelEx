@@ -271,8 +271,8 @@ BOOL resolver_process_attach()
 		if ((*it)->ppdb == thisPDB)
 		{
 			DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
-					(*ppmteModTable)[(*it)->mteIndex]->pszModName), 
-					GetCurrentProcessId());
+					(*ppmteModTable)[(*it)->mteIndex]->pszModName, 
+					GetCurrentProcessId()));
 
 			if (FLoadTreeNotify(*it, 1))
 			{
