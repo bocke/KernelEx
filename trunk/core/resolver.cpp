@@ -41,6 +41,7 @@ static PLONG jtab;
 static LONG old_jtab[4];
 
 static list<PMODREF> swapmr;
+CRITICAL_SECTION resolver_cs;
 
 
 /** Get API configuration for selected module.
@@ -185,8 +186,9 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 
 	//if not - load it
 
-	DBGPRINTF(("Loading non-shared apilib: %s req. by: %s\n", 
-			apilib->apilib_name, pmteModTable[caller->mteIndex]->pszModName));
+	DBGPRINTF(("Loading non-shared apilib: %s req. by: %s [PID=%08x]\n", 
+			apilib->apilib_name, pmteModTable[caller->mteIndex]->pszModName,
+			GetCurrentProcessId()));
 
 	strcpy(dllpath, kernelex_dir.get());
 	strcat(dllpath, apilib->apilib_name);
@@ -217,17 +219,24 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 			*refmod += buffer - &caller->ImplicitImports[0].pMR;
 		}
 
-		DBGPRINTF(("Implicit load: replacing startup tree %s with %s\n", 
+		DBGPRINTF(("Implicit load: replacing tree %s => %s [PID=%08x]\n", 
 				pmteModTable[caller->ImplicitImports[*refmod - buffer].pMR->mteIndex]
-				->pszModName, apilib->apilib_name));
+				->pszModName, apilib->apilib_name,
+				GetCurrentProcessId()));
+
+		//remember tree which we overwrite - we will initialize it ourselves
+		//in resolver_process_attach as a result of initializing our tree
+		//requirement: Core is in IAT of the apilib !!!
+		swapmr.push_back(caller->ImplicitImports[*refmod - buffer].pMR);
 
 		//modify original - modifications will be seen by dll initializer
-		swapmr.push_back(caller->ImplicitImports[*refmod - buffer].pMR);
+		//which will initialize our mr tree
 		caller->ImplicitImports[*refmod - buffer].pMR = mr;
 	}
 	else //dynamic resolve (GetProcAddress)
 	{
-		DBGPRINTF(("Explicit load: initializing tree of %s\n", apilib->apilib_name));
+		DBGPRINTF(("Explicit load: initializing tree %s [PID=%08x]\n", 
+				apilib->apilib_name, GetCurrentProcessId()));
 
 		if (FLoadTreeNotify(mr, 0))
 		{
@@ -251,22 +260,33 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 BOOL resolver_process_attach()
 {
 	BOOL ret = TRUE;
-	list<PMODREF>::const_iterator it;
+	const PDB98* thisPDB = PIDtoPDB(GetCurrentProcessId());
+	list<PMODREF>::iterator it;
 
-	if (swapmr.empty())
-		return ret;
+	EnterCriticalSection(&resolver_cs);
 
-	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
+	it = swapmr.begin();
+	while (it != swapmr.end())
 	{
-		DBGPRINTF(("Post-Initializing %s\n", (*ppmteModTable)[(*it)->mteIndex]->pszModName));
-		if (FLoadTreeNotify(*it, 1))
+		if ((*it)->ppdb == thisPDB)
 		{
-			ret = FALSE;
-			break;
+			DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
+					(*ppmteModTable)[(*it)->mteIndex]->pszModName), 
+					GetCurrentProcessId());
+
+			if (FLoadTreeNotify(*it, 1))
+			{
+				ret = FALSE;
+				break;
+			}
+			it = swapmr.erase(it);
 		}
+		else
+			it++;
 	}
 
-	swapmr.clear();
+	LeaveCriticalSection(&resolver_cs);
+
 	return ret;
 }
 
@@ -697,6 +717,7 @@ int resolver_init()
 
 	jtab = (PLONG) dseg->jtab;
 
+	InitializeCriticalSection(&resolver_cs);
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
 
 	SettingsDB::instance.flush_all();
