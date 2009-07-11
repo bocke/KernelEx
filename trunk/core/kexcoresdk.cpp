@@ -33,6 +33,15 @@ unsigned long kexGetKEXVersion()
 	return VERSION_CODE;
 }
 
+int kexIsDebugCore()
+{
+#ifdef _DEBUG
+	return 1;
+#else
+	return 0;
+#endif
+}
+
 void kexDebugPrint(const char* format, ...)
 {
 #ifdef _DEBUG

@@ -165,7 +165,7 @@ bool ApiLibraryManager::load_apilib(const char* apilib_name)
 
 		strcpy(apilib->apilib_name, apilib_name);
 
-		strcpy(dllpath, kernelex_dir.get());
+		strcpy(dllpath, kernelex_dir);
 		strcat(dllpath, apilib_name);
 		apilib->mod_handle = LoadLibrary(dllpath);
 

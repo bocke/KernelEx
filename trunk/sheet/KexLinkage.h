@@ -37,6 +37,7 @@ class KexLinkage
 	typedef void (*kexSetModuleSettings_t)(const char* module, 
 			const char* conf_name, BYTE ldr_flags);
 	typedef unsigned long (*kexGetKEXVersion_t)(void);
+	typedef int (*kexIsDebugCore_t)(void);
 
 public:
 
@@ -56,6 +57,7 @@ public:
 	kexGetModuleSettings_t m_kexGetModuleSettings;
 	kexSetModuleSettings_t m_kexSetModuleSettings;
 	kexGetKEXVersion_t m_kexGetKEXVersion;
+	kexIsDebugCore_t m_kexIsDebugCore;
 
 protected:
 	KexLinkage();

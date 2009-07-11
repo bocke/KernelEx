@@ -56,8 +56,11 @@ bool KexLinkage::Prepare()
 			"kexSetModuleSettings");
 	m_kexGetKEXVersion = (kexGetKEXVersion_t) GetProcAddress(hKernelEx,
 			"kexGetKEXVersion");
+	m_kexIsDebugCore = (kexIsDebugCore_t) GetProcAddress(hKernelEx,
+			"kexIsDebugCore");
 
-	if (!m_kexGetModuleSettings || !m_kexSetModuleSettings || !m_kexGetKEXVersion)
+	if (!m_kexGetModuleSettings || !m_kexSetModuleSettings 
+			|| !m_kexGetKEXVersion || !m_kexIsDebugCore)
 		return false;
 
 	//read config file location from registry

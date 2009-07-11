@@ -19,19 +19,20 @@
  *
  */
 
-#include "debug.h"
+#include <new>
 #include <stdio.h>
 #include <stdarg.h>
 #include <windows.h>
-
-#define BUFLEN 256
+#include "debug.h"
+#include "internals.h"
+#include "DebugWindow.h"
 
 extern "C"
 int vsnprintf(char *buffer, size_t n, const char *format, va_list ap);
 
 void dbgvprintf(const char* format, void* _argp)
 {
-	char msg[BUFLEN];
+	char msg[DEBUGMSG_MAXLEN];
 	va_list argp = (va_list) _argp;
 	int cnt = vsnprintf(msg, sizeof(msg), format, argp);
 
@@ -44,4 +45,103 @@ void dbgprintf(const char* format, ...)
 	va_start(argp, format);
 	dbgvprintf(format, argp);
 	va_end(argp);
+}
+
+void* get_process_env_data(const char* env, void* (*c)())
+{
+	//environment variable: ENV=ProcessID:DATA
+	char buf[20];
+	DWORD ret;
+	DWORD ProcID;
+	void* data = NULL;
+	
+	ret = GetEnvironmentVariable(env, buf, sizeof(buf));
+	if (ret == 0 || ret > sizeof(buf) 
+			|| sscanf(buf, "%x:%x", &ProcID, &data) != 2
+			|| ProcID != GetCurrentProcessId())
+	{
+		//invalid/missing value - create new data
+		data = c();
+		if (data)
+		{
+			sprintf(buf, "%x:%x", GetCurrentProcessId(), data);
+			SetEnvironmentVariable(env, buf);
+		}
+	}
+
+	return data;
+}
+
+void* heap_creator()
+{
+	return HeapCreate(0, 0, 0);
+}
+
+HANDLE get_process_debug_heap()
+{
+	return get_process_env_data("KEXDBGH", heap_creator);
+}
+
+void* tls_creator()
+{
+	return (void*) TlsAlloc();
+}
+
+DWORD get_process_debug_tls()
+{
+	return (DWORD) get_process_env_data("KEXDBGT", tls_creator);
+}
+
+extern "C"
+int snprintf(char *buffer, size_t n, const char* format, ...);
+
+DWORD __stdcall log_api(const char* source, const char* target, const char* api_name, DWORD ret)
+{
+	DebugWindow* dw = DebugWindow::get();
+	if (!dw)
+		return 0;
+	
+	char msg[DEBUGMSG_MAXLEN];
+
+	const char* proc = ((*ppmteModTable)[(*pppdbCur)->pExeMODREF->mteIndex])->pszModName;
+	snprintf(msg, sizeof(msg), "%s|%x|%s|%s|%s|%x", proc, 
+			GetCurrentThreadId(), source, target, api_name, ret);
+
+	dw->append(msg);
+
+	return ret;
+}
+
+ThreadAddrStack::ThreadAddrStack()
+{
+	pos = 0;
+}
+
+void __stdcall ThreadAddrStack::push_ret_addr(DWORD tls, DWORD addr)
+{
+	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(tls);
+	if (!tas)
+	{
+		void* mem = HeapAlloc(get_process_debug_heap(), 0, sizeof(ThreadAddrStack));
+		tas = new (mem) ThreadAddrStack;
+		TlsSetValue(tls, mem);
+	}
+	tas->stack[tas->pos++] = addr;
+}
+
+DWORD __stdcall ThreadAddrStack::pop_ret_addr(DWORD tls)
+{
+	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(tls);
+	if (!tas || !tas->pos)
+		return 0;
+	return tas->stack[--tas->pos];
+}
+
+PROC create_log_stub(const char* caller, const char* target, const char* api, PROC orig)
+{
+	HANDLE heap = get_process_debug_heap();
+	void* mem = HeapAlloc(heap, 0, sizeof(log_stub));
+	return (PROC) new (mem) log_stub(caller, 
+			target, api, (unsigned long) orig, 
+			(unsigned long) log_api, get_process_debug_tls());
 }

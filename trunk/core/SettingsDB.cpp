@@ -32,6 +32,7 @@ SettingsDB SettingsDB::instance;
 SettingsDB::SettingsDB()
 {
 	InitializeCriticalSection(&cs);
+	MakeCriticalSectionGlobal(&cs);
 }
 
 SettingsDB::~SettingsDB()
@@ -173,7 +174,7 @@ appsetting SettingsDB::get_appsetting(const char* path)
 		//then try wildcard matching
 		for (it = db_wild.begin() ; it != db_wild.end() ; it++)
 		{
-			if (wildcmp(it->first.get(), path))
+			if (wildcmp(it->first, path))
 				break;
 		}
 	}
@@ -241,7 +242,7 @@ void SettingsDB::dump_db()
 	for (it = db.begin() ; it != db.end() ; it++)
 	{
 		ApiConfiguration* conf = it->second.conf;
-		dbgprintf("%-40s %-10s %02x\n", it->first.get(), 
+		dbgprintf("%-40s %-10s %02x\n", it->first, 
 				conf ? conf->get_name() : "unknown", it->second.flags);
 	}
 
@@ -249,7 +250,7 @@ void SettingsDB::dump_db()
 	for (it = db_wild.begin() ; it != db_wild.end() ; it++)
 	{
 		ApiConfiguration* conf = it->second.conf;
-		dbgprintf("%-40s %-10s %02x\n", it->first.get(), 
+		dbgprintf("%-40s %-10s %02x\n", it->first, 
 				conf ? conf->get_name() : "unknown", it->second.flags);
 	}
 }

@@ -30,6 +30,8 @@ struct ApiLibrary
 	HMODULE mod_handle;
 	int index;
 	char apilib_name[1]; // variable size array
+
+	bool is_shared() const { return (DWORD) mod_handle >= 0x80000000; }
 };
 
 class ApiLibraryManager

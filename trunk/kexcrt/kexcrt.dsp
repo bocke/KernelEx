@@ -54,10 +54,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\exit.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\_vsnprintf.c
 # End Source File
 # Begin Source File
@@ -87,6 +83,10 @@ SOURCE=.\ctypes.c
 # Begin Source File
 
 SOURCE=.\msvc\dllcrt0.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\exit.c
 # End Source File
 # Begin Source File
 
@@ -263,6 +263,10 @@ SOURCE=.\strstr.c
 # Begin Source File
 
 SOURCE=.\strtok.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\strtok_r.c
 # End Source File
 # Begin Source File
 
