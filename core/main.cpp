@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "apiconfmgr.h"
 #include "internals.h"
+#include "DebugWindow.h"
 
 extern int internals_init();
 extern void internals_uninit();
@@ -64,6 +65,10 @@ int kexInit()
 		goto __error2;
 
 	resolver_hook();
+	
+#ifdef _DEBUG
+	DebugWindow::create();
+#endif
 
 	DBGPRINTF(("Initialized successfully\n"));
 	return ++init_count;
@@ -89,6 +94,9 @@ int kexUninit()
 	DBGPRINTF(("Uninitializing\n"));
 	resolver_unhook();
 	resolver_uninit();
+#ifdef _DEBUG
+	DebugWindow::destroy();
+#endif
 	internals_uninit();
 	return --init_count;
 }
@@ -116,7 +124,7 @@ void load_MPRServices()
         RegOpenKey(hk_serv, subkey, &hk_this);
         size = sizeof(dllname);
         if (RegQueryValueEx(hk_this, "DllName", NULL, NULL, (BYTE*)dllname, &size) 
-                == ERROR_SUCCESS && strcmpi(dllname, own_path.get()) != 0)
+                == ERROR_SUCCESS && strcmpi(dllname, own_path) != 0)
         {         
             LoadLibrary(dllname);
         }
@@ -239,21 +247,14 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 {
 	if (reason == DLL_PROCESS_ATTACH && GetModuleHandle("MPREXE.EXE"))
 	{
+		//auto start if loaded by MPREXE
+
 		//load all other MPR services before further execution
 		load_MPRServices();
 
 		//initialize
 		if (!kexInit())
 			return FALSE;
-
-		//in case KernelEx was loaded globally we don't want to unload it ever
-		IMTE** pmteModTable = *ppmteModTable;
-		pmteModTable[MRFromHLib(hInstance)->mteIndex]->cUsage++;
-		
-		//we don't want to unload the api libraries as well
-		ApiLibrary* apilib;
-		for (int i = 1 ; (apilib = ApiLibraryManager::get_apilib(i)) ; i++)
-			pmteModTable[MRFromHLib(apilib->mod_handle)->mteIndex]->cUsage++;
 
 		return TRUE;
 	}

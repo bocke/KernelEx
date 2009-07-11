@@ -42,7 +42,7 @@ ApiConfigurationManager::ApiConfigurationManager()
 {
 	new_apiconf_ptrs = NULL;
 	new_apiconf_cnt = 0;
-	strcpy(core_conf_file, kernelex_dir.get());
+	strcpy(core_conf_file, kernelex_dir);
 	strcat(core_conf_file, "core.ini");
 }
 

@@ -26,6 +26,7 @@
 #include "sharedmem.h"
 #include "sstring.hpp"
 #include "resource.h"
+#include "k32ord.h"
 
 /** MSVC for-loop workaround. */
 #ifdef _MSC_VER
@@ -78,21 +79,5 @@ extern FLoadTreeNotify_t FLoadTreeNotify;
 extern FreeLibRemove_t FreeLibRemove;
 
 MODREF* MRfromCallerAddr(DWORD addr);
-
-extern "C" {
-
-void __stdcall _EnterSysLevel(CRITICAL_SECTION*);
-void __stdcall _LeaveSysLevel(CRITICAL_SECTION*);
-
-ULONG __stdcall VxDCall1(ULONG);
-ULONG __stdcall VxDCall2(ULONG, ULONG);
-ULONG __stdcall VxDCall3(ULONG, ULONG, ULONG);
-ULONG __stdcall VxDCall4(ULONG, ULONG, ULONG, ULONG);
-ULONG __stdcall VxDCall5(ULONG, ULONG, ULONG, ULONG, ULONG);
-ULONG __stdcall VxDCall6(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
-ULONG __stdcall VxDCall7(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
-ULONG __stdcall VxDCall8(ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG, ULONG);
-
-}
 
 #endif

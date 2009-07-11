@@ -303,12 +303,14 @@ BOOL CALLBACK KexShlExt::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 				{
 					EnableWindow(GetDlgItem(hwnd, IDC_COMPAT), FALSE);
 					EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), FALSE);
+					EnableWindow(GetDlgItem(hwnd, IDC_LOG), FALSE);
 				}
 				else
 				{
 					EnableWindow(GetDlgItem(hwnd, IDC_COMPAT), TRUE);
 					EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), 
 							IsDlgButtonChecked(hwnd, IDC_COMPAT));
+					EnableWindow(GetDlgItem(hwnd, IDC_LOG), TRUE);
 				}
 				PropSheet_Changed(GetParent(hwnd), hwnd);
 				break;
@@ -318,6 +320,7 @@ BOOL CALLBACK KexShlExt::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 				PropSheet_Changed(GetParent(hwnd), hwnd);
 				break;
 			case IDC_SYSTEM:
+			case IDC_LOG:
 				PropSheet_Changed(GetParent(hwnd), hwnd);
 				break;
 			}
@@ -360,13 +363,22 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 		CheckDlgButton(hwnd, IDC_DISABLE, BST_CHECKED);
 		EnableWindow(GetDlgItem(hwnd, IDC_COMPAT), FALSE);
 		EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), FALSE);
+		EnableWindow(GetDlgItem(hwnd, IDC_LOG), FALSE);
+	}
+	if (ms->flags & 4)
+	{
+		CheckDlgButton(hwnd, IDC_LOG, BST_CHECKED);
 	}
 
 	//set KernelEx version
 	unsigned long ver = KexLinkage::instance.m_kexGetKEXVersion();
+	int debug = KexLinkage::instance.m_kexIsDebugCore();
 	char ver_s[32];
-	sprintf(ver_s, "KernelEx Core v%d.%d.%d", ver>>24, (ver>>16) & 0xff, ver & 0xffff);
+	sprintf(ver_s, "KernelEx Core v%d.%d.%d %s", 
+			ver>>24, (ver>>16) & 0xff, ver & 0xffff, debug ? "DEBUG" : "");
 	SendMessage(GetDlgItem(hwnd, IDC_KEXVER), WM_SETTEXT, 0, (LPARAM) ver_s);
+
+	ShowWindow(GetDlgItem(hwnd, IDC_LOG), debug ? SW_SHOW : SW_HIDE);
 }
 
 
@@ -380,6 +392,8 @@ void KexShlExt::OnApply(HWND hwnd)
 	if (IsDlgButtonChecked(hwnd, IDC_COMPAT))
 		conf = KexLinkage::instance.confs[SendMessage(
 				GetDlgItem(hwnd, IDC_SYSTEM), CB_GETCURSEL, 0, 0)].name.get();
+	if (IsDlgButtonChecked(hwnd, IDC_LOG))
+		flags |= 4;
 
 	if (flags != ms->flags || strcmp(conf, ms->conf) != 0)
 		KexLinkage::instance.m_kexSetModuleSettings(ms->file, conf, flags);

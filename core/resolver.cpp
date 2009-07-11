@@ -23,6 +23,7 @@
 #include <algorithm>
 #pragma warning(disable:4530) //we don't do exception handling
 #include <list>
+#pragma warning(default:4530)
 #include "debug.h"
 #include "resolver.h"
 #include "apiconf.h"
@@ -44,11 +45,13 @@ static list<PMODREF> swapmr;
 CRITICAL_SECTION resolver_cs;
 
 
+
 /** Get API configuration for selected module.
  * @param module Target module.
- * @return Pointer to API configuration or NULL to not use extended API.
+ * @param cp Value receives configuration information for extended API.
+ * @return True to use extended API, false use standard API.
  */
-static ApiConfiguration* get_config(MODREF* moduleMR)
+static bool get_config(MODREF* moduleMR, config_params& cp)
 {
 	IMTE** pmteModTable = *ppmteModTable;
 	PDB98* ppdbCur = *pppdbCur;
@@ -70,7 +73,7 @@ static ApiConfiguration* get_config(MODREF* moduleMR)
 		flags = module->flags;
 
 		if (flags & LDR_KEX_DISABLE)
-			return NULL;
+			return false;
 	}
 	else
 		conf = NULL;
@@ -88,7 +91,7 @@ static ApiConfiguration* get_config(MODREF* moduleMR)
 		flags = process->flags;
 
 		if (flags & LDR_KEX_DISABLE)
-			return NULL;
+			return false;
 	}
 
 	//if no process configuration then get parent configuration
@@ -102,16 +105,11 @@ static ApiConfiguration* get_config(MODREF* moduleMR)
 			IMTE_KEX* parent = (IMTE_KEX*) pmteModTable[ppdbParent->pExeMODREF->mteIndex];
 			conf = parent->config;
 			flags = parent->flags;
+			flags &= ~LDR_LOG_APIS; //don't inherit LOG flag
 
 			if (flags & LDR_KEX_DISABLE)
-				return NULL;
+				return false;
 		}
-	}
-
-	if (flags & LDR_LOG_APIS)
-	{
-		//TODO: not implemented yet
-		DBGPRINTF(("Resolver flag LDR_LOG_APIS not implemented\n"));
 	}
 
 	if (flags & LDR_FILTER_APIS)
@@ -124,7 +122,11 @@ static ApiConfiguration* get_config(MODREF* moduleMR)
 	if (!conf)
 		conf = ApiConfigurationManager::get_default_configuration();
 
-	return conf;
+	cp.apiconf = conf;
+#ifdef _DEBUG
+	cp.log_apis = (flags & LDR_LOG_APIS) != 0;
+#endif
+	return conf != NULL;
 }
 
 /** Finds overridden module index for target module.
@@ -166,7 +168,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	DBGASSERT(api_lib_num > 0); //ensure apilib ID isn't STD's
 	apilib = ApiLibraryManager::get_apilib(api_lib_num);
 	DBGASSERT(apilib != NULL);
-	DBGASSERT((DWORD) apilib->mod_handle < 0x80000000);
+	DBGASSERT(!apilib->is_shared());
 	idx = 0xff00 + api_lib_num;
 
 	//first check if api library has already been loaded
@@ -190,7 +192,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 			apilib->apilib_name, pmteModTable[caller->mteIndex]->pszModName,
 			GetCurrentProcessId()));
 
-	strcpy(dllpath, kernelex_dir.get());
+	strcpy(dllpath, kernelex_dir);
 	strcat(dllpath, apilib->apilib_name);
 
 	_EnterSysLevel(krnl32lock);
@@ -257,37 +259,64 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	return (PROC)(img_base + (addr & 0x00ffffff));
 }
 
+/** Performs resolver actions on new process attach.
+ * @return TRUE on success, FALSE otherwise.
+ */
 BOOL resolver_process_attach()
 {
-	BOOL ret = TRUE;
+	//initialize all modules replaced by api libraries
+
 	const PDB98* thisPDB = PIDtoPDB(GetCurrentProcessId());
 	list<PMODREF>::iterator it;
+	bool cont = true;
 
+	//find first entry on the list addressed for this process
 	EnterCriticalSection(&resolver_cs);
-
-	it = swapmr.begin();
-	while (it != swapmr.end())
-	{
+	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
 		if ((*it)->ppdb == thisPDB)
-		{
-			DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
-					(*ppmteModTable)[(*it)->mteIndex]->pszModName, 
-					GetCurrentProcessId()));
+			break;
 
-			if (FLoadTreeNotify(*it, 1))
-			{
-				ret = FALSE;
-				break;
-			}
-			it = swapmr.erase(it);
-		}
-		else
-			it++;
-	}
-
+	if (it == swapmr.end())
+		cont = false;
 	LeaveCriticalSection(&resolver_cs);
 
-	return ret;
+	//process entry and find next entry
+	while (cont)
+	{		
+		DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
+				(*ppmteModTable)[(*it)->mteIndex]->pszModName, 
+				GetCurrentProcessId()));
+
+		if (FLoadTreeNotify(*it, 1))
+			return FALSE;
+
+		EnterCriticalSection(&resolver_cs);
+		it = swapmr.erase(it);
+		for ( ; it != swapmr.end() ; it++)
+			if ((*it)->ppdb == thisPDB)
+				break;
+
+		if (it == swapmr.end())	
+			cont = false;
+		LeaveCriticalSection(&resolver_cs);
+	}
+
+	//reference all shared api libraries
+
+	ApiLibrary* lib;
+	int i = 0;
+	while ((lib = ApiLibraryManager::get_apilib(i++)) != NULL)
+	{ 
+		if (lib->is_shared())
+		{
+			char dllpath[MAX_PATH];
+			strcpy(dllpath, kernelex_dir);
+			strcat(dllpath, lib->apilib_name);
+			LoadLibrary(dllpath);
+		}
+	}
+
+	return TRUE;
 }
 
 static PROC WINAPI OriExportFromOrdinal(IMAGE_NT_HEADERS* PEh, WORD ordinal)
@@ -447,7 +476,7 @@ DWORD encode_address(DWORD addr, const ApiLibrary* apilib)
 	}
 
 	//non-shared apilib
-	if ((DWORD) apilib->mod_handle < 0x80000000)
+	if (!apilib->is_shared())
 	{
 		//max non-shared apilib size 16MB
 		DBGASSERT(addr - (DWORD) apilib->mod_handle < 0x01000000);
@@ -485,8 +514,8 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 	if (!caller)
 		caller = (*pppdbCur)->pExeMODREF;
 	
-	ApiConfiguration* apiconf = get_config(caller);
-	if (apiconf)
+	config_params cp;
+	if (get_config(caller, cp))
 	{
 		WORD mod_index = target->mod_index;
 
@@ -496,8 +525,8 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 		DBGASSERT(mod_index);
 		mod_index--;
 
-		if (!apiconf->is_table_empty(mod_index))
-			ret = decode_address(apiconf->get(mod_index, ordinal), 
+		if (!cp.apiconf->is_table_empty(mod_index))
+			ret = decode_address(cp.apiconf->get(mod_index, ordinal), 
 					target->pNTHdr, caller, refmod);
 		else 
 			ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
@@ -521,8 +550,8 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 	if (!caller)
 		caller = (*pppdbCur)->pExeMODREF;
 
-	ApiConfiguration* apiconf = get_config(caller);
-	if (apiconf)
+	config_params cp;
+	if (get_config(caller, cp))
 	{
 		WORD mod_index = target->mod_index;
 
@@ -532,11 +561,18 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 		DBGASSERT(mod_index);
 		mod_index--;
 
-		if (!apiconf->is_table_empty(mod_index))
-			ret = decode_address(apiconf->get(mod_index, hint, name), 
+		if (!cp.apiconf->is_table_empty(mod_index))
+			ret = decode_address(cp.apiconf->get(mod_index, hint, name), 
 					target->pNTHdr, caller, refmod);
 		else 
 			ret = OriExportFromName(target->pNTHdr, hint, name);
+#ifdef _DEBUG
+		if (ret && cp.log_apis)
+		{
+			IMTE_KEX* icaller = (IMTE_KEX*)((*ppmteModTable)[caller->mteIndex]);
+			ret = create_log_stub(icaller->pszModName, target->pszModName, name, ret);
+		}
+#endif
 	}
 	else 
 		ret = OriExportFromName(target->pNTHdr, hint, name);
@@ -548,52 +584,6 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 
 	return ret;
 }
-
-#if 0
-
-//todo: vGetProcAddress_new
-PROC WINAPI GetProcAddress_new(HMODULE hModule, LPCSTR lpProcName)
-{
-	DWORD caller = *((DWORD*)&hModule - 1);
-	PDB98* ppdbCur = *pppdbCur;
-	MODREF* mod_mr;
-	IMAGE_NT_HEADERS* peh;
-	PROC ret;
-
-	_EnterSysLevel(&ppdbCur->CriticalSection);
-	mod_mr = MRFromHLib(hModule);
-	if (!mod_mr)
-	{
-		_SetError(ERROR_INVALID_HANDLE);
-		ret = NULL;
-	}
-	else
-	{
-		IMTE_KEX* target = (IMTE_KEX*) pmteModTable[mod_mr->mteIndex];
-
-		if (HIWORD(lpProcName))
-		{
-			ret = ExportFromName(target, (IMTE_KEX*) IMTEfromCallerAddr(caller), 0, lpProcName);
-		}
-		else
-		{
-			ret = ExportFromOrdinal(target, (IMTE_KEX*) IMTEfromCallerAddr(caller), (WORD) lpProcName);
-		}
-		if (!ppdbCur->DebuggeeCB || _CheckMustComplete())
-		{
-			if (!ret)
-				_SetError(ERROR_PROC_NOT_FOUND);
-		}
-		else
-		{
-			ret = _DEBCreateDIT(*((DWORD*)ppdbCur->DebuggeeCB + 5), ret);
-		}
-
-	}
-	_LeaveSysLevel(&ppdbCur->CriticalSection);
-	return ret;
-}
-#endif
 
 PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
@@ -657,17 +647,17 @@ void dump_imtes(void)
 	int total = 0;
 	
 	dbgprintf("Dumping IMTEs...\n");
-	dbgprintf("%-6s %-12s %s %s %s\n", "No.", "Process", "Module", "Config", "Flags");
+	dbgprintf("%-4s %-12s %-7s %s %s\n", "No.", "Process", "Config", "Fl", "Module");
 	for (WORD i = 0 ; i < imteMax ; i++)
 	{
 		IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[i];
 		if (imte)
 		{
-			dbgprintf("#%-5d %-12s %s %s %02x\n", i,
-					pmteModTable[imte->pMR->ppdb->pExeMODREF->mteIndex]->pszSModName, 
-					imte->pszFileName, 
+			dbgprintf("#%-3d %-12s %-7s %02x %s\n", i,
+					pmteModTable[imte->pMR->ppdb->pExeMODREF->mteIndex]->pszSModName,  
 					imte->config ? imte->config->get_name() : "unknown", 
-					imte->flags);
+					imte->flags,
+					imte->pszFileName);
 			total++;
 		}
 	}
@@ -718,6 +708,7 @@ int resolver_init()
 	jtab = (PLONG) dseg->jtab;
 
 	InitializeCriticalSection(&resolver_cs);
+	MakeCriticalSectionGlobal(&resolver_cs);
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
 
 	SettingsDB::instance.flush_all();
