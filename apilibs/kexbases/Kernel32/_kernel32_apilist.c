@@ -133,6 +133,8 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetVersionExW", GetVersionExW_WIN2K3),
 	DECL_API("GetVersionExW", GetVersionExW_VISTA),
 	DECL_API("GetVersionExW", GetVersionExW_WIN2K8),
+	DECL_API("GetVolumePathNameA", GetVolumePathNameA_new),
+	DECL_API("GetVolumePathNameW", GetVolumePathNameW_new),
 	DECL_API("GetWindowsDirectoryW", GetWindowsDirectoryW_new),
 	DECL_API("GlobalAddAtomW", GlobalAddAtomW_new),
 	DECL_API("GlobalFindAtomW", GlobalFindAtomW_new),

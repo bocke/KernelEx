@@ -224,6 +224,22 @@ SOURCE=.\rpcrt4\_rpcrt4_apilist.h
 SOURCE=.\rpcrt4\unirpcrt4.c
 # End Source File
 # End Group
+# Begin Group "winspool"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\winspool\_winspool_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\winspool\_winspool_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\winspool\DefaultPrinter.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\common.c
@@ -231,17 +247,7 @@ SOURCE=.\common.c
 # Begin Source File
 
 SOURCE=.\kexbasen.def
-
-!IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
-
 # PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
