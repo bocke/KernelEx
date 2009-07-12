@@ -27,8 +27,8 @@ private:
 	static DebugWindow* instance;
 	CRITICAL_SECTION cs;
 	HMENU menu;
-	sstring includes;
-	sstring excludes;
+	list<sstring> includes;
+	list<sstring> excludes;
 
 	static BOOL CALLBACK DebugDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static BOOL CALLBACK FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

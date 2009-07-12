@@ -11,10 +11,15 @@ const unsigned short WM_KEXAPPENDLOG = 0x6eef;
 
 DebugWindow* DebugWindow::instance = NULL;
 
-DebugWindow::DebugWindow() : includes("*"), excludes("")
+extern "C"
+char* strtok_r(char* s, const char* delim, char** holder);
+
+
+DebugWindow::DebugWindow()
 {
 	DWORD tid;
 	hwnd = (HWND) -1;
+	includes.push_back("*");
 	InitializeCriticalSection(&cs);
 	InitCommonControls();
 	hThread = CreateThread(NULL, 0, thread, (void*) this, 0, &tid);
@@ -125,9 +130,6 @@ void DebugWindow::HandleMenu()
 	}
 }
 
-extern "C"
-char* strtok_r(char* s, const char* delim, char** holder);
-
 void DebugWindow::AppendLog(char* msg)
 {
 	LV_ITEM item;
@@ -161,15 +163,44 @@ BOOL CALLBACK DebugWindow::FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 	DebugWindow* _this = (DebugWindow*) GetWindowLong(hwnd, GWL_USERDATA);
 	int len1, len2;
 	char* buf;
+	char* pch;
+	char* p;
+	list<sstring>::const_iterator it;
 
 	switch (msg)
 	{
 	case WM_INITDIALOG:
 		_this = (DebugWindow*) lParam;
 		SetWindowLong(hwnd, GWL_USERDATA, lParam);
-		SetDlgItemText(hwnd, IDC_DFINCLUDE, _this->includes);
-		SetDlgItemText(hwnd, IDC_DFEXCLUDE, _this->excludes);
+		
+		len1 = 0; 
+		len2 = 0;
+		for (it = _this->includes.begin() ; it != _this->includes.end() ; it++)
+			len1 += it->length() + 1;
+		for (it = _this->excludes.begin() ; it != _this->excludes.end() ; it++)
+			len2 += it->length() + 1;
+		buf = (char*) alloca(max(len1, len2));
+		
+		buf[0] = '\0';
+		for (it = _this->includes.begin() ; it != _this->includes.end() ; it++)
+		{
+			if (it != _this->includes.begin())
+				strcat(buf, ";");
+			strcat(buf, *it);
+		}
+		SetDlgItemText(hwnd, IDC_DFINCLUDE, buf);
+		
+		buf[0] = '\0';
+		for (it = _this->excludes.begin() ; it != _this->excludes.end() ; it++)
+		{
+			if (it != _this->excludes.begin())
+				strcat(buf, ";");
+			strcat(buf, *it);
+		}
+		SetDlgItemText(hwnd, IDC_DFEXCLUDE, buf);
+		
 		break;
+
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) 
 		{
@@ -181,21 +212,41 @@ BOOL CALLBACK DebugWindow::FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 			len2 = GetWindowTextLength(GetDlgItem(hwnd, IDC_DFEXCLUDE)) + 1;
 			buf = (char*) alloca(max(len1, len2));
 			EnterCriticalSection(&_this->cs);
+
 			GetDlgItemText(hwnd, IDC_DFINCLUDE, buf, len1);
-			_this->includes = buf;
+			_this->includes.clear();
+			pch = strtok_r(buf, ";", &p);
+			if (pch)
+			{
+				_this->includes.push_back(pch);
+				while ((pch = strtok_r(NULL, ";", &p)) != NULL)
+					_this->includes.push_back(pch);
+			}
+
 			GetDlgItemText(hwnd, IDC_DFEXCLUDE, buf, len2);
-			_this->excludes = buf;
+			_this->excludes.clear();
+			pch = strtok_r(buf, ";", &p);
+			if (pch)
+			{
+				_this->excludes.push_back(pch);
+				while ((pch = strtok_r(NULL, ";", &p)) != NULL)
+					_this->excludes.push_back(pch);
+			}
+
 			LeaveCriticalSection(&_this->cs);
 			EndDialog(hwnd, 0);
 			break;
 		}
 		break;
+
 	case WM_CLOSE:
 		EndDialog(hwnd, 0);
 		break;
+
 	default:
 		return FALSE;
 	}
+
 	return TRUE;
 }
 
@@ -288,16 +339,38 @@ DWORD WINAPI DebugWindow::thread(void* param)
 void DebugWindow::append(const char* str)
 {
 	static char msg[DEBUGMSG_MAXLEN];
-
-	//filter out based on includes and excludes
-	if (includes.length() == 0)
-		return;
-	if (strcmp(includes, "*") != 0 && !strstr(str, includes))
-		return;
-	if (excludes.length() != 0 && strstr(str, excludes))
-		return;
+	bool filter_out = true;
+	list<sstring>::const_iterator it;
 
 	EnterCriticalSection(&cs);
+
+	//filter out based on includes and excludes
+	if (includes.size() != 0)
+	{
+		if (includes.size() == 1 && strcmp(includes.front(), "*") == 0)
+			filter_out = false;
+		else for (it = includes.begin() ; it != includes.end() ; it++)
+			if (strstr(str, *it))
+			{
+				filter_out = false;
+				break;
+			}
+	}
+
+	if (!filter_out)
+		for (it = excludes.begin() ; it != excludes.end() ; it++)
+			if (strstr(str, *it))
+			{
+				filter_out = true;
+				break;
+			}
+
+	if (filter_out)
+	{
+		LeaveCriticalSection(&cs);
+		return;
+	}
+
 	strncpy(msg, str, sizeof(msg));
 	msg[sizeof(msg) - 1] = '\0';
 
