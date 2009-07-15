@@ -35,6 +35,8 @@
 #endif
 #endif
 
+#define IS_SHARED(x) (((DWORD)x) >= 0x80000000)
+
 extern HINSTANCE hInstance;
 
 extern IMTE*** ppmteModTable;

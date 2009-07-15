@@ -60,6 +60,10 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 	ApiConfiguration* conf;
 	BYTE flags;
 
+	//shared modules should use standard api
+	if (IS_SHARED(module->baseAddress))
+		return false;
+
 	//unless override flag is set try to get module configuration first
 	if (!(process->flags & LDR_OVERRIDE_PROC_MOD))
 	{
@@ -497,7 +501,7 @@ inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* call
 	if ((p & 0xffff0000) == 0xffff0000)
 		return OriExportFromOrdinal(target_NThdr, LOWORD(p));
 	//non-shared system library
-	if (p < 0x80000000)
+	if (!IS_SHARED(p))
 		return (PROC)(p + target_NThdr->OptionalHeader.ImageBase);
 	//non-shared api library
 	if (p >= 0xc0000000)

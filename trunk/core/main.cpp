@@ -140,7 +140,7 @@ void load_MPRServices()
  */
 static bool ensure_shared_memory(DWORD addr)
 {
-	if (addr < 0x80000000)
+	if (!IS_SHARED(addr))
 	{
 		MessageBox(NULL, "KernelEx not loaded into shared memory!", 
 				"Critical Error", MB_ICONERROR | MB_OK);
