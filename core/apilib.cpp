@@ -284,7 +284,7 @@ bool ApiLibraryManager::are_api_tables_sorted(const apilib_api_table* tab)
 
 apilib_api_table* ApiLibraryManager::make_shared_api_tables(const apilib_api_table* in)
 {
-	bool copy_strings = (size_t) in < 0x80000000 ? true : false;
+	bool copy_strings = IS_SHARED(in) ? false : true;
 	bool sorted = are_api_tables_sorted(in);
 	
 	if (!sorted)
@@ -488,12 +488,12 @@ bool ApiLibraryManager::parse_system_dll(const char* dll_name, apilib_api_table*
 	if (!mem_dll)
 	{
 		//check if we deal with shared library but it is not loaded yet
-		if (PEh->OptionalHeader.ImageBase >= 0x80000000)
+		if (IS_SHARED(PEh->OptionalHeader.ImageBase))
 			offset = (unsigned long) LoadLibrary(dll_name);
 	}
 	else
 	{
-		if ((unsigned long) mem_dll >= 0x80000000)
+		if (IS_SHARED(mem_dll))
 			offset = (unsigned long) mem_dll;
 	}
 

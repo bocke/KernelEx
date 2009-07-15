@@ -24,6 +24,7 @@
 
 #include <string.h>
 
+/** Simple string container class. */
 class sstring
 {
 public:

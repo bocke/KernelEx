@@ -257,6 +257,10 @@ SOURCE=.\internals.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\is_sorted.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\kexcoresdk.h
 # End Source File
 # Begin Source File
@@ -274,6 +278,10 @@ SOURCE=.\SettingsDB.h
 # Begin Source File
 
 SOURCE=.\sharedmem.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\sstring.hpp
 # End Source File
 # Begin Source File
 
