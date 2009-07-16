@@ -124,7 +124,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 
 	//finally if everything else fails take default configuration
 	if (!conf)
-		conf = ApiConfigurationManager::get_default_configuration();
+		conf = apiconfmgr.get_default_configuration();
 
 	cp.apiconf = conf;
 #ifdef _DEBUG
@@ -170,7 +170,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	DBGASSERT(addr >= 0xc0000000);
 	api_lib_num = (addr >> 24) - 0xc0;
 	DBGASSERT(api_lib_num > 0); //ensure apilib ID isn't STD's
-	apilib = ApiLibraryManager::get_apilib(api_lib_num);
+	apilib = apilibmgr.get_apilib_by_index(api_lib_num);
 	DBGASSERT(apilib != NULL);
 	DBGASSERT(!apilib->is_shared());
 	idx = 0xff00 + api_lib_num;
@@ -196,8 +196,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 			apilib->apilib_name, pmteModTable[caller->mteIndex]->pszModName,
 			GetCurrentProcessId()));
 
-	strcpy(dllpath, kernelex_dir);
-	strcat(dllpath, apilib->apilib_name);
+	apilib->get_dll_path(dllpath);
 
 	_EnterSysLevel(krnl32lock);
 	mr = MRLoadTree(dllpath);
@@ -273,6 +272,7 @@ BOOL resolver_process_attach()
 	const PDB98* thisPDB = PIDtoPDB(GetCurrentProcessId());
 	list<PMODREF>::iterator it;
 	bool cont = true;
+	bool loaded = false;
 
 	//find first entry on the list addressed for this process
 	EnterCriticalSection(&resolver_cs);
@@ -293,6 +293,7 @@ BOOL resolver_process_attach()
 
 		if (FLoadTreeNotify(*it, 1))
 			return FALSE;
+		loaded = true;
 
 		EnterCriticalSection(&resolver_cs);
 		it = swapmr.erase(it);
@@ -305,17 +306,18 @@ BOOL resolver_process_attach()
 		LeaveCriticalSection(&resolver_cs);
 	}
 
-	//reference all shared api libraries
+	if (!loaded)
+		return TRUE;
 
+	//reference all shared api libraries
 	ApiLibrary* lib;
-	int i = 0;
-	while ((lib = ApiLibraryManager::get_apilib(i++)) != NULL)
+	int i = 1;
+	while ((lib = apilibmgr.get_apilib_by_index(i++)) != NULL)
 	{ 
 		if (lib->is_shared())
 		{
 			char dllpath[MAX_PATH];
-			strcpy(dllpath, kernelex_dir);
-			strcat(dllpath, lib->apilib_name);
+			lib->get_dll_path(dllpath);
 			LoadLibrary(dllpath);
 		}
 	}

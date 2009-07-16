@@ -22,7 +22,6 @@
 #include <windows.h>
 #include <cstdio>
 #include "internals.h"
-#include <tlhelp32.h>
 #include "resolver.h"
 #include "debug.h"
 #include "pemanip.h"
@@ -46,67 +45,6 @@ FreeLibRemove_t FreeLibRemove = NULL;
 
 sstring kernelex_dir("");
 sstring own_path("");
-
-HANDLE fullcritlock_hndl = NULL;
-
-//FIXME: CreateToolhelp32Snapshot + Process32First/Next should be replaced by
-//       plstPdb + PnodGetLstElem() + SetLstCurElem() (see DumpProcesses())
-void FullCritLock()
-{
-	PROCESSENTRY32 pe;
-	BOOL result;
-
-	DBGPRINTF(("FullCritLock\n"));
-	if (fullcritlock_hndl)
-	{
-		DBGPRINTF(("Error: lock already acquired\n"));
-		return;
-	}
-
-	_EnterSysLevel(krnl32lock);
-	fullcritlock_hndl = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	DBGASSERT(fullcritlock_hndl != INVALID_HANDLE_VALUE);
-
-	pe.dwSize = sizeof(pe);
-	result = Process32First(fullcritlock_hndl, &pe);
-	DBGASSERT(result != FALSE);
-	do
-	{
-		PDB98* pdb;
-		pdb = PIDtoPDB(pe.th32ProcessID);
-		_EnterSysLevel(&pdb->CriticalSection);
-	}
-	while (Process32Next(fullcritlock_hndl, &pe));
-}
-
-void FullCritUnlock()
-{
-	PROCESSENTRY32 pe;
-	BOOL result;
-
-	if (!fullcritlock_hndl)
-	{
-		DBGPRINTF(("Error: not locked\n"));
-		return;
-	}
-
-	pe.dwSize = sizeof(pe);
-	result = Process32First(fullcritlock_hndl, &pe);
-	DBGASSERT(result != FALSE);
-	do
-	{
-		PDB98* pdb;
-		pdb = PIDtoPDB(pe.th32ProcessID);
-		_LeaveSysLevel(&pdb->CriticalSection);
-	}
-	while (Process32Next(fullcritlock_hndl, &pe));
-
-	CloseHandle(fullcritlock_hndl);
-	fullcritlock_hndl = NULL;
-
-	_LeaveSysLevel(krnl32lock);
-	DBGPRINTF(("FullCritUnlock\n"));
-}
 
 bool isWinMe()
 {
@@ -471,7 +409,7 @@ static bool find_kernelex_install_dir()
 
 	DBGPRINTF(("KernelEx directory: %s\n", path));
 	strcat(path, "\\");
-	kernelex_dir = path;
+	kernelex_dir = strupr(path);
 	return true;
 }
 
