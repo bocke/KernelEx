@@ -28,7 +28,7 @@
 #include "resource.h"
 #include "k32ord.h"
 
-/** MSVC for-loop workaround. */
+/** MSVC 6.0 for-loop workaround. */
 #ifdef _MSC_VER
 #if _MSC_VER < 1201
 #define for if (0); else for
@@ -48,8 +48,6 @@ extern WORD* pimteMax;
 extern sstring kernelex_dir;
 extern sstring own_path;
 
-void FullCritLock();
-void FullCritUnlock();
 void ShowError(UINT id, ...);
 bool isWinMe();
 

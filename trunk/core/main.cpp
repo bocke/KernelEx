@@ -38,12 +38,6 @@ extern BOOL resolver_process_attach();
 
 static int init_count = 0;
 
-static void prepare()
-{
-	ApiConfigurationManager acm;
-	acm.reload_api_configurations();
-}
-
 //these should be visible only in debug builds
 #ifdef _DEBUG
 extern "C" _KEXCOREIMP
@@ -59,7 +53,7 @@ int kexInit()
 	if (!internals_init())
 		goto __error1;
 
-	prepare();
+	apiconfmgr.load_api_configurations();
 
 	if (!resolver_init())
 		goto __error2;
