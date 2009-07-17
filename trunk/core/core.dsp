@@ -106,18 +106,31 @@ SOURCE=.\apilib.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\apilog.cpp
+
+!IF  "$(CFG)" == "Core - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "Core - Win32 Debug"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\core.def
 
 !IF  "$(CFG)" == "Core - Win32 Release"
 
 # Begin Custom Build
 OutDir=.\Release
-ProjDir=.
+WkspDir=.
 InputPath=.\core.def
 
 "$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(ProjDir)\k32ord.h 
-	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(ProjDir)\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(WkspDir)\common\k32ord.h 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(WkspDir)\common\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.exp 
 	del $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.dll 
@@ -128,12 +141,12 @@ InputPath=.\core.def
 
 # Begin Custom Build
 OutDir=.\Debug
-ProjDir=.
+WkspDir=.
 InputPath=.\core.def
 
 "$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(ProjDir)\k32ord.h 
-	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(ProjDir)\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(WkspDir)\common\k32ord.h 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(WkspDir)\common\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.exp 
 	del $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.dll 
@@ -188,11 +201,6 @@ SOURCE=.\internals.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\k32ord.def
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
 SOURCE=.\kexcoresdk.cpp
 # End Source File
 # Begin Source File
@@ -238,6 +246,10 @@ SOURCE=.\apiconfmgr.h
 # Begin Source File
 
 SOURCE=.\apilib.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\apilog.h
 # End Source File
 # Begin Source File
 
