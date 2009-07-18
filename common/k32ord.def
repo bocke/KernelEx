@@ -11,5 +11,7 @@ EXPORTS
     VxDCall7 @7 NONAME
     VxDCall8 @8 NONAME
     _EnterSysLevel @97 NONAME
-	_LeaveSysLevel @98 NONAME
-	MakeCriticalSectionGlobal
+    _LeaveSysLevel @98 NONAME
+    MakeCriticalSectionGlobal
+    MapSL
+    LoadLibrary16 @35 NONAME

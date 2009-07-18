@@ -333,6 +333,10 @@ SOURCE=.\Gdi32\FontResourceExA.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Gdi32\gdi9x.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Gdi32\GetGlyphOutlineA_fix.c
 # End Source File
 # Begin Source File
@@ -498,6 +502,15 @@ SOURCE=.\auxdecl.h
 # Begin Source File
 
 SOURCE=.\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\k32ord.def
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\k32ord.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
