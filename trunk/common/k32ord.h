@@ -59,6 +59,9 @@ MAKE_HEADER(void __stdcall MakeCriticalSectionGlobal(CRITICAL_SECTION* cs))
 
 MAKE_HEADER(ULONG __stdcall CommonUnimpStub())
 
+MAKE_HEADER(DWORD __stdcall MapSL(DWORD addr16))
+MAKE_HEADER(DWORD __stdcall LoadLibrary16(LPSTR libname))
+
 #ifdef __cplusplus
 }
 #endif

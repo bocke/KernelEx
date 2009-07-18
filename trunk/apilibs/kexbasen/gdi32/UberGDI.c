@@ -328,6 +328,13 @@ DWORD WINAPI GetGlyphOutlineW_new(
 )
 {
 	UINT glyph = 0;
+	//GetGlyphOutlineW must receive same fix GetGlyphOutlineA received since apilibs interlinking changed
+	MAT2 matr;
+	if ( lpmat2 ) 
+	{
+		memcpy( &matr, lpmat2, sizeof(MAT2) );
+		lpmat2 = &matr;
+	}
 	if (uFormat & GGO_GLYPH_INDEX)
 		return GetGlyphOutlineA( hdc, uChar, uFormat, lpgm, cbBuffer, lpvBuffer, lpmat2 );
 	GetGlyphIndicesW_new( hdc, (LPWSTR)&uChar, 1, (LPWORD)&glyph, 0 );
