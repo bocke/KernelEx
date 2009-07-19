@@ -273,6 +273,15 @@ SOURCE=..\common\is_sorted.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\k32ord.def
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\k32ord.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\kexcoresdk.h
 # End Source File
 # Begin Source File

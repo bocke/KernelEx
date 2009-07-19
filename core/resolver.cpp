@@ -156,6 +156,15 @@ static WORD resolve_mod_index(IMTE_KEX* target)
 	return target->mod_index = 0xffff;
 }
 
+/** Resolves address where target function is in non-shared api library.
+ *  Checks if api library is loaded for process, if it isn't it is loaded.
+ *  Code executes either under process CS (dynamic resolve) or system CS
+ *  (static resolve).
+ * @param addr Encoded api library ID + offset in this api library
+ * @param caller Module that requests api from api library.
+ * @param refmod 
+ * @return Valid address to function for calling process.
+ */
 static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 {
 	MODREF* mr;
@@ -269,7 +278,7 @@ BOOL resolver_process_attach()
 {
 	//initialize all modules replaced by api libraries
 
-	const PDB98* thisPDB = PIDtoPDB(GetCurrentProcessId());
+	const PDB98* thisPDB = *pppdbCur;
 	list<PMODREF>::iterator it;
 	bool cont = true;
 	bool loaded = false;
@@ -512,6 +521,17 @@ inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* call
 	return (PROC) p;
 }
 
+static void unresolved_export_handler()
+{
+	const PDB98* thisPDB = *pppdbCur;
+	list<PMODREF>::iterator it;
+	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
+	{
+		if ((*it)->ppdb == thisPDB)
+			it = swapmr.erase(it);
+	}
+}
+
 PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal)
 {
 	PROC ret;
@@ -541,9 +561,12 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 		ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
 
 	if (!ret && refmod)
+	{
 		DBGPRINTF(("%s: unresolved export %s:%d\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
 				target->pszModName, ordinal));
+		unresolved_export_handler();
+	}
 
 	return ret;
 }
@@ -584,9 +607,12 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 		ret = OriExportFromName(target->pNTHdr, hint, name);
 
 	if (!ret && refmod)
+	{
 		DBGPRINTF(("%s: unresolved export %s:%s\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
 				target->pszModName, name));
+		unresolved_export_handler();
+	}
 
 	return ret;
 }
