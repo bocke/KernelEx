@@ -22,8 +22,18 @@
 #ifndef _USER32_APILIST_H
 #define _USER32_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
+
+/* There is no GetAltTabInfoA or RealGetWindowClassA in 9x */
+#ifdef GetAltTabInfo
+#undef GetAltTabInfo
+#endif
+EXTERN_C BOOL WINAPI GetAltTabInfo(HWND,int,PVOID,LPSTR,UINT);
+#ifdef RealGetWindowClass
+#undef RealGetWindowClass
+#endif
+EXTERN_C UINT WINAPI RealGetWindowClass(HWND  hwnd, LPTSTR pszType, UINT  cchType);
+
 
 typedef BOOL (WINAPI *IsHungThread_t)(DWORD ThreadID);
 extern IsHungThread_t IsHungThread_pfn;

@@ -22,7 +22,6 @@
 #ifndef _KERNEL32_APILIST_H
 #define _KERNEL32_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
 #include <tlhelp32.h>
 
