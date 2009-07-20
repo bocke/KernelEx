@@ -22,7 +22,6 @@
 #ifndef _USER32_APILIST_H
 #define _USER32_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
 
 BOOL init_user32();
