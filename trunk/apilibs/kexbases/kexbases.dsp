@@ -497,10 +497,6 @@ SOURCE=.\main.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\auxdecl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\common.h
 # End Source File
 # Begin Source File

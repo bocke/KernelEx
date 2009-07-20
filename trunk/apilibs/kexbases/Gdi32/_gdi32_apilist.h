@@ -22,7 +22,6 @@
 #ifndef _GDI32_APILIST_H
 #define _GDI32_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
 
 BOOL init_gdi32();

@@ -29,7 +29,6 @@
 #include <malloc.h>
 
 #include "gdi9x.h"
-#include "auxdecl.h"
 #include "k32ord.h"
 
 #ifdef _MSC_VER
@@ -289,10 +288,7 @@ BOOL WINAPI ExtTextOutA_new(
 					buffer = (int*)alloca(cbCount*sizeof(int));
 				
 				if (!buffer) 
-				{
-					SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 					return FALSE;
-				}
 				MakeDxFromDxDy(lpDx,buffer, cbCount);
 				lpDx = buffer;
 			}
@@ -336,10 +332,7 @@ BOOL WINAPI ExtTextOutW_new(
 					buffer = (int*)alloca(cbCount*sizeof(int));
 				
 				if (!buffer) 
-				{
-					SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 					return FALSE;
-				}
 				MakeDxFromDxDy(lpDx,buffer,cbCount);
 				lpDx = buffer;
 			}
