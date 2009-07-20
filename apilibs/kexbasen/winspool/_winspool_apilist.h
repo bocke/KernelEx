@@ -22,7 +22,6 @@
 #ifndef _WINSPOOL_APILIST_H
 #define _WINSPOOL_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
 
 BOOL init_winspool();

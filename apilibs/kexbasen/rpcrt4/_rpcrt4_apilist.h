@@ -22,7 +22,6 @@
 #ifndef _RPCRT4_APILIST_H
 #define _RPCRT4_APILIST_H
 
-#include "auxdecl.h"
 #include "kexcoresdk.h"
 
 BOOL init_rpcrt4();
