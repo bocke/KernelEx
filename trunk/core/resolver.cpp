@@ -525,11 +525,17 @@ static void unresolved_export_handler()
 {
 	const PDB98* thisPDB = *pppdbCur;
 	list<PMODREF>::iterator it;
-	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
+
+	EnterCriticalSection(&resolver_cs);
+	it = swapmr.begin();
+	while (it != swapmr.end())
 	{
 		if ((*it)->ppdb == thisPDB)
 			it = swapmr.erase(it);
+		else
+			it++;
 	}
+	LeaveCriticalSection(&resolver_cs);
 }
 
 PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal)
