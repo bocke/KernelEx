@@ -244,7 +244,14 @@ Section "Install"
   ;Store uninstaller key
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\KernelEx" "DisplayName" "KernelEx ${VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\KernelEx" "UninstallString" '"$INSTDIR\uninstall.exe"'
-
+  
+  ;Write verifier
+  SetOverWrite on
+  File verify\Release\verify.exe
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" \
+    "KexVerify" "$INSTDIR\verify.exe"
+  SetOverwrite lastused
+  
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -285,6 +292,9 @@ Section "Uninstall"
   DeleteRegValue HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" "UXTHEME"
   Delete /REBOOTOK "$INSTDIR\wtsapi32.dll"
   DeleteRegValue HKLM "System\CurrentControlSet\Control\SessionManager\KnownDLLs" "WTSAPI32"
+  
+  Delete "$INSTDIR\verify.exe"
+  DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "KexVerify"
 
   Delete "$INSTDIR\Uninstall.exe"
 
