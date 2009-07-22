@@ -351,17 +351,15 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 
 	KexLinkage::instance.m_kexGetModuleSettings(ms->file, ms->conf, &ms->flags);
 	
-	bool conf_found = false;
 	for (int i = 0 ; i < KexLinkage::instance.confs.size() ; i++)
 		if (!strcmp(ms->conf, KexLinkage::instance.confs[i].name))
 		{
 			CheckDlgButton(hwnd, IDC_COMPAT, BST_CHECKED);
 			EnableWindow(GetDlgItem(hwnd, IDC_SYSTEM), TRUE);
 			SendMessage(GetDlgItem(hwnd, IDC_SYSTEM), CB_SETCURSEL, i, 0);
-			conf_found = true;
 			break;
 		}
-	if (!conf_found && !default_index_valid)
+	if (!(ms->flags & 128) && (KexLinkage::instance.disable_extensions || !default_index_valid))
 		ms->flags |= 1;
 	if (ms->flags & 1)
 	{
@@ -391,7 +389,7 @@ void KexShlExt::OnApply(HWND hwnd)
 {
 	ModuleSetting* ms = (ModuleSetting*) GetWindowLong(hwnd, GWL_USERDATA);
 	BYTE flags = 0;
-	const char* conf = "default";
+	const char* conf = "";
 	if (IsDlgButtonChecked(hwnd, IDC_DISABLE))
 		flags |= 1;
 	if (IsDlgButtonChecked(hwnd, IDC_COMPAT))

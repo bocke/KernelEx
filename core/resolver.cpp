@@ -71,7 +71,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 		{
 			appsetting as = SettingsDB::instance.get_appsetting(module->pszFileName);
 			module->config = as.conf;
-			module->flags = as.flags | LDR_VALID_FLAG;
+			module->flags = as.flags;
 		}
 		conf = module->config;
 		flags = module->flags;
@@ -89,7 +89,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 		{
 			appsetting as = SettingsDB::instance.get_appsetting(process->pszFileName);
 			process->config = as.conf;
-			process->flags = as.flags | LDR_VALID_FLAG;
+			process->flags = as.flags;
 		}
 		conf = process->config;
 		flags = process->flags;
@@ -124,13 +124,18 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 
 	//finally if everything else fails take default configuration
 	if (!conf)
+	{
+		if (apiconfmgr.are_extensions_disabled())
+			return false;
 		conf = apiconfmgr.get_default_configuration();
+	}
 
+	DBGASSERT(conf != NULL);
 	cp.apiconf = conf;
 #ifdef _DEBUG
 	cp.log_apis = (flags & LDR_LOG_APIS) != 0;
 #endif
-	return conf != NULL;
+	return true;
 }
 
 /** Finds overridden module index for target module.

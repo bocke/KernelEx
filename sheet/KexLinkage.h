@@ -54,6 +54,7 @@ public:
 	static KexLinkage instance;
 	vector<conf> confs;
 	int default_index;
+	bool disable_extensions;
 	kexGetModuleSettings_t m_kexGetModuleSettings;
 	kexSetModuleSettings_t m_kexSetModuleSettings;
 	kexGetKEXVersion_t m_kexGetKEXVersion;

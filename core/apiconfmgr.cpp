@@ -36,6 +36,7 @@ ApiConfigurationManager::ApiConfigurationManager()
 	apiconf_ptrs = NULL;
 	apiconf_cnt = 0;
 	default_apiconf = NULL;
+	disable_extensions = false;
 }
 
 ApiConfigurationManager::~ApiConfigurationManager()
@@ -70,21 +71,30 @@ bool ApiConfigurationManager::add_apiconf(ApiConfiguration* ac)
 
 ApiConfiguration* ApiConfigurationManager::get_api_configuration(const char* conf_name)
 {
-	if (!strcmp("default", conf_name))
-		return get_default_configuration();
-	
 	for (int i = 0 ; i < apiconf_cnt ; i++)
 		if (!strcmp(apiconf_ptrs[i]->conf_name, conf_name))
 			return apiconf_ptrs[i];
 	return NULL;
 }
 
-void ApiConfigurationManager::load_api_configurations()
+bool ApiConfigurationManager::load_api_configurations()
 {
 	strcpy(core_conf_file, kernelex_dir);
 	strcat(core_conf_file, "core.ini");
 
 	DBGPRINTF(("Loading api configurations\n"));
+
+	HKEY key;
+	LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+			"Software\\KernelEx", 0, KEY_WRITE, &key);
+	if (result == ERROR_SUCCESS)
+	{
+		DWORD type, data, size = sizeof(data);
+		RegQueryValueEx(key, "DisableExtensions", NULL, &type, (BYTE*) &data, &size);
+		if (result == ERROR_SUCCESS && type == REG_DWORD && size == sizeof(data) && data == 1)
+			disable_extensions = true;
+		RegCloseKey(key);
+	}
 	
 	int default_apiconf_index = GetPrivateProfileInt(
 			"ApiConfigurations", "default", 0, core_conf_file);
@@ -103,7 +113,7 @@ void ApiConfigurationManager::load_api_configurations()
 			if (i <= default_apiconf_index)
 			{
 				DBGPRINTF(("Failed to load default api configuration - aborting\n"));
-				return;
+				return false;
 			}
 			break;
 		}
@@ -146,7 +156,7 @@ __error:
 		if (i == default_apiconf_index)
 		{
 			DBGPRINTF(("Failed to load default api configuration - aborting\n"));
-			return;
+			return false;
 		}
 	} //for loop
 
@@ -156,10 +166,15 @@ __error:
 	if (default_apiconf_index >= 0)
 		default_apiconf = apiconf_ptrs[default_apiconf_index];
 	else
-		default_apiconf = NULL;
+	{
+		DBGPRINTF(("Failed to load default api configuration - aborting\n"));
+		return false;
+	}
 
-	DBGPRINTF(("Default api configuration is: %s\n", 
-			default_apiconf ? default_apiconf->get_name() : "system"));
+	DBGPRINTF(("Default api configuration is: %s\n", default_apiconf->get_name()));
+	DBGPRINTF(("API extensions are by default: %s\n", 
+			disable_extensions ? "disabled" : "enabled"));
+	return true;
 }
 
 bool ApiConfigurationManager::join_apilibs(ApiConfiguration* apiconf)

@@ -197,7 +197,13 @@ appsetting SettingsDB::get_appsetting(const char* path)
 	bool atend = it == db.end() || it == db_wild.end();
 	LeaveCriticalSection(&cs);
 	if (!atend)
-		return it->second;
+	{
+		appsetting as = it->second;
+		as.flags |= LDR_VALID_FLAG;
+		if (!as.conf && !(as.flags & LDR_KEX_DISABLE))
+			as.conf = apiconfmgr.get_default_configuration();
+		return as;
+	}
 	else
 		return appsetting();
 }
@@ -222,9 +228,8 @@ void SettingsDB::write_single(const char* path, const char* conf_name, BYTE flag
 			"Software\\KernelEx\\AppSettings\\Configs", 0, KEY_WRITE, &key);
 	if (result == ERROR_SUCCESS)
 	{
-		if (!as.conf || as.conf == apiconfmgr.get_default_configuration())
-			RegSetValueEx(key, path, 0, REG_SZ, (const BYTE*) "default",
-					sizeof("default"));
+		if (!as.conf)
+			RegDeleteValue(key, path);
 		else
 			RegSetValueEx(key, path, 0, REG_SZ, (const BYTE*) conf_name, 
 					strlen(conf_name) + 1);

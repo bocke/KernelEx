@@ -29,8 +29,9 @@ class ApiConfigurationManager
 public:
 	ApiConfigurationManager();
 	~ApiConfigurationManager();
-	void load_api_configurations();
+	bool load_api_configurations();
 	ApiConfiguration* get_default_configuration();
+	bool are_extensions_disabled();
 	ApiConfiguration* get_api_configuration(const char* conf_name);
 
 #ifdef _DEBUG
@@ -44,6 +45,7 @@ private:
 	ApiConfiguration** apiconf_ptrs;
 	int apiconf_cnt;
 	ApiConfiguration* default_apiconf;
+	bool disable_extensions;
 
 	bool join_apilibs(ApiConfiguration* apiconf);
 	bool parse_overrides(ApiConfiguration* apiconf);
@@ -53,6 +55,11 @@ private:
 inline ApiConfiguration* ApiConfigurationManager::get_default_configuration()
 {
 	return default_apiconf;
+}
+
+inline bool ApiConfigurationManager::are_extensions_disabled()
+{
+	return disable_extensions;
 }
 
 extern ApiConfigurationManager apiconfmgr;
