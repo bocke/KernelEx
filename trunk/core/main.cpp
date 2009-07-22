@@ -38,7 +38,7 @@ extern BOOL resolver_process_attach();
 
 static int init_count = 0;
 
-//these should be visible only in debug builds
+//these should be visible externally only in debug builds
 #ifdef _DEBUG
 extern "C" _KEXCOREIMP
 #endif
@@ -53,7 +53,8 @@ int kexInit()
 	if (!internals_init())
 		goto __error1;
 
-	apiconfmgr.load_api_configurations();
+	if (!apiconfmgr.load_api_configurations())
+		goto __error2;
 
 	if (!resolver_init())
 		goto __error2;
@@ -74,7 +75,7 @@ __error1:
 	return 0;
 }
 
-//these should be visible only in debug builds
+//these should be visible externally only in debug builds
 #ifdef _DEBUG
 extern "C" _KEXCOREIMP
 #endif
