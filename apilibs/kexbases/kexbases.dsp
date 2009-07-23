@@ -460,8 +460,8 @@ WkspDir=.
 InputPath=.\kexbases.def
 
 "$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(WkspDir)\common\k32ord.h 
-	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(WkspDir)\common\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj "$(WkspDir)\common\k32ord.h" 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:"$(WkspDir)\common\k32ord.def" /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.exp 
 	del $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.dll 
@@ -476,8 +476,8 @@ WkspDir=.
 InputPath=.\kexbases.def
 
 "$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj $(WkspDir)\common\k32ord.h 
-	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:$(WkspDir)\common\k32ord.def /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj "$(WkspDir)\common\k32ord.h" 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:"$(WkspDir)\common\k32ord.def" /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.exp 
 	del $(OutDir)\k32ord.obj 
 	del $(OutDir)\k32ord.dll 
