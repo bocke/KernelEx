@@ -52,7 +52,10 @@ storage* storage::get_storage(bool alloc)
 void storage::return_storage()
 {
 	PDB_KEX* pdb = (PDB_KEX*) *pppdbCur;
-	BOOL ret = VirtualFree(pdb->kex_data_storage, storage_size, MEM_RELEASE);
-	DBGASSERT(ret != FALSE);
-	pdb->kex_data_storage = NULL;
+	if (pdb->kex_data_storage)
+	{
+		BOOL ret = VirtualFree(pdb->kex_data_storage, 0, MEM_RELEASE);
+		DBGASSERT(ret != FALSE);
+		pdb->kex_data_storage = NULL;
+	}
 }
