@@ -21,9 +21,6 @@
 
 #include <windows.h>
 #include <algorithm>
-#pragma warning(disable:4530) //we don't do exception handling
-#include <list>
-#pragma warning(default:4530)
 #include "debug.h"
 #include "resolver.h"
 #include "apiconf.h"
@@ -32,6 +29,7 @@
 #include "../setup/loadstub.h"
 #include "thunks.h"
 #include "SettingsDB.h"
+#include "storage.h"
 
 using namespace std;
 
@@ -40,9 +38,6 @@ int system_path_len;
 
 static PLONG jtab;
 static LONG old_jtab[4];
-
-static list<PMODREF> swapmr;
-CRITICAL_SECTION resolver_cs;
 
 
 
@@ -246,7 +241,9 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		//remember tree which we overwrite - we will initialize it ourselves
 		//in resolver_process_attach as a result of initializing our tree
 		//requirement: Core is in IAT of the apilib !!!
-		swapmr.push_back(caller->ImplicitImports[*refmod - buffer].pMR);
+		storage* s = storage::get_storage(true);
+		DBGASSERT(s != NULL);
+		s->data[s->size++] = (void*) caller->ImplicitImports[*refmod - buffer].pMR;
 
 		//modify original - modifications will be seen by dll initializer
 		//which will initialize our mr tree
@@ -282,43 +279,22 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 BOOL resolver_process_attach()
 {
 	//initialize all modules replaced by api libraries
-
-	const PDB98* thisPDB = *pppdbCur;
-	list<PMODREF>::iterator it;
-	bool cont = true;
 	bool loaded = false;
+	storage* s = storage::get_storage(false);
+	if (!s)
+		return TRUE;
 
-	//find first entry on the list addressed for this process
-	EnterCriticalSection(&resolver_cs);
-	for (it = swapmr.begin() ; it != swapmr.end() ; it++)
-		if ((*it)->ppdb == thisPDB)
-			break;
-
-	if (it == swapmr.end())
-		cont = false;
-	LeaveCriticalSection(&resolver_cs);
-
-	//process entry and find next entry
-	while (cont)
-	{		
+	for (int i = 0 ; i < s->size ; i++)
+	{
 		DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
-				(*ppmteModTable)[(*it)->mteIndex]->pszModName, 
+				(*ppmteModTable)[((MODREF*) s->data[i])->mteIndex]->pszModName, 
 				GetCurrentProcessId()));
 
-		if (FLoadTreeNotify(*it, 1))
+		if (FLoadTreeNotify((MODREF*) s->data[i], 1))
 			return FALSE;
 		loaded = true;
-
-		EnterCriticalSection(&resolver_cs);
-		it = swapmr.erase(it);
-		for ( ; it != swapmr.end() ; it++)
-			if ((*it)->ppdb == thisPDB)
-				break;
-
-		if (it == swapmr.end())	
-			cont = false;
-		LeaveCriticalSection(&resolver_cs);
 	}
+	storage::return_storage();
 
 	if (!loaded)
 		return TRUE;
@@ -526,23 +502,6 @@ inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* call
 	return (PROC) p;
 }
 
-static void unresolved_export_handler()
-{
-	const PDB98* thisPDB = *pppdbCur;
-	list<PMODREF>::iterator it;
-
-	EnterCriticalSection(&resolver_cs);
-	it = swapmr.begin();
-	while (it != swapmr.end())
-	{
-		if ((*it)->ppdb == thisPDB)
-			it = swapmr.erase(it);
-		else
-			it++;
-	}
-	LeaveCriticalSection(&resolver_cs);
-}
-
 PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal)
 {
 	PROC ret;
@@ -576,7 +535,6 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 		DBGPRINTF(("%s: unresolved export %s:%d\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
 				target->pszModName, ordinal));
-		unresolved_export_handler();
 	}
 
 	return ret;
@@ -622,7 +580,6 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 		DBGPRINTF(("%s: unresolved export %s:%s\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
 				target->pszModName, name));
-		unresolved_export_handler();
 	}
 
 	return ret;
@@ -750,8 +707,6 @@ int resolver_init()
 
 	jtab = (PLONG) dseg->jtab;
 
-	InitializeCriticalSection(&resolver_cs);
-	MakeCriticalSectionGlobal(&resolver_cs);
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
 
 	SettingsDB::instance.flush_all();
