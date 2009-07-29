@@ -37,8 +37,8 @@ char system_path[MAX_PATH];
 int system_path_len;
 
 static PLONG jtab;
-static LONG old_jtab[4];
-
+static LONG old_jtab[JTAB_SIZE];
+static HKEY known_dlls_key;
 
 
 /** Get API configuration for selected module.
@@ -101,6 +101,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 		if (ppdbParent && !(ppdbParent->Flags & (fTerminated | fTerminating | 
                   fNearlyTerminating | fDosProcess | fWin16Process)))
 		{
+			pmteModTable = *ppmteModTable;
 			IMTE_KEX* parent = (IMTE_KEX*) pmteModTable[ppdbParent->pExeMODREF->mteIndex];
 			conf = parent->config;
 			flags = parent->flags;
@@ -234,7 +235,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		}
 
 		DBGPRINTF(("Implicit load: replacing tree %s => %s [PID=%08x]\n", 
-				pmteModTable[caller->ImplicitImports[*refmod - buffer].pMR->mteIndex]
+				(*ppmteModTable)[caller->ImplicitImports[*refmod - buffer].pMR->mteIndex]
 				->pszModName, apilib->apilib_name,
 				GetCurrentProcessId()));
 
@@ -261,6 +262,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		}
 	}
 
+	pmteModTable = *ppmteModTable;
 	IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[mr->mteIndex];
 
 	img_base = imte->pNTHdr->OptionalHeader.ImageBase;
@@ -585,6 +587,50 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 	return ret;
 }
 
+bool are_extensions_enabled()
+{
+	config_params cp;
+	MODREF* exe = (*pppdbCur)->pExeMODREF;
+	return get_config(exe, cp);
+}
+
+typedef BOOL (__stdcall *IsKnownDLL_t)(char*, const char*);
+
+static BOOL WINAPI IsKnownKexDLL(char* name, const char* ext)
+{
+	LONG res;
+	DWORD type;
+	char path[MAX_PATH];
+	DWORD size = sizeof(path);
+
+	if (ext && strcmp(ext, "DLL") != 0)
+		return FALSE;
+	
+	if (are_extensions_enabled())
+	{
+		//workaround windows bug
+		int pos = strlen(name) - 4;
+		if (pos > 0 && name[pos] == '.')
+		name[pos] = '\0';
+
+		res = RegQueryValueEx(known_dlls_key, name, NULL, &type, (BYTE*) path, &size);
+	}
+	else
+		res = ERROR_INVALID_FUNCTION;
+	
+	if (res == ERROR_SUCCESS && type == REG_SZ)
+	{
+		memcpy(name, (const char*) kernelex_dir, kernelex_dir.length());
+		memcpy(name + kernelex_dir.length(), path, size);
+		return TRUE;
+	}
+	else
+	{
+		IsKnownDLL_t IsKnownDLL = (IsKnownDLL_t) old_jtab[JTAB_KNO_DLL];
+		return IsKnownDLL(name, NULL);
+	}
+}
+
 PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
 	IMAGE_DOS_HEADER* dos_hdr;
@@ -708,6 +754,7 @@ int resolver_init()
 	jtab = (PLONG) dseg->jtab;
 
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
+	RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\KernelEx\\KnownDLLs", &known_dlls_key);
 
 	SettingsDB::instance.flush_all();
 
@@ -716,6 +763,8 @@ int resolver_init()
 
 void resolver_uninit()
 {
+	DBGPRINTF(("resolver_uninit()\n"));
+	RegCloseKey(known_dlls_key);
 	SettingsDB::instance.clear();
 	reset_imtes();
 }
@@ -723,17 +772,16 @@ void resolver_uninit()
 void resolver_hook()
 {
 	DBGPRINTF(("resolver_hook()\n"));
-	old_jtab[0] = InterlockedExchange(jtab + JTAB_EFO_DYN, (LONG) ExportFromOrdinalDynamic_thunk);
-	old_jtab[1] = InterlockedExchange(jtab + JTAB_EFO_STA, (LONG) ExportFromOrdinalStatic_thunk);
-	old_jtab[2] = InterlockedExchange(jtab + JTAB_EFN_DYN, (LONG) ExportFromNameDynamic_thunk);
-	old_jtab[3] = InterlockedExchange(jtab + JTAB_EFN_STA, (LONG) ExportFromNameStatic_thunk);
+	old_jtab[JTAB_EFO_DYN] = InterlockedExchange(jtab + JTAB_EFO_DYN, (LONG) ExportFromOrdinalDynamic_thunk);
+	old_jtab[JTAB_EFO_STA] = InterlockedExchange(jtab + JTAB_EFO_STA, (LONG) ExportFromOrdinalStatic_thunk);
+	old_jtab[JTAB_EFN_DYN] = InterlockedExchange(jtab + JTAB_EFN_DYN, (LONG) ExportFromNameDynamic_thunk);
+	old_jtab[JTAB_EFN_STA] = InterlockedExchange(jtab + JTAB_EFN_STA, (LONG) ExportFromNameStatic_thunk);
+	old_jtab[JTAB_KNO_DLL] = InterlockedExchange(jtab + JTAB_KNO_DLL, (LONG) IsKnownKexDLL);
 }
 
 void resolver_unhook()
 {
 	DBGPRINTF(("resolver_unhook()\n"));
-	InterlockedExchange(jtab + JTAB_EFO_DYN, old_jtab[0]);
-	InterlockedExchange(jtab + JTAB_EFO_STA, old_jtab[1]);
-	InterlockedExchange(jtab + JTAB_EFN_DYN, old_jtab[2]);
-	InterlockedExchange(jtab + JTAB_EFN_STA, old_jtab[3]);
+	for (int i = 0 ; i < JTAB_SIZE ; i++)
+		InterlockedExchange(jtab + i, old_jtab[i]);
 }
