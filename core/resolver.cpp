@@ -570,7 +570,9 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 		if (ret && cp.log_apis)
 		{
 			IMTE_KEX* icaller = (IMTE_KEX*)((*ppmteModTable)[caller->mteIndex]);
-			ret = create_log_stub(icaller->pszModName, target->pszModName, name, ret);
+			if (DWORD(ret) < target->pNTHdr->OptionalHeader.ImageBase 
+					+ target->pNTHdr->OptionalHeader.BaseOfData)
+				ret = create_log_stub(icaller->pszModName, target->pszModName, name, ret);
 		}
 #endif
 	}

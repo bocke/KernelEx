@@ -27,7 +27,7 @@
 #include "internals.h"
 #include "DebugWindow.h"
 
-void* get_process_env_data(const char* env, void* (*c)())
+void* get_process_env_data(const char* env, void* (*creator)())
 {
 	//environment variable: ENV=ProcessID:DATA
 	char buf[20];
@@ -41,7 +41,7 @@ void* get_process_env_data(const char* env, void* (*c)())
 			|| ProcID != GetCurrentProcessId())
 	{
 		//invalid/missing value - create new data
-		data = c();
+		data = creator();
 		if (data)
 		{
 			sprintf(buf, "%x:%x", GetCurrentProcessId(), data);
@@ -64,7 +64,11 @@ HANDLE get_process_debug_heap()
 
 void* tls_creator()
 {
-	return (void*) TlsAlloc();
+	for (int i = 0 ; i < 79 ; i++)
+		TlsAlloc();
+	for (int i = 0 ; i < 78 ; i++)
+		TlsFree(i);
+	return (void*) 78;
 }
 
 DWORD get_process_debug_tls()
@@ -107,6 +111,7 @@ void __stdcall ThreadAddrStack::push_ret_addr(DWORD tls, DWORD addr)
 		TlsSetValue(tls, mem);
 	}
 	tas->stack[tas->pos++] = addr;
+	DBGASSERT(tas->pos < sizeof(tas->stack) / sizeof(tas->stack[0]));
 }
 
 DWORD __stdcall ThreadAddrStack::pop_ret_addr(DWORD tls)
@@ -120,8 +125,10 @@ DWORD __stdcall ThreadAddrStack::pop_ret_addr(DWORD tls)
 PROC create_log_stub(const char* caller, const char* target, const char* api, PROC orig)
 {
 	HANDLE heap = get_process_debug_heap();
+	char* new_api = (char*) HeapAlloc(heap, 0, strlen(api) + 1);
+	strcpy(new_api, api);
 	void* mem = HeapAlloc(heap, 0, sizeof(log_stub));
 	return (PROC) new (mem) log_stub(caller, 
-			target, api, (unsigned long) orig, 
+			target, new_api, (unsigned long) orig, 
 			(unsigned long) log_api, get_process_debug_tls());
 }
