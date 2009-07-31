@@ -34,7 +34,7 @@ public:
 
 private:
 	int pos;
-	DWORD stack[31];
+	DWORD stack[1023];
 };
 
 #pragma pack(push,1)
@@ -60,20 +60,20 @@ public:
 private:
 	unsigned char c_push1;
 	DWORD tls1;
-	redir_stub tas_store; //arg1=tls, arg2=caller ret
+	redir_stub tas_store;     //arg1=tls, arg2=caller ret
 	redir_stub call_orig;
 	unsigned char c_pusheax1; //orig ret
-	unsigned char c_push2;
+	unsigned char c_push2;    //api name
 	const char* v_name;
-	unsigned char c_push3;
+	unsigned char c_push3;    //target module
 	const char* v_target;
-	unsigned char c_push4;
+	unsigned char c_push4;    //calling module
 	const char* v_source;
-	unsigned char c_push5;
+	unsigned char c_push5;    //tls
 	DWORD tls2;
-	redir_stub tas_restore; //restore caller ret
-	unsigned char c_pusheax2;	
-	redir_stub jmp_logfun; //jmp to log_fun
+	redir_stub tas_restore;
+	unsigned char c_pusheax2; //caller return address	
+	redir_stub jmp_logfun;    //jump to log_fun
 };
 
 #pragma pack(pop)

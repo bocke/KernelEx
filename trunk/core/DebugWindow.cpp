@@ -117,7 +117,7 @@ void DebugWindow::InitDialog(HWND hwnd)
 	col.cx = 120;
 	col.pszText = "Function";
 	ListView_InsertColumn(hList, 4, &col);
-	col.cx = 40;
+	col.cx = 50;
 	col.mask |= LVCF_FMT;
 	col.fmt = LVCFMT_RIGHT;
 	col.pszText = "Return";
@@ -361,7 +361,6 @@ void DebugWindow::append(const char* str)
 {
 	static char msg[DEBUGMSG_MAXLEN];
 	bool filter_out = true;
-	list<sstring>::const_iterator it;
 
 	EnterCriticalSection(&cs);
 
@@ -370,21 +369,28 @@ void DebugWindow::append(const char* str)
 	{
 		if (includes.size() == 1 && strcmp(includes.front(), "*") == 0)
 			filter_out = false;
-		else for (it = includes.begin() ; it != includes.end() ; it++)
-			if (strstr(str, *it))
-			{
-				filter_out = false;
-				break;
-			}
+		else 
+		{
+			list<sstring>::const_iterator it;
+			for (it = includes.begin() ; it != includes.end() ; it++)
+				if (strstr(str, *it))
+				{
+					filter_out = false;
+					break;
+				}
+		}
 	}
 
 	if (!filter_out)
+	{
+		list<sstring>::const_iterator it;
 		for (it = excludes.begin() ; it != excludes.end() ; it++)
 			if (strstr(str, *it))
 			{
 				filter_out = true;
 				break;
 			}
+	}
 
 	if (filter_out)
 	{
