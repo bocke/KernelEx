@@ -129,7 +129,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 	DBGASSERT(conf != NULL);
 	cp.apiconf = conf;
 #ifdef _DEBUG
-	cp.log_apis = (flags & LDR_LOG_APIS) != 0;
+	cp.log_apis = (process->flags & LDR_LOG_APIS) != 0;
 #endif
 	return true;
 }
@@ -528,6 +528,15 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 					target->pNTHdr, caller, refmod);
 		else 
 			ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
+#ifdef _DEBUG
+		if (ret && cp.log_apis)
+		{
+			IMTE_KEX* icaller = (IMTE_KEX*)((*ppmteModTable)[caller->mteIndex]);
+			if (DWORD(ret) < target->pNTHdr->OptionalHeader.ImageBase 
+					+ target->pNTHdr->OptionalHeader.BaseOfData)
+				ret = create_log_stub(icaller->pszModName, target->pszModName, ordinal, ret);
+		}
+#endif
 	}
 	else 
 		ret = OriExportFromOrdinal(target->pNTHdr, ordinal);

@@ -40,7 +40,15 @@ DebugWindow::DebugWindow()
 {
 	DWORD tid;
 	hwnd = (HWND) -1;
+	
+	//we're interested in everything
 	includes.push_back("*");
+	//these usually aren't interesting
+	excludes.push_back("Tls");
+	excludes.push_back("Heap");
+	excludes.push_back("CriticalSection");
+	excludes.push_back("Interlocked");
+	
 	InitializeCriticalSection(&cs);
 	InitCommonControls();
 	hThread = CreateThread(NULL, 0, thread, (void*) this, 0, &tid);
@@ -79,11 +87,21 @@ BOOL CALLBACK DebugWindow::DebugDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 		break;
 	case WM_NOTIFY:
 		nmhdr = (NMHDR*) lParam;
-		if (nmhdr->idFrom == IDC_LOG && nmhdr->code == NM_RCLICK)
-		{
-			_this->HandleMenu();
-			break;
-		}
+		if (nmhdr->idFrom == IDC_LOG)
+			if (nmhdr->code == NM_RCLICK)
+			{
+				_this->HandleMenu();
+				break;
+			}
+			else if (nmhdr->code == LVN_KEYDOWN)
+			{
+				LPNMLVKEYDOWN nm = (LPNMLVKEYDOWN) lParam;
+				if (nm->wVKey == VK_DELETE)
+				{
+					_this->DeleteSelItems();
+					break;
+				}
+			}
 	default:
 		return FALSE;
 	}
@@ -94,7 +112,7 @@ void DebugWindow::InitDialog(HWND hwnd)
 {
 	hList = GetDlgItem(hwnd, IDC_LOG);
 	SetClassLong(hwnd, GCL_STYLE, GetClassLong(hwnd, GCL_STYLE) | CS_NOCLOSE);
-	MoveWindow(hwnd, 0, 0, 320, 200, TRUE);
+	MoveWindow(hwnd, 0, 0, 480, 200, TRUE);
 	SendMessage(hList, LVM_SETEXTENDEDLISTVIEWSTYLE,
            0, LVS_EX_FULLROWSELECT);
 
@@ -102,26 +120,28 @@ void DebugWindow::InitDialog(HWND hwnd)
 	memset(&col, 0, sizeof(col));
 	col.mask = LVCF_TEXT | LVCF_SUBITEM | LVCF_WIDTH;
 
-	col.cx = 80;
-	col.pszText = "Process";
+	col.cx = 20;
+	col.pszText = "Depth";
 	ListView_InsertColumn(hList, 0, &col);
 	col.cx = 60;
 	col.pszText = "Thread";
 	ListView_InsertColumn(hList, 1, &col);
-	col.cx = 80;
+	col.cx = 90;
 	col.pszText = "Source";
 	ListView_InsertColumn(hList, 2, &col);
-	col.cx = 80;
+	col.cx = 90;
 	col.pszText = "Dest";
 	ListView_InsertColumn(hList, 3, &col);
-	col.cx = 120;
+	col.cx = 130;
 	col.pszText = "Function";
 	ListView_InsertColumn(hList, 4, &col);
-	col.cx = 50;
+	col.cx = 60;
 	col.mask |= LVCF_FMT;
 	col.fmt = LVCFMT_RIGHT;
 	col.pszText = "Return";
 	ListView_InsertColumn(hList, 5, &col);
+
+#define NUM_COLS                 6
 
 	menu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_LOGMENU));
 	menu = GetSubMenu(menu, 0);
@@ -148,6 +168,18 @@ void DebugWindow::HandleMenu()
 		DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DEBUGFILTER), 
 				hwnd, FilterDlgProc, (LPARAM) this);
 		break;
+	}
+}
+
+void DebugWindow::DeleteSelItems()
+{
+	if (ListView_GetSelectedCount(hList) == 0)
+		return;
+
+	for (int i = ListView_GetItemCount(hList) - 1 ; i >= 0 ; i--)
+	{
+		if (ListView_GetItemState(hList, i, LVIS_SELECTED))
+			ListView_DeleteItem(hList, i);
 	}
 }
 
@@ -312,7 +344,7 @@ void DebugWindow::WriteToFile()
 	col.pszText = buf;
 	col.cchTextMax = sizeof(buf);
 	DWORD wlen;
-	for (int j = 0 ; j < 6 ; j++)
+	for (int j = 0 ; j < NUM_COLS ; j++)
 	{
 		DWORD len;
 		ListView_GetColumn(hList, j, &col);
@@ -326,7 +358,7 @@ void DebugWindow::WriteToFile()
 	rows = ListView_GetItemCount(hList);
 	for (int i = 0 ; i < rows ; i++)
 	{
-		for (int j = 0 ; j < 6 ; j++)
+		for (int j = 0 ; j < NUM_COLS ; j++)
 		{
 			DWORD len; DWORD wlen;
 			ListView_GetItemText(hList, i, j, buf, sizeof(buf));
