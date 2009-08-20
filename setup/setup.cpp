@@ -38,13 +38,16 @@
 Setup::Setup(const char* backup_file)
 {
 	this->backup_file = backup_file;
-	h_kernel32 = GetModuleHandle("kernel32");
+	for (string::iterator it = this->backup_file.begin() ; it != this->backup_file.end() ; it++)
+		*it = toupper(*it);
+
+	h_kernel32 = GetModuleHandle("KERNEL32");
 	
 	detect_old_version();
 
 	pemem.OpenMemory(h_kernel32);
 	if (!pemem.HasTarget())
-		ShowError(IDS_FAILOPEN, "k32mem");
+		ShowError(IDS_FAILOPEN, "KERNEL32 memory image");
 
 	version = get_signature_ver();
 
@@ -424,8 +427,8 @@ void Setup::install()
 
 	if (version >= 0)
 	{
-		if (version > KEX_STUB_VER)
-			ShowError(IDS_INVSTUB, version);
+		if (version == KEX_STUB_VER)
+			return;
 		else
 			upgrade = true;
 	}
@@ -436,9 +439,10 @@ void Setup::install()
 	pefile.OpenFile(upgrade ? backup_file.c_str() : kernel32path, 0x10000);
 	if (!pefile.HasTarget())
 	{
-		if (version == KEX_STUB_VER)
-			return;
-		ShowError(IDS_FAILOPEN, upgrade ? backup_file.c_str() : kernel32path);
+		if (upgrade)
+			ShowError(IDS_FAILOPENBACKUP, backup_file.c_str(), kernel32path);
+		else
+			ShowError(IDS_FAILOPEN, kernel32path);
 	}
 
 	find_ExportFromX();
