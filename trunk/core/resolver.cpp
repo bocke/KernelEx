@@ -464,7 +464,9 @@ DWORD encode_address(DWORD addr, const ApiLibrary* apilib)
 	//STD apilib
 	if (index == 0)
 	{
-		if (addr < 0xc0000000)
+		//normal address (shared or nonshared library) 
+		//or ordinal number for export forwarding
+		if (addr < 0xc0000000 || addr >= 0xffff0000)
 			return addr;
 		
 		//extremely rare scenario: driver hijacked apis so the address is now

@@ -264,9 +264,9 @@ BOOL CALLBACK DebugWindow::FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 			len1 = GetWindowTextLength(GetDlgItem(hwnd, IDC_DFINCLUDE)) + 1;
 			len2 = GetWindowTextLength(GetDlgItem(hwnd, IDC_DFEXCLUDE)) + 1;
 			buf = (char*) alloca(max(len1, len2));
-			EnterCriticalSection(&_this->cs);
 
 			GetDlgItemText(hwnd, IDC_DFINCLUDE, buf, len1);
+			EnterCriticalSection(&_this->cs);
 			_this->includes.clear();
 			pch = strtok_r(buf, ";", &p);
 			if (pch)
@@ -275,8 +275,10 @@ BOOL CALLBACK DebugWindow::FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 				while ((pch = strtok_r(NULL, ";", &p)) != NULL)
 					_this->includes.push_back(pch);
 			}
+			LeaveCriticalSection(&_this->cs);
 
 			GetDlgItemText(hwnd, IDC_DFEXCLUDE, buf, len2);
+			EnterCriticalSection(&_this->cs);
 			_this->excludes.clear();
 			pch = strtok_r(buf, ";", &p);
 			if (pch)
@@ -285,8 +287,8 @@ BOOL CALLBACK DebugWindow::FilterDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 				while ((pch = strtok_r(NULL, ";", &p)) != NULL)
 					_this->excludes.push_back(pch);
 			}
-
 			LeaveCriticalSection(&_this->cs);
+
 			EndDialog(hwnd, 0);
 			break;
 		}
