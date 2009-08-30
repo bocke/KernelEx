@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib rpcrt4.lib usp10.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib delayimp.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /pdbtype:sept /OPT:NOWIN98 /DELAYLOAD:shell32.dll /DELAYLOAD:rpcrt4.dll /DELAYLOAD:usp10.dll /DELAYLOAD:comdlg32.dll /DELAYLOAD:winspool.drv /DELAYLOAD:shlwapi.dll
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shlwapi.lib shell32.lib rpcrt4.lib usp10.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib delayimp.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /OPT:NOWIN98 /DELAYLOAD:shell32.dll /DELAYLOAD:rpcrt4.dll /DELAYLOAD:usp10.dll /DELAYLOAD:comdlg32.dll /DELAYLOAD:winspool.drv /DELAYLOAD:shlwapi.dll
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -197,6 +197,10 @@ SOURCE=.\shell32\auxshlguid.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\shell32\folderfix.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\shell32\pidl.h
 # End Source File
 # Begin Source File
@@ -206,6 +210,10 @@ SOURCE=.\shell32\SHGetFolderLocation.c
 # Begin Source File
 
 SOURCE=.\shell32\SHGetFolderPath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shell32\SHGetSpecialFolder_fix.c
 # End Source File
 # Begin Source File
 
@@ -258,6 +266,22 @@ SOURCE=.\shlwapi\_shlwapi_apilist.h
 # Begin Source File
 
 SOURCE=.\shlwapi\string.c
+# End Source File
+# End Group
+# Begin Group "shfolder"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\shfolder\_shfolder_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\shfolder\_shfolder_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shfolder\shfolder.c
 # End Source File
 # End Group
 # Begin Source File

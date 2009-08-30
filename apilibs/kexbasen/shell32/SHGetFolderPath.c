@@ -20,7 +20,9 @@
  */
 
 #include <windows.h>
+#include <shlobj.h>
 #include "kexcoresdk.h"
+#include "folderfix.h"
 
 typedef HRESULT (WINAPI *SHGetFolderPathA_t)(HWND, int, HANDLE, DWORD, LPSTR);
 typedef HRESULT (WINAPI *SHGetFolderPathW_t)(HWND, int, HANDLE, DWORD, LPWSTR);
@@ -66,6 +68,7 @@ HRESULT WINAPI SHGetFolderPathA_new(HWND hwndOwner, int nFolder, HANDLE hToken, 
 		SHGetFolderPathA_pfn = (SHGetFolderPathA_t) LoadShfolderProc("SHGetFolderPathA");
 	if (SHGetFolderPathA_pfn == NULL)
 		return E_NOTIMPL;
+	nFolder = folder_fix(nFolder);
 	return SHGetFolderPathA_pfn(hwndOwner, nFolder, hToken, dwFlags, pszPath);
 }
 
@@ -76,5 +79,6 @@ HRESULT WINAPI SHGetFolderPathW_new(HWND hwndOwner, int nFolder, HANDLE hToken, 
 		SHGetFolderPathW_pfn = (SHGetFolderPathW_t) LoadShfolderProc("SHGetFolderPathW");
 	if (SHGetFolderPathW_pfn == NULL)
 		return E_NOTIMPL;
+	nFolder = folder_fix(nFolder);
 	return SHGetFolderPathW_pfn(hwndOwner, nFolder, hToken, dwFlags, pszPath);
 }
