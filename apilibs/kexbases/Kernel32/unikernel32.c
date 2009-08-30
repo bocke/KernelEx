@@ -854,7 +854,7 @@ LPWSTR WINAPI lstrcpynW_new(LPWSTR dst, LPCWSTR src, INT n)
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
 		SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
+		return NULL;
 	}
-    return ret;
+	return ret;
 }
