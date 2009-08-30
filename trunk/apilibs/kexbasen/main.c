@@ -31,9 +31,10 @@
 #include "rpcrt4/_rpcrt4_apilist.h"
 #include "winspool/_winspool_apilist.h"
 #include "shlwapi/_shlwapi_apilist.h"
+#include "shfolder/_shfolder_apilist.h"
 //#include "/__apilist.h"
 
-static apilib_api_table api_table[10];
+static apilib_api_table api_table[11];
 
 static void fill_apitable()
 {
@@ -46,6 +47,7 @@ static void fill_apitable()
 	api_table[6] = apitable_rpcrt4;
 	api_table[7] = apitable_winspool;
 	api_table[8] = apitable_shlwapi;
+	api_table[9] = apitable_shfolder;
 	//last entry is null terminator
 }
 
@@ -59,7 +61,7 @@ const apilib_api_table* get_api_table()
 
 BOOL init()
 {
-	return common_init() && init_kernel32() && init_gdi32() && init_user32() && init_advapi32() && init_comdlg32() && init_shell32() && init_rpcrt4() && init_winspool() && init_shlwapi();
+	return common_init() && init_kernel32() && init_gdi32() && init_user32() && init_advapi32() && init_comdlg32() && init_shell32() && init_rpcrt4() && init_winspool() && init_shlwapi() && init_shfolder();
 }
 
 BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
