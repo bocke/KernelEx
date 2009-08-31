@@ -193,15 +193,7 @@ SOURCE=.\shell32\_shell32_apilist.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\shell32\auxshlguid.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\shell32\folderfix.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\shell32\pidl.h
 # End Source File
 # Begin Source File
 
