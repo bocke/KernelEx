@@ -19,18 +19,26 @@
  *
  */
 
-#ifndef __STORAGE_H
-#define __STORAGE_H
+#ifndef __MODINIT_H
+#define __MODINIT_H
 
-class storage
+#include "structs.h"
+
+class ModuleInitializer
 {
 public:
 	int size;
-	void* data[1]; //dummy table
+	MODREF* data[1023];
+
+	void add_module(MODREF* mr);
+	bool initialize_modules();
+	void destroy();
 	
-	static const int storage_size;
-	static storage* get_storage(bool alloc);
-	static void return_storage();
+	static ModuleInitializer* get_instance(bool alloc);
+
+private:
+	ModuleInitializer();
+	~ModuleInitializer();
 };
 
 #endif

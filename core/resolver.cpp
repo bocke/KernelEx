@@ -29,7 +29,7 @@
 #include "../setup/loadstub.h"
 #include "thunks.h"
 #include "SettingsDB.h"
-#include "storage.h"
+#include "ModInit.h"
 
 using namespace std;
 
@@ -258,9 +258,8 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		//remember tree which we overwrite - we will initialize it ourselves
 		//in resolver_process_attach as a result of initializing our tree
 		//requirement: Core is in IAT of the apilib !!!
-		storage* s = storage::get_storage(true);
-		DBGASSERT(s != NULL);
-		s->data[s->size++] = (void*) caller->ImplicitImports[*refmod - buffer].pMR;
+		ModuleInitializer* mi = ModuleInitializer::get_instance(true);
+		mi->add_module(caller->ImplicitImports[*refmod - buffer].pMR);
 
 		//modify original - modifications will be seen by dll initializer
 		//which will initialize our mr tree
@@ -297,25 +296,15 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 BOOL resolver_process_attach()
 {
 	//initialize all modules replaced by api libraries
-	bool loaded = false;
-	storage* s = storage::get_storage(false);
-	if (!s)
+	ModuleInitializer* mi = ModuleInitializer::get_instance(false);
+	if (!mi)
 		return TRUE;
 
-	for (int i = 0 ; i < s->size ; i++)
-	{
-		DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
-				(*ppmteModTable)[((MODREF*) s->data[i])->mteIndex]->pszModName, 
-				GetCurrentProcessId()));
+	bool initialized = mi->initialize_modules();
+	mi->destroy();
 
-		if (FLoadTreeNotify((MODREF*) s->data[i], 1))
-			return FALSE;
-		loaded = true;
-	}
-	storage::return_storage();
-
-	if (!loaded)
-		return TRUE;
+	if (!initialized)
+		return FALSE;
 
 	//reference all shared api libraries
 	ApiLibrary* lib;

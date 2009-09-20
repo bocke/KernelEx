@@ -209,7 +209,15 @@ SOURCE=.\main.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ModInit.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\pemanip.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProcessStorage.cpp
 # End Source File
 # Begin Source File
 
@@ -222,10 +230,6 @@ SOURCE=.\SettingsDB.cpp
 # Begin Source File
 
 SOURCE=.\sharedmem.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\storage.cpp
 # End Source File
 # Begin Source File
 
@@ -290,7 +294,19 @@ SOURCE=..\common\kexcoresdk.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\key_table.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ModInit.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\common\pemanip.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProcessStorage.h
 # End Source File
 # Begin Source File
 
@@ -307,10 +323,6 @@ SOURCE=.\sharedmem.h
 # Begin Source File
 
 SOURCE=..\common\sstring.hpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\storage.h
 # End Source File
 # Begin Source File
 
