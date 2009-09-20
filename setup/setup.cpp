@@ -29,21 +29,19 @@
 #include "loadstub.h"
 #include "setup.h"
 #include "wininit.h"
+#include "version.h"
 #include "resource.h"
 
 #define CODE_SEG ".text"
 #define DATA_SEG ".data"
 
 
-Setup::Setup(const char* backup_file)
+Setup::Setup(char* _backup_file) : backup_file(strupr(_backup_file))
 {
-	this->backup_file = backup_file;
-	for (string::iterator it = this->backup_file.begin() ; it != this->backup_file.end() ; it++)
-		*it = toupper(*it);
-
 	h_kernel32 = GetModuleHandle("KERNEL32");
 	
 	detect_old_version();
+	detect_downgrade();
 
 	pemem.OpenMemory(h_kernel32);
 	if (!pemem.HasTarget())
@@ -88,6 +86,28 @@ bool Setup::detect_old_version()
 	if (strcmp(buf, "4") < 0)
 		ShowError(IDS_OLDKEX);
 	return true;
+}
+
+void Setup::detect_downgrade()
+{
+	typedef unsigned long (*kexGetKEXVersion_t)();
+	kexGetKEXVersion_t kexGetKEXVersion_pfn;
+	HMODULE h_kernelex;
+	unsigned long version;
+	
+	h_kernelex = LoadLibrary("KERNELEX.DLL");
+
+	//no KernelEx installed, continue
+	if (!h_kernelex)
+		return;
+
+	kexGetKEXVersion_pfn = (kexGetKEXVersion_t) GetProcAddress(h_kernelex, "kexGetKEXVersion");
+	version = kexGetKEXVersion_pfn();
+	FreeLibrary(h_kernelex);
+
+	//trying to downgrade - forbid
+	if (version > VERSION_CODE)
+		ShowError(IDS_DOWNGRADE);
 }
 
 int Setup::find_pattern(DWORD offset, int size, const short* pattern, 
@@ -220,7 +240,7 @@ void Setup::mod_imte_alloc()
 		0x66,0xff,0x05,-1,-1,-1,0xbf,0x6a,0x3c,0xe8,
 	};
 	static const short after[] = {
-		0x66,0xff,0x05,-1,-1,-1,0xbf,0x6a,0x44,0xe8,
+		0x66,0xff,0x05,-1,-1,-1,0xbf,0x6a,0x40,0xe8,
 	};
 
 	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
@@ -234,6 +254,30 @@ void Setup::mod_imte_alloc()
 		else ShowError(IDS_MULPAT, "mod_imte_alloc");
 	}
 	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "mod_imte_alloc",
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	set_pattern(found_loc, after, length);
+}
+
+void Setup::mod_mr_alloc()
+{
+	static const short pattern[] = {
+		0x75,0xF6,0x8D,0x04,-1,0x1C,0x00,0x00,0x00,0x50
+	};
+	static const short after[] = {
+		0x75,0xF6,0x8D,0x04,-1,0x24,0x00,0x00,0x00,0x50
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
+	int size = pefile.GetSectionSize(CODE_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size, pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "mod_mr_alloc");
+		else ShowError(IDS_MULPAT, "mod_mr_alloc");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "mod_mr_alloc",
 			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
 	set_pattern(found_loc, after, length);
 }
@@ -394,7 +438,7 @@ bool Setup::is_fixupc(DWORD addr)
 	return false;
 }
 
-string Setup::get_temp_file_name()
+sstring Setup::get_temp_file_name()
 {
 	char tmpdir[MAX_PATH];
 	char target[MAX_PATH];
@@ -417,6 +461,7 @@ void Setup::ShowError(UINT id, ...)
 	else
 		_vsnprintf(out, sizeof(out), format, vargs);
 	va_end(vargs);
+	DBGPRINTF(("%s\n", out));
 	MessageBox(NULL, out, "KernelEx Setup", MB_OK | MB_ICONERROR);
 	exit(id);
 }
@@ -436,11 +481,11 @@ void Setup::install()
 	char kernel32path[MAX_PATH];
 	GetModuleFileName(h_kernel32, kernel32path, sizeof(kernel32path));
 	
-	pefile.OpenFile(upgrade ? backup_file.c_str() : kernel32path, 0x10000);
+	pefile.OpenFile(upgrade ? backup_file : kernel32path, 0x10000);
 	if (!pefile.HasTarget())
 	{
 		if (upgrade)
-			ShowError(IDS_FAILOPENBACKUP, backup_file.c_str(), kernel32path);
+			ShowError(IDS_FAILOPENBACKUP, backup_file, kernel32path);
 		else
 			ShowError(IDS_FAILOPEN, kernel32path);
 	}
@@ -450,6 +495,7 @@ void Setup::install()
 	disable_platform_check();
 	disable_resource_check();
 	mod_imte_alloc();
+	mod_mr_alloc();
 	mod_pdb_alloc();
 
 	KernelEx_codeseg* cseg;
@@ -527,13 +573,13 @@ void Setup::install()
 	// backup original file
 	if (!upgrade)
 	{
-		if (!CopyFile(kernel32path, backup_file.c_str(), FALSE))
-			ShowError(IDS_FAILBAK, backup_file.c_str());
+		if (!CopyFile(kernel32path, backup_file, FALSE))
+			ShowError(IDS_FAILBAK, backup_file);
 	}
 
 	// save patched file
-	string tmp_file = get_temp_file_name();
-	pefile.SaveFile(tmp_file.c_str());
+	sstring tmp_file = get_temp_file_name();
+	pefile.SaveFile(tmp_file);
 
 	if (is_winme)
 	{
@@ -561,10 +607,12 @@ void Setup::install()
 
 int main(int argc, char** argv)
 {
+	DBGPRINTF(("KernelEx setup program running\n"));
 	if (argc != 2)
 		return 1;
 
 	Setup setup(argv[1]);
 	setup.install();
+	DBGPRINTF(("Setup finished\n"));
 	return 0;
 }

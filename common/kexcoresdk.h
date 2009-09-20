@@ -149,24 +149,32 @@ _KEXCOREIMP HANDLE kexOpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWO
 _KEXCOREIMP BOOL kexAreExtensionsEnabled();
 
 
+/** KernelEx resolver flags. */
+#define KRF_KEX_DISABLE          1  /* disable KernelEx API extensions for this module */
+#define KRF_OVERRIDE_PROC_MOD    2  /* use same configuration and flags for all modules in a process */
+#define KRF_LOG_APIS             4  /* enable API tracing */
+#define KRF_NO_INHERIT          16  /* don't inherit configuration and flags to child processes */
+#define KRF_VALID_FLAG         128  /* denotes that flags field is valid */
+
+
 /** kexGetModuleSettings - Retrieve per module settings.
  *	
  * @param module Module path.
- * @param conf_name Receives configuration name, has to be at least 256 bytes long.
- * @param ldr_flags Receives flags.
+ * @param conf_name Receives configuration name, buffer has to be at least 256 bytes long.
+ * @param mod_flags Receives resolver flags.
  */
 _KEXCOREIMP void kexGetModuleSettings(const char* module, 
-                                      char* conf_name, BYTE* ldr_flags);
+                                      char* conf_name, DWORD* mod_flags);
 
 
 /** kexSetModuleSettings - Set per module settings.
  *
  * @param module Module path.
  * @param conf_name Configuration name to be set for the module.
- * @param ldr_flags Flags to be set for the module.
+ * @param mod_flags Resolver flags to be set for the module.
  */
 _KEXCOREIMP void kexSetModuleSettings(const char* module, 
-                                      const char* conf_name, BYTE ldr_flags);
+                                      const char* conf_name, DWORD mod_flags);
 
 
 /** kexFlushAppSettings - Reloads all module settings from registy. */

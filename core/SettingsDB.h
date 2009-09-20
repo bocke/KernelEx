@@ -28,16 +28,10 @@
 
 #include "sstring.hpp"
 #include <map>
+#include "resolver.h"
 #include "apiconf.h"
 
 using namespace std;
-
-struct appsetting
-{
-	appsetting() : conf(NULL), flags(0) {}
-	ApiConfiguration* conf;
-	unsigned long flags;
-};
 
 class SettingsDB
 {

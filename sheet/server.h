@@ -22,7 +22,7 @@
 #ifndef _SERVER_H
 #define _SERVER_H
 
-extern UINT g_LockCount;
+extern long g_LockCount;
 extern HMODULE g_hModule;
 
 #endif // _SERVER_H

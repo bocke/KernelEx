@@ -50,86 +50,102 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 {
 	IMTE** pmteModTable = *ppmteModTable;
 	PDB98* ppdbCur = *pppdbCur;
-	IMTE_KEX* module = (IMTE_KEX*) pmteModTable[moduleMR->mteIndex];
-	IMTE_KEX* process = (IMTE_KEX*) pmteModTable[ppdbCur->pExeMODREF->mteIndex];
-	ApiConfiguration* conf;
-	BYTE flags;
+	volatile MODREF_KEX module(moduleMR);
+	MODREF_KEX process(ppdbCur->pExeMODREF);
 
 	//shared modules should use standard api
-	if (IS_SHARED(module->baseAddress))
+	if (IS_SHARED(pmteModTable[module.mr.mteIndex]->baseAddress))
 		return false;
 
-	//unless override flag is set try to get module configuration first
-	if (!(process->flags & LDR_OVERRIDE_PROC_MOD))
-	{
-		if (!(module->flags & LDR_VALID_FLAG))
-		{
-			appsetting as = SettingsDB::instance.get_appsetting(module->pszFileName);
-			module->config = as.conf;
-			module->flags = as.flags;
-		}
-		conf = module->config;
-		flags = module->flags;
+	//if settings are already known, exit immediatelly
+	if (module.as.flags & LDR_VALID_FLAG)
+		goto __end;
 
-		if (flags & LDR_KEX_DISABLE)
-			return false;
+	//we need process settings to know if process.LDR_OVERRIDE_PROC_MOD is set
+	if (!(process.as.flags & LDR_VALID_FLAG))
+	{
+		//try to take settings from database...
+		pmteModTable = *ppmteModTable;
+		process.as = SettingsDB::instance
+			.get_appsetting(pmteModTable[process.mr.mteIndex]->pszFileName);
+
+		//...if settings are not there, take them from parent process...
+		if (!(process.as.flags & LDR_VALID_FLAG))
+		{
+			PDB98* ppdbParent = ppdbCur->ParentPDB;
+
+			//...IF there is parent process and...
+			if (ppdbParent && !(ppdbParent->Flags & (fTerminated | fTerminating | 
+					  fNearlyTerminating | fDosProcess | fWin16Process)))
+			{
+				MODREF_KEX parent(ppdbParent->pExeMODREF);
+
+				//...unless parent disallows us to inherit them
+				if ((parent.as.flags & LDR_VALID_FLAG) && !(parent.as.flags & LDR_NO_INHERIT))
+				{
+					process.as = parent.as;
+#ifdef _DEBUG       //don't inherit log flag
+					process.as.flags &= ~LDR_LOG_APIS;	
+#endif
+				}
+			}
+		}
 	}
+
+	//at this point we know whether override is enabled or not
+	if ((process.as.flags & LDR_VALID_FLAG))
+	{
+		//if it is then take process settings
+		if (process.as.flags & LDR_OVERRIDE_PROC_MOD)
+		{
+			module.as = process.as;
+			goto __end;
+		}
+	}
+	//if process still doesn't have settings, set some reasonable defaults
 	else
-		conf = NULL;
-
-	//if above failed or override flag was set try to get process configuration
-	if (!conf)
-	{
-		if (!(process->flags & LDR_VALID_FLAG))
-		{
-			appsetting as = SettingsDB::instance.get_appsetting(process->pszFileName);
-			process->config = as.conf;
-			process->flags = as.flags;
-		}
-		conf = process->config;
-		flags = process->flags;
-
-		if (flags & LDR_KEX_DISABLE)
-			return false;
-	}
-
-	//if no process configuration then get parent configuration
-	if (!conf)
-	{
-		PDB98* ppdbParent = ppdbCur->ParentPDB;
-
-		if (ppdbParent && !(ppdbParent->Flags & (fTerminated | fTerminating | 
-                  fNearlyTerminating | fDosProcess | fWin16Process)))
-		{
-			pmteModTable = *ppmteModTable;
-			IMTE_KEX* parent = (IMTE_KEX*) pmteModTable[ppdbParent->pExeMODREF->mteIndex];
-			conf = parent->config;
-			flags = parent->flags;
-			flags &= ~LDR_LOG_APIS; //don't inherit LOG flag
-
-			if (flags & LDR_KEX_DISABLE)
-				return false;
-		}
-	}
-
-	if (flags & LDR_FILTER_APIS)
-	{
-		//TODO: not implemented yet
-		DBGPRINTF(("Resolver flag LDR_FILTER_APIS not implemented\n"));
-	}
-
-	//finally if everything else fails take default configuration
-	if (!conf)
 	{
 		if (apiconfmgr.are_extensions_disabled())
-			return false;
-		conf = apiconfmgr.get_default_configuration();
+		{
+			process.as.flags = LDR_VALID_FLAG | LDR_KEX_DISABLE;
+		}
+		else
+		{
+			process.as.conf = apiconfmgr.get_default_configuration();
+			process.as.flags = LDR_VALID_FLAG;
+		}
 	}
 
-	DBGASSERT(conf != NULL);
-	cp.apiconf = conf;
+	//if module == process then we've already got everything we need
+	if (&module.as == &process.as)
+		goto __end;
+
+	//lookup module settings in database
+	pmteModTable = *ppmteModTable;
+	module.as = SettingsDB::instance
+		.get_appsetting(pmteModTable[module.mr.mteIndex]->pszFileName);
+
+	if (module.as.flags & LDR_VALID_FLAG)
+	{
+#ifdef _DEBUG //copy log flag from process to module
+		if (process.as.flags & LDR_LOG_APIS)
+			module.as.flags |= LDR_LOG_APIS;
+#endif
+		goto __end;
+	}
+
+	//if module has no settings, take them from process
+	module.as = process.as;
+
+__end:
+	DBGASSERT(module.as.flags & LDR_VALID_FLAG);
+	if (module.as.flags & LDR_KEX_DISABLE)
+		return false;
+
+	DBGASSERT(module.as.conf != NULL);
+	cp.apiconf = module.as.conf;
 #ifdef _DEBUG
-	cp.log_apis = (process->flags & LDR_LOG_APIS) != 0;
+	cp.log_apis = (module.as.flags & LDR_LOG_APIS) != 0;
 #endif
 	return true;
 }
@@ -533,7 +549,7 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 #ifdef _DEBUG
 		if (ret && cp.log_apis)
 		{
-			IMTE_KEX* icaller = (IMTE_KEX*)((*ppmteModTable)[caller->mteIndex]);
+			IMTE* icaller = (*ppmteModTable)[caller->mteIndex];
 			if (DWORD(ret) < target->pNTHdr->OptionalHeader.ImageBase 
 					+ target->pNTHdr->OptionalHeader.BaseOfData)
 				ret = create_log_stub(icaller->pszModName, target->pszModName, ordinal, ret);
@@ -580,7 +596,7 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 #ifdef _DEBUG
 		if (ret && cp.log_apis)
 		{
-			IMTE_KEX* icaller = (IMTE_KEX*)((*ppmteModTable)[caller->mteIndex]);
+			IMTE* icaller = (*ppmteModTable)[caller->mteIndex];
 			if (DWORD(ret) < target->pNTHdr->OptionalHeader.ImageBase 
 					+ target->pNTHdr->OptionalHeader.BaseOfData)
 				ret = create_log_stub(icaller->pszModName, target->pszModName, name, ret);
@@ -600,6 +616,7 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 	return ret;
 }
 
+/** Determines whether process has API extensions enabled. */
 bool are_extensions_enabled()
 {
 	config_params cp;
@@ -688,9 +705,13 @@ static void reset_imtes()
 		IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[i];
 		if (imte)
 		{
-			imte->config = NULL;
-			imte->flags = 0;
 			imte->mod_index = 0;
+			for (MODREF* mr = imte->pMR ; mr != NULL ; mr = mr->pNextMteMR)
+			{
+				MODREF_KEX kmr(mr);
+				kmr.as.conf = NULL;
+				kmr.as.flags = 0;
+			}
 		}
 	}
 
@@ -706,17 +727,22 @@ void dump_imtes(void)
 	int total = 0;
 	
 	dbgprintf("Dumping IMTEs...\n");
-	dbgprintf("%-4s %-12s %-7s %s %s\n", "No.", "Process", "Config", "Fl", "Module");
 	for (WORD i = 0 ; i < imteMax ; i++)
 	{
 		IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[i];
 		if (imte)
 		{
-			dbgprintf("#%-3d %-12s %-7s %02x %s\n", i,
-					pmteModTable[imte->pMR->ppdb->pExeMODREF->mteIndex]->pszSModName,  
-					imte->config ? imte->config->get_name() : "unknown", 
-					imte->flags,
-					imte->pszFileName);
+			dbgprintf("%s\n", imte->pszFileName);
+
+			for (MODREF* mr = imte->pMR ; mr != NULL ; mr = mr->pNextMteMR)
+			{
+				MODREF_KEX kmr(mr);
+				dbgprintf("\t%02x %-7s %-12s\n", 
+					kmr.as.flags,
+					kmr.as.conf ? kmr.as.conf->get_name() : "none",
+					pmteModTable[mr->ppdb->pExeMODREF->mteIndex]->pszModName);
+			}
+
 			total++;
 		}
 	}
