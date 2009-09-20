@@ -181,6 +181,28 @@ _KEXCOREIMP void kexSetModuleSettings(const char* module,
 _KEXCOREIMP void kexFlushAppSettings(void);
 
 
+/** MAKE_PS_TAG - Helper macro used to create tag for kexXxxProcessValue.
+ * 
+ * Usage: #define MY_TAG    MAKE_PS_TAG('M','Y','T','A')
+ */
+#define MAKE_PS_TAG(a,b,c,d)        (d<<24 | c<<16 | b<<8 | a)
+
+
+/** kexGetProcessValue - Get process value associated with tag. 
+ *
+ * @param tag Unique 32-bit identifier.
+ */
+_KEXCOREIMP void* kexGetProcessValue(DWORD tag);
+
+
+/** kexSetProcessValue - Set process value associated with tag. 
+ *
+ * @param tag Unique 32-bit identifier.
+ * @param value Any data, pass zero to free storage associated with tag.
+ */
+_KEXCOREIMP void kexSetProcessValue(DWORD tag, void* value);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
