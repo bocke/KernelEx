@@ -27,6 +27,8 @@
 #include "internals.h"
 #include "SettingsDB.h"
 #include "debug.h"
+#undef MAKE_PS_TAG
+#include "ProcessStorage.h"
 
 unsigned long kexGetKEXVersion()
 {
@@ -109,4 +111,14 @@ void kexSetModuleSettings(const char* module,
 void kexFlushAppSettings(void)
 {
 	SettingsDB::instance.flush_all();
+}
+
+void* kexGetProcessValue(DWORD tag)
+{
+	return ProcessStorage::get_instance()->get(tag);
+}
+
+void kexSetProcessValue(DWORD tag, void* value)
+{
+	ProcessStorage::get_instance()->set(tag, value);
 }
