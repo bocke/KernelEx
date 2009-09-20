@@ -30,6 +30,7 @@
 #define LDR_OVERRIDE_PROC_MOD    2  /* use same configuration and flags for all modules in a process */
 #define LDR_LOG_APIS             4  /* enable API tracing */
 #define LDR_FILTER_APIS          8  /* allow to control single APIs - enable, disable, switch */
+#define LDR_NO_INHERIT          16  /* don't inherit configuration and flags to child processes */
 #define LDR_VALID_FLAG         128  /* denotes that flags field is valid */
 
 #pragma pack(push,1)
@@ -38,13 +39,25 @@ class ApiConfiguration;
 
 struct IMTE_KEX : public IMTE
 {
-	ApiConfiguration* config;   /* pointer to API configuration required by the module
-	                             * 0 - not checked */
-	BYTE            flags;      /* loader flags */
-	BYTE            unused;     /* unused */
 	WORD            mod_index;  /* this value minus 1 is index into MODAPI table in API configurations
 								 * 0xff00-0xfffe - api libraries
 	                             * 0 - not checked, 0xffff - not an overridden module */
+};
+
+struct appsetting
+{
+	appsetting() : conf(NULL), flags(0) {}
+	ApiConfiguration* conf;     /* pointer to API configuration used by the module */
+	unsigned long flags;        /* resolver flags */
+};
+
+
+struct MODREF_KEX
+{
+	MODREF_KEX(PMODREF pmr) : mr(*pmr), 
+		as(*(appsetting*)(mr.ImplicitImports + mr.cImportedModules)) {}
+	MODREF& mr;
+	appsetting& as;
 };
 
 /* Creates a stub that calls address specified in the constructor. */

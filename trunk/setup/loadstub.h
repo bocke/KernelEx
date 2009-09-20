@@ -23,7 +23,7 @@
 #define __LOADSTUB_H
 
 #define KEX_SIGNATURE "KrnlEx"
-#define KEX_STUB_VER 1
+#define KEX_STUB_VER 2
 
 #define JTAB_SIZE 5
 #define JTAB_EFO_DYN 0
