@@ -294,7 +294,7 @@ SOURCE=..\common\kexcoresdk.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\common\key_table.hpp
+SOURCE=..\common\linear_table.hpp
 # End Source File
 # Begin Source File
 
