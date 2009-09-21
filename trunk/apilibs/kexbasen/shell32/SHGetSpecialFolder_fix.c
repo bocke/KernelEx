@@ -26,7 +26,9 @@
 HRESULT WINAPI SHGetSpecialFolderLocation_fix(HWND hwndOwner, int nFolder, LPVOID *_ppidl)
 {
 	LPITEMIDLIST *ppidl = (LPITEMIDLIST*) _ppidl;
-	nFolder = folder_fix(nFolder);
+	// explorer shouldn't receive this because of start menu bug which displays entries twice
+	if (GetModuleHandle("EXPLORER.EXE") == NULL)
+		nFolder = folder_fix(nFolder);
 	return SHGetSpecialFolderLocation(hwndOwner, nFolder, ppidl);
 }
 
