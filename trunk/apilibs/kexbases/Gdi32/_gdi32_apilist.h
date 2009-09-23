@@ -50,6 +50,7 @@ STUB AddFontMemResourceEx_stub;
 STUB RemoveFontMemResourceEx_stub;
 INT WINAPI AddFontResourceExW_new(LPCWSTR strW, DWORD fl, PVOID pdv);
 INT WINAPI AddFontResourceW_new(LPCWSTR strW);
+int WINAPI EnumFontFamiliesExA_new(HDC hdc, LPLOGFONTA pLogfontA, FONTENUMPROCA pEnumFontFamExProc, LPARAM lParam, DWORD dwFlags);
 int WINAPI EnumFontFamiliesExW_new(HDC hdc, LPLOGFONTW pLogfontW, FONTENUMPROCW pEnumFontFamExProc, LPARAM lParam, DWORD dwFlags);
 int WINAPI EnumFontFamiliesW_new(HDC hdc, LPCWSTR lpszFamily, FONTENUMPROCW lpEnumFontFamProc, LPARAM lParam);
 BOOL WINAPI RemoveFontResourceExW_new(LPCWSTR strW, DWORD fl, PVOID pdv);

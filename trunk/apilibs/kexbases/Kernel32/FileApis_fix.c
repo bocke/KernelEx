@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008-2009, Xeno86
+ *  Copyright (C) 2008-2009, Xeno86, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -69,17 +69,22 @@ BOOL WINAPI ReadFile_fix(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRe
 	if (lpOverlapped && GetLastError() == ERROR_INVALID_PARAMETER)
 	{
 		LONG high = lpOverlapped->OffsetHigh;
-		DWORD nr;
 		SetLastError(lasterr);
 		if ((SetFilePointer(hFile, lpOverlapped->Offset, &high, FILE_BEGIN)
-				== (DWORD)-1 && GetLastError() != NO_ERROR) ||
-				(ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, &nr, 0) && !nr))
-		{
-			SetLastError(ERROR_HANDLE_EOF);
-			return FALSE;
-		}
-		*lpNumberOfBytesRead = nr;
-		return TRUE;
+				== INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR))
+				return FALSE;
+		ResetEvent(lpOverlapped->hEvent);
+		lpOverlapped->Internal = STATUS_PENDING;
+		lpOverlapped->InternalHigh = 0;
+		BOOL result = 
+			ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, &lpOverlapped->InternalHigh, 0);
+		lasterr = GetLastError();
+		lpOverlapped->Internal = STATUS_WAIT_0;
+		SetEvent(lpOverlapped->hEvent);
+		SetLastError(lasterr);
+		if (lpNumberOfBytesRead)
+			*lpNumberOfBytesRead = lpOverlapped->InternalHigh;
+		return result;
 	}
 	return FALSE;
 }
@@ -99,9 +104,20 @@ BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 		LONG high = lpOverlapped->OffsetHigh;
 		SetLastError(lasterr);
 		if ((SetFilePointer(hFile, lpOverlapped->Offset, &high, FILE_BEGIN)
-				== (DWORD)-1 && GetLastError() != NO_ERROR))
+				== INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR))
 			return FALSE;
-		return WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, 0);
+		ResetEvent(lpOverlapped->hEvent);
+		lpOverlapped->Internal = STATUS_PENDING;
+		lpOverlapped->InternalHigh = 0;
+		BOOL result = 
+			WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, &lpOverlapped->InternalHigh, 0);
+		lasterr = GetLastError();
+		lpOverlapped->Internal = STATUS_WAIT_0;
+		SetEvent(lpOverlapped->hEvent);
+		SetLastError(lasterr);
+		if (lpNumberOfBytesWritten)
+			*lpNumberOfBytesWritten = lpOverlapped->InternalHigh;
+		return result;
 	}
 	return FALSE;
 }

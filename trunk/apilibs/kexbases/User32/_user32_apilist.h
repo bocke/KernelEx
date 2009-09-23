@@ -53,6 +53,7 @@ BOOL WINAPI AllowSetForegroundWindow_98(DWORD procid);
 BOOL WINAPI LockSetForegroundWindow_98(UINT lockcode);
 HWND APIENTRY GetAncestor_fix(HWND hwnd, UINT gaFlags);
 int WINAPI GetMouseMovePointsEx_98(UINT size, LPMOUSEMOVEPOINT ptin, LPMOUSEMOVEPOINT ptout, int count, DWORD res);
+HWND WINAPI GetNextDlgTabItem_fix(HWND hDlg, HWND hCtl, BOOL bPrevious);
 BOOL WINAPI IsHungAppWindow_new(HWND hWnd);
 BOOL WINAPI LockWorkStation_new(void);
 UINT WINAPI MapVirtualKeyA_new(UINT uCode, UINT uMapType);

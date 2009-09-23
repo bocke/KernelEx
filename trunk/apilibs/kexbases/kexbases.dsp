@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib version.lib ../../common/KernelEx.lib ../../kexcrt/kexcrt.lib libc.lib /nologo /dll /map /debug /machine:I386 /nodefaultlib /ignore:4092 /OPT:NOWIN98
-# SUBTRACT LINK32 /pdb:none /pdbtype:<none>
+# SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
 
@@ -149,6 +149,10 @@ SOURCE=.\Kernel32\IsProcessorFeaturePresent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\IsWow64Process.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\Jobs.c
 # End Source File
 # Begin Source File
@@ -205,11 +209,11 @@ SOURCE=.\Kernel32\OpenThread.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Kernel32\SetFilePointerEx.c
+SOURCE=.\Kernel32\RemoteDesktop.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Kernel32\ThreadPool.c
+SOURCE=.\Kernel32\SetFilePointerEx.c
 # End Source File
 # Begin Source File
 
@@ -278,6 +282,10 @@ SOURCE=.\User32\GetAncestor.c
 # Begin Source File
 
 SOURCE=.\User32\GetMouseMovePointsEx.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\GetNextDlgTabItem_fix.c
 # End Source File
 # Begin Source File
 

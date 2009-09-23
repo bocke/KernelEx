@@ -76,6 +76,7 @@ static const apilib_named_api user32_named_apis[] =
 	DECL_API("GetLastInputInfo", GetLastInputInfo_new),
 	DECL_API("GetMessageW", GetMessageW_new),
 	DECL_API("GetMouseMovePointsEx", GetMouseMovePointsEx_98),
+	DECL_API("GetNextDlgTabItem", GetNextDlgTabItem_fix),
 	DECL_API("GetWindowLongA", GetWindowLongA_new),
 	DECL_API("IsCharAlphaNumericW", IsCharAlphaNumericW_new),
 	DECL_API("IsCharAlphaW", IsCharAlphaW_new),
