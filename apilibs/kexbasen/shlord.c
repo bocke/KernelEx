@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2009, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -19,14 +19,30 @@
  *
  */
 
+#include <windows.h>
+#include <stdio.h>
+#include "shlord.h"
 #include "common.h"
 
-UNIMPL_FUNC(CreateHardLinkA, 3);
-UNIMPL_FUNC(CreateHardLinkW, 3);
-UNIMPL_FUNC(IsValidLanguageGroup, 2);
-UNIMPL_FUNC(ReplaceFileA, 6);
-UNIMPL_FUNC(ReplaceFileW, 6);
-UNIMPL_FUNC(FindFirstFileExW, 6);
-UNIMPL_FUNC(HeapSetInformation, 4);
-UNIMPL_FUNC(GetProcessIoCounters, 2);
-UNIMPL_FUNC(RtlCaptureStackBackTrace, 4);
+static HMODULE hShlwapi;
+
+void shlwapi_fatal_error(int funcnum)
+{
+	char msg[256];
+	sprintf(msg, "kexbasen: Failed to get shlwapi proc: #%i",funcnum);	
+	fatal_error(msg);
+}
+
+PVOID WINAPI GetShlwapiProc(int funcnum)
+{
+	if (!hShlwapi) 
+	{
+		hShlwapi = GetModuleHandle("shlwapi.dll");
+		if (!hShlwapi)
+			hShlwapi = LoadLibrary("shlwapi.dll");
+	}
+	PVOID proc = GetProcAddress(hShlwapi,(LPSTR)funcnum);
+	if (!proc)
+		shlwapi_fatal_error(funcnum);
+	return proc;	
+}

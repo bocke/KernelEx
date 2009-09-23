@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2009, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -19,14 +19,31 @@
  *
  */
 
-#include "common.h"
+/********************************/
+/* Remote Desktop Services APIs */
+/********************************/
 
-UNIMPL_FUNC(CreateHardLinkA, 3);
-UNIMPL_FUNC(CreateHardLinkW, 3);
-UNIMPL_FUNC(IsValidLanguageGroup, 2);
-UNIMPL_FUNC(ReplaceFileA, 6);
-UNIMPL_FUNC(ReplaceFileW, 6);
-UNIMPL_FUNC(FindFirstFileExW, 6);
-UNIMPL_FUNC(HeapSetInformation, 4);
-UNIMPL_FUNC(GetProcessIoCounters, 2);
-UNIMPL_FUNC(RtlCaptureStackBackTrace, 4);
+#include <windows.h>
+
+/* MAKE_EXPORT ProcessIdToSessionId_new=ProcessIdToSessionId */
+BOOL WINAPI ProcessIdToSessionId_new(DWORD dwProcessId, DWORD *pSessionId)
+{
+	if (!pSessionId)
+	{
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+
+	/* Process not running under RDS session */
+	*pSessionId = 0;
+	return TRUE;
+}
+
+/* MAKE_EXPORT WTSGetActiveConsoleSessionId_new=WTSGetActiveConsoleSessionId */
+DWORD WINAPI WTSGetActiveConsoleSessionId_new(void)
+{
+	/* "If there is no session attached to the physical console, 
+	 *  this function returns 0xFFFFFFFF." 
+	 */
+	return 0xffffffff;
+}
