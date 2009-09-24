@@ -64,13 +64,15 @@ struct MODREF_KEX
 class redir_stub
 {
 public:
-	redir_stub(unsigned long target, bool make_call = false) : c_eax(0xb8), 
-			v_eax(target), c_jmp(make_call ? 0xd0ff : 0xe0ff) {}
+	redir_stub(unsigned long target, bool make_call = true)
+	{
+		op = make_call ? 0xe8 : 0xe9;
+		addr = target - (unsigned long(this) + 5);
+	}
 
 private:
-	unsigned char c_eax;
-	unsigned long v_eax;
-	unsigned short c_jmp;
+	unsigned char op;
+	unsigned long addr;
 };
 
 struct config_params

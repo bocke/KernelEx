@@ -30,6 +30,9 @@
 #include "thunks.h"
 #include "SettingsDB.h"
 #include "ModInit.h"
+#ifdef _DEBUG
+#include "apilog.h"
+#endif
 
 using namespace std;
 
@@ -477,7 +480,7 @@ DWORD encode_address(DWORD addr, const ApiLibrary* apilib)
 		//extremely rare scenario: driver hijacked apis so the address is now
 		//above 0xc0000000 and we use these for encoded apilib addresses
 		//so we have to create a stub in shared arena with proper address
-		return (DWORD) new redir_stub(addr);
+		return (DWORD) new redir_stub(addr, false);
 	}
 
 	//non-shared apilib
