@@ -81,35 +81,6 @@ DWORD get_process_debug_tls()
 extern "C"
 int snprintf(char *buffer, size_t n, const char* format, ...);
 
-DWORD __stdcall log_api(const char* source, const char* target, const char* api_name, DWORD depth, DWORD ret)
-{
-	DebugWindow* dw = DebugWindow::get();
-	if (!dw)
-		return 0;
-	
-	char msg[DEBUGMSG_MAXLEN];
-
-	//fancy call stack depth indicator
-	if (depth < DEBUGMSG_MAXLEN / 2)
-	{
-		for (int i = 0 ; i < depth ; i++)
-			msg[i] = 'l';
-	}
-	else
-	{
-		msg[0] = 'E';
-		msg[1] = 'E';
-		depth = 2;
-	}
-
-	snprintf(msg + depth, sizeof(msg) - depth, "|%x|%s|%s|%s|%x", 
-			GetCurrentThreadId(), source, target, api_name, ret);
-
-	dw->append(msg);
-
-	return ret;
-}
-
 ThreadAddrStack::ThreadAddrStack()
 {
 	pos = 0;
@@ -117,10 +88,7 @@ ThreadAddrStack::ThreadAddrStack()
 
 void __stdcall ThreadAddrStack::push_ret_addr(DWORD addr)
 {
-	//TlsGetValue clears last error value so remember & restore it
-	DWORD lasterr = GetLastError();
 	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(APILOG_TLS_INDEX);
-	SetLastError(lasterr);
 	if (!tas)
 	{
 		void* mem = HeapAlloc(get_process_debug_heap(), 0, sizeof(ThreadAddrStack));
@@ -133,21 +101,96 @@ void __stdcall ThreadAddrStack::push_ret_addr(DWORD addr)
 
 DWORD __stdcall ThreadAddrStack::pop_ret_addr()
 {
-	//TlsGetValue clears last error value so remember & restore it
-	DWORD lasterr = GetLastError();
 	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(APILOG_TLS_INDEX);
-	SetLastError(lasterr);
 	DBGASSERT(tas->pos > 0);
 	return tas->stack[--tas->pos];
 }
 
 DWORD __stdcall ThreadAddrStack::get_level()
 {
-	//TlsGetValue clears last error value so remember & restore it
-	DWORD lasterr = GetLastError();
 	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(APILOG_TLS_INDEX);
-	SetLastError(lasterr);
 	return tas->pos;
+}
+
+
+log_stub::log_stub(const char* source, const char* target, const char* name, 
+		unsigned long proc)
+		: call_prelog(DWORD(pre_log)), call_postlog(DWORD(post_log)),
+		call_orig(proc)
+{
+	c_pushad1 = c_pushad2 = 0x60;
+	c_popad1 = c_popad2 = 0x61;
+	c_ret = 0xc3;
+	c_push1 = c_push2 = 0x68;
+	v_lgd1 = &lgd;
+	v_lgd2 = &lgd;
+	c_push_eax = 0x50;
+	c_add_esp = 0xc483;
+	c_sub_esp = 0xec83;
+	c_byte_4 = c_byte_4_1 = 4;
+	lgd.source = source;
+	lgd.target = target;
+	lgd.api_name = name;
+}
+
+void __stdcall log_stub::pre_log(log_data* lgd)
+{
+	DWORD last_err;
+	DWORD caller_addr;
+	DWORD level;
+	char msg[DEBUGMSG_MAXLEN];
+	
+	caller_addr = *((DWORD*) &lgd + 9);
+	last_err = GetLastError();
+	
+	ThreadAddrStack::push_ret_addr(caller_addr);
+	
+	DebugWindow* dw = DebugWindow::get();
+	if (!dw)
+		return;
+
+	level = ThreadAddrStack::get_level();
+
+	snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s", 
+			level,
+			GetCurrentThreadId(),
+			(level-1) * 2, "",
+			lgd->source, caller_addr,
+			lgd->target, lgd->api_name);
+
+	dw->append(msg);
+
+	SetLastError(last_err);
+}
+
+void __stdcall log_stub::post_log(log_data* lgd, DWORD retval)
+{
+	DWORD last_err;
+	DWORD& caller_addr = *((DWORD*) &retval + 9);
+	DWORD level;
+	char msg[DEBUGMSG_MAXLEN];
+	
+	last_err = GetLastError();
+	
+	DebugWindow* dw = DebugWindow::get();
+	if (!dw)
+		return;
+
+	level = ThreadAddrStack::get_level();
+
+	caller_addr = ThreadAddrStack::pop_ret_addr();
+
+	snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s|%x", 
+			level,
+			GetCurrentThreadId(),
+			(level-1) * 2, "",
+			lgd->source, caller_addr,
+			lgd->target, lgd->api_name,
+			retval);
+
+	dw->append(msg);
+
+	SetLastError(last_err);
 }
 
 PROC create_log_stub(const char* caller, const char* target, const char* api, PROC orig)
@@ -158,8 +201,7 @@ PROC create_log_stub(const char* caller, const char* target, const char* api, PR
 	get_process_debug_tls();
 	void* mem = HeapAlloc(heap, 0, sizeof(log_stub));
 	return (PROC) new (mem) log_stub(caller, 
-			target, new_api, (unsigned long) orig, 
-			(unsigned long) log_api);
+			target, new_api, (unsigned long) orig);
 }
 
 PROC create_log_stub(const char* caller, const char* target, WORD ord, PROC orig)
