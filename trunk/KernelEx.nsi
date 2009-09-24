@@ -292,6 +292,13 @@ Section "Install"
   WriteRegStr HKLM "Software\KernelEx\KnownDLLs" \
     "WTSAPI32" "WTSAPI32.DLL"
   
+  GetTempFileName $0 "$INSTDIR"
+  File /oname=$0 auxiliary\userenv.dll
+  Delete "$INSTDIR\userenv.dll"
+  Rename /REBOOTOK $0  "$INSTDIR\userenv.dll"
+  WriteRegStr HKLM "Software\KernelEx\KnownDLLs" \
+    "USERENV" "USERENV.DLL"
+  
   SetOverwrite lastused
   
   ExecWait '"$WINDIR\regedit.exe" /s "$INSTDIR\settings.reg"'
@@ -356,6 +363,8 @@ Section "Uninstall"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "UXTHEME"
   Delete /REBOOTOK "$INSTDIR\wtsapi32.dll"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "WTSAPI32"
+  Delete /REBOOTOK "$INSTDIR\userenv.dll"
+  DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "USERENV"
   
   Delete "$INSTDIR\verify.exe"
   DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "KexVerify"
