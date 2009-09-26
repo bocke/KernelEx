@@ -42,8 +42,6 @@ BOOL WINAPI ProcessIdToSessionId_new(DWORD dwProcessId, DWORD *pSessionId)
 /* MAKE_EXPORT WTSGetActiveConsoleSessionId_new=WTSGetActiveConsoleSessionId */
 DWORD WINAPI WTSGetActiveConsoleSessionId_new(void)
 {
-	/* "If there is no session attached to the physical console, 
-	 *  this function returns 0xFFFFFFFF." 
-	 */
-	return 0xffffffff;
+	/* local session */
+	return 0;
 }
