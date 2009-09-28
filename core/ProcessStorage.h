@@ -22,7 +22,12 @@
 #ifndef __PROCESSSTORAGE_H
 #define __PROCESSSTORAGE_H
 
-#include "linear_table.hpp"
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#endif
+
+#include <map>
+#include "winheap_allocator.hpp"
 
 #define MAKE_PS_TAG(a,b,c,d)     (d<<24 | c<<16 | b<<8 | a)
 
@@ -32,15 +37,18 @@ public:
 	static ProcessStorage* get_instance();
 	void* get(DWORD tag);
 	bool set(DWORD tag, void* value);
+	void* allocate(int n);
+	void deallocate(void* ptr);
 
 private:
-	//we should propably use hash table rather than linear table
-	//if we will store more than few entries
-	linear_table<DWORD, void*, 500> m_table;
-	CRITICAL_SECTION cs;
+	typedef winheap_allocator<std::pair<DWORD,void*> > _Allocator;
+	typedef std::map<DWORD, void*, std::less<DWORD>, _Allocator> _Map;
+	_Allocator m_allocator;
+	_Map m_table;
+	CRITICAL_SECTION m_cs;
 
 	static ProcessStorage* create_instance();
-	ProcessStorage();
+	ProcessStorage(HANDLE heap);
 	~ProcessStorage();
 };
 

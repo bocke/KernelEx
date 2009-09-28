@@ -122,3 +122,13 @@ void kexSetProcessValue(DWORD tag, void* value)
 {
 	ProcessStorage::get_instance()->set(tag, value);
 }
+
+void* kexProcessAllocate(int n)
+{
+	return ProcessStorage::get_instance()->allocate(n);
+}
+
+void kexProcessDeallocate(void* p)
+{
+	ProcessStorage::get_instance()->deallocate(p);
+}
