@@ -203,6 +203,19 @@ _KEXCOREIMP void* kexGetProcessValue(DWORD tag);
 _KEXCOREIMP void kexSetProcessValue(DWORD tag, void* value);
 
 
+/** kexProcessAllocate - Allocate memory from process storage.
+ * @param n Number of bytes to allocate.
+ * @return Pointer to memory block.
+ */
+_KEXCOREIMP void* kexProcessAllocate(int n);
+
+
+/** kexProcessDeallocate - Free memory from process storage.
+ * @param p Pointer to memory block allocated by kexProcessAllocate.
+ */
+_KEXCOREIMP void kexProcessDeallocate(void* p);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

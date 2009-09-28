@@ -30,9 +30,10 @@ struct PDB_KEX : PDB98
 	void* kex_storage;
 };
 
-ProcessStorage::ProcessStorage()
+ProcessStorage::ProcessStorage(HANDLE heap) 
+	: m_allocator(heap), m_table(std::less<DWORD>(), m_allocator)
 {
-	InitializeCriticalSection(&cs);
+	InitializeCriticalSection(&m_cs);
 }
 
 ProcessStorage* ProcessStorage::get_instance()
@@ -46,32 +47,58 @@ ProcessStorage* ProcessStorage::get_instance()
 void* ProcessStorage::get(DWORD tag)
 {
 	void* ret;
-	EnterCriticalSection(&cs);
+	_Map::iterator it;
+	
+	EnterCriticalSection(&m_cs);
 
-	ret = m_table.get(tag);
+	it = m_table.find(tag);
+	if (it != m_table.end())
+		ret = it->second;
+	else
+		ret = NULL;
 
-	LeaveCriticalSection(&cs);
+	LeaveCriticalSection(&m_cs);
+
 	return ret;
 }
 
 bool ProcessStorage::set(DWORD tag, void* value)
 {
 	bool ret;
-	EnterCriticalSection(&cs);
+	_Map::iterator it;
+
+	EnterCriticalSection(&m_cs);
 
 	if (value == NULL)
 	{
-		m_table.free(tag);
+		m_table.erase(tag);
 		ret = true;
 	}
 	else
 	{
-		ret = m_table.set(tag, value);
+		it = m_table.lower_bound(tag);
+		if (it == m_table.end() || m_table.key_comp()(tag, it->first))
+			m_table.insert(it, std::pair<DWORD,void*>(tag, value));
+		else
+			it->second = value;
+		ret = true;
 	}
 
-	LeaveCriticalSection(&cs);
+	LeaveCriticalSection(&m_cs);
+
 	return ret;
 }
+
+void* ProcessStorage::allocate(int n)
+{
+	return _Allocator::rebind<char>::other(m_allocator).allocate(n, (char*) 0);
+}
+
+void ProcessStorage::deallocate(void* ptr)
+{
+	_Allocator::rebind<char>::other(m_allocator).deallocate(ptr, 0);
+}
+
 
 ProcessStorage* ProcessStorage::create_instance()
 {
@@ -86,10 +113,13 @@ ProcessStorage* ProcessStorage::create_instance()
 		return (ProcessStorage*) pdb->kex_storage;
 	}
 
-	pdb->kex_storage = VirtualAlloc(NULL, sizeof(ProcessStorage), 
-			MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+	HANDLE heap = HeapCreate(0, 0, 0);
+	DBGASSERT(heap != NULL);
+
+	pdb->kex_storage = HeapAlloc(heap, 0, sizeof(ProcessStorage));
 	DBGASSERT(pdb->kex_storage != NULL);
-	ret = new (pdb->kex_storage) ProcessStorage;
+	
+	ret = new (pdb->kex_storage) ProcessStorage(heap);
 	_LeaveSysLevel(krnl32lock);
 
 	return ret;

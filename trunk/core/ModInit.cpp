@@ -60,8 +60,7 @@ ModuleInitializer* ModuleInitializer::get_instance(bool alloc)
 
 	if (!mi && alloc)
 	{
-		mi = (ModuleInitializer*) VirtualAlloc(NULL, sizeof(ModuleInitializer), 
-				MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+		mi = (ModuleInitializer*) store->allocate(sizeof(ModuleInitializer));
 		DBGASSERT(mi != NULL);
 		new (mi) ModuleInitializer;
 		store->set(TAG_MODINIT, mi);
@@ -72,7 +71,7 @@ ModuleInitializer* ModuleInitializer::get_instance(bool alloc)
 
 void ModuleInitializer::destroy()
 {
-	BOOL ret = VirtualFree(this, 0, MEM_RELEASE);
-	DBGASSERT(ret != FALSE);
-	ProcessStorage::get_instance()->set(TAG_MODINIT, NULL);
+	ProcessStorage* store = ProcessStorage::get_instance();
+	store->deallocate(this);
+	store->set(TAG_MODINIT, NULL);
 }

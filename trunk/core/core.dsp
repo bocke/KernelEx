@@ -294,10 +294,6 @@ SOURCE=..\common\kexcoresdk.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\common\linear_table.hpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ModInit.h
 # End Source File
 # Begin Source File
@@ -339,6 +335,10 @@ SOURCE=..\common\version.h
 # Begin Source File
 
 SOURCE=.\wildcmp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\winheap_allocator.hpp
 # End Source File
 # End Group
 # Begin Group "Resource Files"
