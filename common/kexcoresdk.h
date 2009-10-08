@@ -181,39 +181,26 @@ _KEXCOREIMP void kexSetModuleSettings(const char* module,
 _KEXCOREIMP void kexFlushAppSettings(void);
 
 
-/** MAKE_PS_TAG - Helper macro used to create tag for kexXxxProcessValue.
- * 
- * Usage: #define MY_TAG    MAKE_PS_TAG('M','Y','T','A')
- */
-#define MAKE_PS_TAG(a,b,c,d)        (d<<24 | c<<16 | b<<8 | a)
-
-
-/** kexGetProcessValue - Get process value associated with tag. 
+/** kexPsAllocIndex - Reserve process storage entry. 
  *
- * @param tag Unique 32-bit identifier.
+ * @return Index to access process storage.
  */
-_KEXCOREIMP void* kexGetProcessValue(DWORD tag);
+_KEXCOREIMP int kexPsAllocIndex(void);
 
 
-/** kexSetProcessValue - Set process value associated with tag. 
+/** kexPsGetValue - Get process value associated with tag. 
  *
- * @param tag Unique 32-bit identifier.
+ * @param index Index allocated with kexPsAllocIndex.
+ */
+_KEXCOREIMP void* kexPsGetValue(int index);
+
+
+/** kexPsSetValue - Set process value associated with tag. 
+ *
+ * @param index Index allocated with kexPsAllocIndex.
  * @param value Any data, pass zero to free storage associated with tag.
  */
-_KEXCOREIMP void kexSetProcessValue(DWORD tag, void* value);
-
-
-/** kexProcessAllocate - Allocate memory from process storage.
- * @param n Number of bytes to allocate.
- * @return Pointer to memory block.
- */
-_KEXCOREIMP void* kexProcessAllocate(int n);
-
-
-/** kexProcessDeallocate - Free memory from process storage.
- * @param p Pointer to memory block allocated by kexProcessAllocate.
- */
-_KEXCOREIMP void kexProcessDeallocate(void* p);
+_KEXCOREIMP int kexPsSetValue(int index, void* value);
 
 
 #ifdef __cplusplus

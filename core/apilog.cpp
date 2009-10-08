@@ -96,7 +96,7 @@ void __stdcall ThreadAddrStack::push_ret_addr(DWORD addr)
 		TlsSetValue(APILOG_TLS_INDEX, mem);
 	}
 	tas->stack[tas->pos++] = addr;
-	DBGASSERT(tas->pos < sizeof(tas->stack) / sizeof(tas->stack[0]));
+	DBGASSERT(tas->pos < countof(tas->stack));
 }
 
 DWORD __stdcall ThreadAddrStack::pop_ret_addr()

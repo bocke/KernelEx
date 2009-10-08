@@ -24,12 +24,11 @@
 
 #include "structs.h"
 
+bool ModuleInitializer_init();
+
 class ModuleInitializer
 {
 public:
-	int size;
-	MODREF* data[1023];
-
 	void add_module(MODREF* mr);
 	bool initialize_modules();
 	void destroy();
@@ -37,6 +36,9 @@ public:
 	static ModuleInitializer* get_instance(bool alloc);
 
 private:
+	int size;
+	MODREF* data[64];
+
 	ModuleInitializer();
 	~ModuleInitializer();
 };

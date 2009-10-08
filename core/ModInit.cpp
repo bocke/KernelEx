@@ -21,12 +21,19 @@
 
 #include <windows.h>
 #include <stdlib.h>
+#include <new>
 #include "ModInit.h"
 #include "ProcessStorage.h"
 #include "internals.h"
 #include "debug.h"
 
-#define TAG_MODINIT       MAKE_PS_TAG('M','O','D','I')
+static int modinit_index;
+
+bool ModuleInitializer_init()
+{
+	modinit_index = ProcessStorage::allocate();
+	return modinit_index != -1;
+}
 
 ModuleInitializer::ModuleInitializer()
 {
@@ -56,14 +63,14 @@ bool ModuleInitializer::initialize_modules()
 ModuleInitializer* ModuleInitializer::get_instance(bool alloc)
 {
 	ProcessStorage* store = ProcessStorage::get_instance();
-	ModuleInitializer* mi = (ModuleInitializer*) store->get(TAG_MODINIT);
+	ModuleInitializer* mi = (ModuleInitializer*) store->get(modinit_index);
 
 	if (!mi && alloc)
 	{
-		mi = (ModuleInitializer*) store->allocate(sizeof(ModuleInitializer));
+		mi = (ModuleInitializer*) HeapAlloc(_GetProcessHeap(), 0, sizeof(ModuleInitializer));
 		DBGASSERT(mi != NULL);
 		new (mi) ModuleInitializer;
-		store->set(TAG_MODINIT, mi);
+		store->set(modinit_index, mi);
 	}
 
 	return mi;
@@ -72,6 +79,6 @@ ModuleInitializer* ModuleInitializer::get_instance(bool alloc)
 void ModuleInitializer::destroy()
 {
 	ProcessStorage* store = ProcessStorage::get_instance();
-	store->deallocate(this);
-	store->set(TAG_MODINIT, NULL);
+	HeapFree(_GetProcessHeap(), 0, this);
+	store->set(modinit_index, NULL);
 }

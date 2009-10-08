@@ -35,6 +35,8 @@
 #endif
 #endif
 
+#define countof(x) (sizeof(x)/sizeof(x[0]))
+
 #define IS_SHARED(x) (((DWORD)x) >= 0x80000000)
 
 extern HINSTANCE hInstance;
@@ -75,5 +77,6 @@ extern AllocHandle_t AllocHandle;
 
 MODREF* MRfromCallerAddr(DWORD addr);
 HANDLE _OpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId);
+HANDLE _GetProcessHeap();
 
 #endif
