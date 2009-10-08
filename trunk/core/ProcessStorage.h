@@ -22,33 +22,22 @@
 #ifndef __PROCESSSTORAGE_H
 #define __PROCESSSTORAGE_H
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
-
-#include <map>
-#include "winheap_allocator.hpp"
-
-#define MAKE_PS_TAG(a,b,c,d)     (d<<24 | c<<16 | b<<8 | a)
+#define PS_MAX_INDEX 64
 
 class ProcessStorage
 {
 public:
 	static ProcessStorage* get_instance();
-	void* get(DWORD tag);
-	bool set(DWORD tag, void* value);
-	void* allocate(int n);
-	void deallocate(void* ptr);
+	void* get(int index);
+	bool set(int index, void* value);
+	static int allocate();
 
 private:
-	typedef winheap_allocator<std::pair<DWORD,void*> > _Allocator;
-	typedef std::map<DWORD, void*, std::less<DWORD>, _Allocator> _Map;
-	_Allocator m_allocator;
-	_Map m_table;
-	CRITICAL_SECTION m_cs;
+	static long count;
+	void* data[PS_MAX_INDEX];
 
 	static ProcessStorage* create_instance();
-	ProcessStorage(HANDLE heap);
+	ProcessStorage();
 	~ProcessStorage();
 };
 

@@ -25,15 +25,17 @@
 #include "internals.h"
 #include "debug.h"
 
+long ProcessStorage::count;
+
 struct PDB_KEX : PDB98
 {
 	void* kex_storage;
 };
 
-ProcessStorage::ProcessStorage(HANDLE heap) 
-	: m_allocator(heap), m_table(std::less<DWORD>(), m_allocator)
+ProcessStorage::ProcessStorage()
 {
-	InitializeCriticalSection(&m_cs);
+	for (int i = 0 ; i < PS_MAX_INDEX ; i++)
+		data[i] = NULL;
 }
 
 ProcessStorage* ProcessStorage::get_instance()
@@ -44,59 +46,28 @@ ProcessStorage* ProcessStorage::get_instance()
 	return (ProcessStorage*) pdb->kex_storage;
 }
 
-void* ProcessStorage::get(DWORD tag)
+void* ProcessStorage::get(int index)
 {
-	void* ret;
-	_Map::iterator it;
-	
-	EnterCriticalSection(&m_cs);
-
-	it = m_table.find(tag);
-	if (it != m_table.end())
-		ret = it->second;
+	if (index >= 0 && index < PS_MAX_INDEX)
+		return data[index];
 	else
-		ret = NULL;
-
-	LeaveCriticalSection(&m_cs);
-
-	return ret;
+		return NULL;
 }
 
-bool ProcessStorage::set(DWORD tag, void* value)
+bool ProcessStorage::set(int index, void* value)
 {
-	bool ret;
-	_Map::iterator it;
-
-	EnterCriticalSection(&m_cs);
-
-	if (value == NULL)
-	{
-		m_table.erase(tag);
-		ret = true;
-	}
+	if (index >= 0 && index < PS_MAX_INDEX)
+		data[index] = value;
 	else
-	{
-		it = m_table.lower_bound(tag);
-		if (it == m_table.end() || m_table.key_comp()(tag, it->first))
-			m_table.insert(it, std::pair<DWORD,void*>(tag, value));
-		else
-			it->second = value;
-		ret = true;
-	}
-
-	LeaveCriticalSection(&m_cs);
-
-	return ret;
+		return false;
+	return true;
 }
 
-void* ProcessStorage::allocate(int n)
+int ProcessStorage::allocate()
 {
-	return _Allocator::rebind<char>::other(m_allocator).allocate(n, (char*) 0);
-}
-
-void ProcessStorage::deallocate(void* ptr)
-{
-	_Allocator::rebind<char>::other(m_allocator).deallocate(ptr, 0);
+	if (count >= PS_MAX_INDEX - 1)
+		return -1;
+	return InterlockedIncrement(&count);
 }
 
 
@@ -113,14 +84,12 @@ ProcessStorage* ProcessStorage::create_instance()
 		return (ProcessStorage*) pdb->kex_storage;
 	}
 
-	HANDLE heap = HeapCreate(0, 0, 0);
-	DBGASSERT(heap != NULL);
-
-	pdb->kex_storage = HeapAlloc(heap, 0, sizeof(ProcessStorage));
-	DBGASSERT(pdb->kex_storage != NULL);
+	pdb->kex_storage = HeapAlloc(_GetProcessHeap(), 0, sizeof(ProcessStorage));
 	
-	ret = new (pdb->kex_storage) ProcessStorage(heap);
+	ret = new (pdb->kex_storage) ProcessStorage();
 	_LeaveSysLevel(krnl32lock);
+
+	DBGASSERT(pdb->kex_storage != NULL && ret != NULL);
 
 	return ret;
 }

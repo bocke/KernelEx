@@ -25,6 +25,7 @@
 #include "resolver.h"
 #include "debug.h"
 #include "pemanip.h"
+#include "ModInit.h"
 
 #ifdef _DEBUG
 #define _D(x) x
@@ -65,7 +66,7 @@ void ShowError(UINT id, ...)
 	
 	va_start(vargs, id);
 	if (!LoadString(hInstance, id, format, sizeof(format)))
-		sprintf(out, "ERROR: Missing string resource %d", id);
+		sprintf(out, "ERROR: %d [Missing error description]", id);
 	else
 		_vsnprintf(out, sizeof(out), format, vargs);
 	va_end(vargs);
@@ -185,6 +186,24 @@ HANDLE _OpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId)
 	if (ret == INVALID_HANDLE_VALUE)
 		return NULL;
 	return ret;
+}
+
+HANDLE _GetProcessHeap()
+{
+	HANDLE hp = GetProcessHeap();
+
+	if (!hp)
+	{
+		PDB98* pdb = *pppdbCur;
+		IMAGE_NT_HEADERS* nth = (*ppmteModTable)[pdb->pExeMODREF->mteIndex]->pNTHdr;
+		//create new default heap
+		hp = pdb->DefaultHeap = HeapCreate(0, nth->OptionalHeader.SizeOfHeapCommit, 0);
+		//this will prevent the system from creating another default heap
+		nth->OptionalHeader.SizeOfHeapReserve = 0;
+	}
+
+	DBGASSERT(hp != NULL);
+	return hp;
 }
 
 /* find win32 mutex */
@@ -456,10 +475,12 @@ int internals_init()
 	AllocHandle = find_AllocHandle();
 	bool instdir_rslt = find_kernelex_install_dir();
 	is_winme = (GetVersion() == 0xc0005a04);
+	bool modinit_rslt = ModuleInitializer_init();
 
 	if (!h_kernel32 || !ppmteModTable || !krnl32lock || !pppdbCur || !MRFromHLib
 			|| !pimteMax || !TIDtoTDB || !MRLoadTree || !FreeLibTree 
-			|| !FLoadTreeNotify || !FreeLibRemove || !AllocHandle || !instdir_rslt)
+			|| !FLoadTreeNotify || !FreeLibRemove || !AllocHandle || !instdir_rslt 
+			|| !modinit_rslt)
 		return 0;
 	return 1;
 }

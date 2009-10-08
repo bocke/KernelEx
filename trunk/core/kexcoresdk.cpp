@@ -113,22 +113,17 @@ void kexFlushAppSettings(void)
 	SettingsDB::instance.flush_all();
 }
 
-void* kexGetProcessValue(DWORD tag)
+int kexPsAllocIndex(void)
 {
-	return ProcessStorage::get_instance()->get(tag);
+	return ProcessStorage::allocate();
 }
 
-void kexSetProcessValue(DWORD tag, void* value)
+void* kexPsGetValue(int index)
 {
-	ProcessStorage::get_instance()->set(tag, value);
+	return ProcessStorage::get_instance()->get(index);
 }
 
-void* kexProcessAllocate(int n)
+int kexPsSetValue(int index, void* value)
 {
-	return ProcessStorage::get_instance()->allocate(n);
-}
-
-void kexProcessDeallocate(void* p)
-{
-	ProcessStorage::get_instance()->deallocate(p);
+	return ProcessStorage::get_instance()->set(index, value);
 }

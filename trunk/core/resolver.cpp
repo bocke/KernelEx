@@ -243,7 +243,7 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		//it is okay to use global buffer because static resolve code is protected by k32 lock
 
 		//not buffered yet?
-		if (!(*refmod >= buffer && *refmod < buffer + sizeof(buffer)))
+		if (!(*refmod >= buffer && *refmod < buffer + countof(buffer)))
 		{
 			//make a copy
 			for (int i = 0 ; i < caller->cImportedModules ; i++)
