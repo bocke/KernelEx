@@ -21,48 +21,15 @@
 
 #include <new>
 #include <windows.h>
-#include <stdio.h>
 #include "apilog.h"
 #include "debug.h"
 #include "internals.h"
 #include "DebugWindow.h"
+#include "ProcessStorage.h"
 
 #define APILOG_TLS_INDEX       78
 
-void* get_process_env_data(const char* env, void* (*creator)())
-{
-	//environment variable: ENV=ProcessID:DATA
-	char buf[20];
-	DWORD ret;
-	DWORD ProcID;
-	void* data = NULL;
-	
-	ret = GetEnvironmentVariable(env, buf, sizeof(buf));
-	if (ret == 0 || ret > sizeof(buf) 
-			|| sscanf(buf, "%x:%x", &ProcID, &data) != 2
-			|| ProcID != GetCurrentProcessId())
-	{
-		//invalid/missing value - create new data
-		data = creator();
-		if (data)
-		{
-			sprintf(buf, "%x:%x", GetCurrentProcessId(), data);
-			SetEnvironmentVariable(env, buf);
-		}
-	}
-
-	return data;
-}
-
-void* heap_creator()
-{
-	return HeapCreate(0, 0, 0);
-}
-
-HANDLE get_process_debug_heap()
-{
-	return get_process_env_data("KEXDBGH", heap_creator);
-}
+static int apilog_ps_index = -1;
 
 void* tls_creator()
 {
@@ -73,9 +40,15 @@ void* tls_creator()
 	return (void*) APILOG_TLS_INDEX;
 }
 
-DWORD get_process_debug_tls()
+void get_process_debug_tls()
 {
-	return (DWORD) get_process_env_data("KEXDBGT", tls_creator);
+	ProcessStorage* ps = ProcessStorage::get_instance();
+	if (apilog_ps_index == -1)
+		apilog_ps_index = ps->allocate();
+	if (APILOG_TLS_INDEX != (DWORD) ps->get(apilog_ps_index))
+	{
+		ps->set(apilog_ps_index, tls_creator());
+	}
 }
 
 extern "C"
@@ -91,7 +64,7 @@ void __stdcall ThreadAddrStack::push_ret_addr(DWORD addr)
 	ThreadAddrStack* tas = (ThreadAddrStack*) TlsGetValue(APILOG_TLS_INDEX);
 	if (!tas)
 	{
-		void* mem = HeapAlloc(get_process_debug_heap(), 0, sizeof(ThreadAddrStack));
+		void* mem = HeapAlloc(_GetProcessHeap(), 0, sizeof(ThreadAddrStack));
 		tas = new (mem) ThreadAddrStack;
 		TlsSetValue(APILOG_TLS_INDEX, mem);
 	}
@@ -195,11 +168,10 @@ void __stdcall log_stub::post_log(log_data* lgd, DWORD retval)
 
 PROC create_log_stub(const char* caller, const char* target, const char* api, PROC orig)
 {
-	HANDLE heap = get_process_debug_heap();
-	char* new_api = (char*) HeapAlloc(heap, 0, strlen(api) + 1);
+	char* new_api = (char*) HeapAlloc(_GetProcessHeap(), 0, strlen(api) + 1);
 	strcpy(new_api, api);
 	get_process_debug_tls();
-	void* mem = HeapAlloc(heap, 0, sizeof(log_stub));
+	void* mem = HeapAlloc(_GetProcessHeap(), 0, sizeof(log_stub));
 	return (PROC) new (mem) log_stub(caller, 
 			target, new_api, (unsigned long) orig);
 }
