@@ -38,20 +38,14 @@ static PROC LoadShfolderProc(const char* proc)
 	
 	//first try with shell32
 	if (!hShell32)
-	{
-		hShell32 = GetModuleHandle(Shell32Fn);
-		if (!hShell32) hShell32 = LoadLibrary(Shell32Fn);
-	}
+		hShell32 = LoadLibrary(Shell32Fn);
 	if (hShell32) ret = kexGetProcAddress(hShell32, proc);
 	
 	//fallback to shfolder
 	if (!ret)
 	{
-		if (!hShfolder)
-		{
-			hShfolder = GetModuleHandle(ShfolderFn);
-			if (!hShfolder) hShfolder = LoadLibrary(ShfolderFn);
-		}
+		if (!hShfolder) 
+			hShfolder = LoadLibrary(ShfolderFn);
 		if (hShfolder) ret = kexGetProcAddress(hShfolder, proc);
 	}
 	SetLastError(lasterr);
