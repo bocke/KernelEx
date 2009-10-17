@@ -23,9 +23,17 @@
 #include "kexcoresdk.h"
 #include "_kernel32_apilist.h"
 
+extern BOOL init_jemalloc();
+extern void uninit_jemalloc();
+
 BOOL init_kernel32()
 {
-	return TRUE;
+	return init_jemalloc();
+}
+
+void uninit_kernel32()
+{
+	uninit_jemalloc();
 }
 
 static const apilib_named_api kernel32_named_apis[] = 
@@ -76,6 +84,12 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetProfileStringW", GetProfileStringW_fwd),
 	DECL_API("GetTimeFormatW", GetTimeFormatW_fwd),
 	DECL_API("GetVolumeInformationW", GetVolumeInformationW_fwd),
+	DECL_API("HeapAlloc", HeapAlloc_new),
+	DECL_API("HeapCreate", HeapCreate_new),
+	DECL_API("HeapDestroy", HeapDestroy_new),
+	DECL_API("HeapFree", HeapFree_new),
+	DECL_API("HeapReAlloc", HeapReAlloc_new),
+	DECL_API("HeapSize", HeapSize_new),
 	DECL_API("IsBadStringPtrW", IsBadStringPtrW_fwd),
 	DECL_API("OpenEventW", OpenEventW_fwd),
 	DECL_API("OpenFileMappingW", OpenFileMappingW_fwd),

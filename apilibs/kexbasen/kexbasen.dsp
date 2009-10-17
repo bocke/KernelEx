@@ -113,6 +113,10 @@ SOURCE=.\kernel32\ThreadPool.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\kernel32\allocator.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\kernel32\unikernel32.c
 # End Source File
 # End Group
