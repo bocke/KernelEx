@@ -362,6 +362,52 @@ void Setup::find_IsKnownDLL()
 	_IsKnownDLL = decode_call(IsKnownDLL_call, 5);
 }
 
+void Setup::find_FLoadTreeNotify1()
+{
+	static const short pattern[] = {
+		0x56,0xA1,-1,-1,-1,-1,0x6A,0x01,0x8B,0x08,0xFF,0xB1,0x98,0x00,0x00,
+		0x00,0xE8,-2,-2,-2,-2,0x83,0xF8,0x01,0x1B,0xF6,0xF7,0xDE
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
+	int size = pefile.GetSectionSize(CODE_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size,pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "FLoadTreeNotify1");
+		else ShowError(IDS_MULPAT, "FLoadTreeNotify1");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "FLoadTreeNotify1", 
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	FLoadTreeNotify_call1 = found_loc + 16;
+	_FLoadTreeNotify = decode_call(FLoadTreeNotify_call1, 5);
+}
+
+void Setup::find_FLoadTreeNotify2()
+{
+	static const short pattern[] = {
+		0x6A,0x00,0x57,0xE8,-1,-1,-1,-1,0x6A,0x00,0x56,0xE8,-2,-2,-2,-2,
+		0x85,0xC0,0x74,0x12,0x56,0xE8,-1,-1,-1,-1,0x68,0x5A,0x04,0x00,0x00,
+		0x33,0xF6,0xE8,-1,-1,-1,-1
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
+	int size = pefile.GetSectionSize(CODE_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size,pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "FLoadTreeNotify2");
+		else ShowError(IDS_MULPAT, "FLoadTreeNotify2");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "FLoadTreeNotify2", 
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	FLoadTreeNotify_call2 = found_loc + 11;
+}
+
 void Setup::kill_process(const char* name)
 {
 	PROCESSENTRY32 pe32;
@@ -492,6 +538,8 @@ void Setup::install()
 
 	find_ExportFromX();
 	find_IsKnownDLL();
+	find_FLoadTreeNotify1();
+	find_FLoadTreeNotify2();
 	disable_platform_check();
 	disable_resource_check();
 	mod_imte_alloc();
@@ -524,6 +572,7 @@ void Setup::install()
 	dseg->jtab[JTAB_EFN_DYN] = _ExportFromName + pefile.GetImageBase();
 	dseg->jtab[JTAB_EFN_STA] = _ExportFromName + pefile.GetImageBase();
 	dseg->jtab[JTAB_KNO_DLL] = _IsKnownDLL + pefile.GetImageBase();
+	dseg->jtab[JTAB_FLD_TRN] = _FLoadTreeNotify + pefile.GetImageBase();
 
 	//exportfromx patch
 	DWORD code = (DWORD) pefile.GetSectionByName(CODE_SEG);
@@ -567,7 +616,15 @@ void Setup::install()
 
 	//isknowndll patch
 	set_call_ref(IsKnownDLL_call, (DWORD) &cseg->jmp_stub[JTAB_KNO_DLL]);
-	DBGPRINTF(("KNO_DLL: address %08x\n", pefile.PointerToRva((void*) a) 
+	DBGPRINTF(("KNO_DLL: address %08x\n", pefile.PointerToRva((void*) IsKnownDLL_call) 
+			+ pefile.GetImageBase()));
+
+	//FLoadTreeNotify patch
+	set_call_ref(FLoadTreeNotify_call1, (DWORD) &cseg->jmp_stub[JTAB_FLD_TRN]);
+	DBGPRINTF(("FLD_TRN: address %08x\n", pefile.PointerToRva((void*) FLoadTreeNotify_call1)
+			+ pefile.GetImageBase()));
+	set_call_ref(FLoadTreeNotify_call2, (DWORD) &cseg->jmp_stub[JTAB_FLD_TRN]);
+	DBGPRINTF(("FLD_TRN: address %08x\n", pefile.PointerToRva((void*) FLoadTreeNotify_call2)
 			+ pefile.GetImageBase()));
 
 	// backup original file

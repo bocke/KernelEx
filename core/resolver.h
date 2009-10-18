@@ -88,8 +88,8 @@ struct config_params
 bool are_extensions_enabled();
 DWORD encode_address(DWORD addr, const ApiLibrary* apilib);
 PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName);
-PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal);
-PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD hint, LPCSTR name);
+PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, BOOL is_static, WORD ordinal);
+PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, BOOL is_static, WORD hint, LPCSTR name);
 
 #ifdef _DEBUG
 void dump_imtes(void);

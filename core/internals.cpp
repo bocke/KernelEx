@@ -46,7 +46,6 @@ MRFromHLib_t MRFromHLib = NULL;
 TIDtoTDB_t TIDtoTDB = NULL;
 MRLoadTree_t MRLoadTree = NULL;
 FreeLibTree_t FreeLibTree = NULL;
-FLoadTreeNotify_t FLoadTreeNotify = NULL;
 FreeLibRemove_t FreeLibRemove = NULL;
 AllocHandle_t AllocHandle = NULL;
 
@@ -470,7 +469,7 @@ int internals_init()
 	TIDtoTDB = find_TIDtoTDB();
 	MRLoadTree = find_MRLoadTree();
 	FreeLibTree = find_FreeLibTree();
-	FLoadTreeNotify = find_FLoadTreeNotify();
+//	FLoadTreeNotify = find_FLoadTreeNotify();
 	FreeLibRemove = find_FreeLibRemove();
 	AllocHandle = find_AllocHandle();
 	bool instdir_rslt = find_kernelex_install_dir();
@@ -479,7 +478,7 @@ int internals_init()
 
 	if (!h_kernel32 || !ppmteModTable || !krnl32lock || !pppdbCur || !MRFromHLib
 			|| !pimteMax || !TIDtoTDB || !MRLoadTree || !FreeLibTree 
-			|| !FLoadTreeNotify || !FreeLibRemove || !AllocHandle || !instdir_rslt 
+			|| /*!FLoadTreeNotify ||*/ !FreeLibRemove || !AllocHandle || !instdir_rslt 
 			|| !modinit_rslt)
 		return 0;
 	return 1;

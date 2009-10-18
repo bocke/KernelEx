@@ -37,6 +37,7 @@ private:
 	DWORD _ExportFromOrdinal;
 	DWORD _ExportFromName;
 	DWORD _IsKnownDLL;
+	DWORD _FLoadTreeNotify;
 	HMODULE h_kernel32;
 	PEmanip pemem;
 	PEmanip pefile;
@@ -44,6 +45,8 @@ private:
 	DWORD gpa_ExportFromName_call;
 	DWORD EFN_EFO_call;
 	DWORD IsKnownDLL_call;
+	DWORD FLoadTreeNotify_call1;
+	DWORD FLoadTreeNotify_call2;
 	int version;
 	bool is_winme;
 	bool upgrade;
@@ -59,8 +62,8 @@ private:
 	void mod_pdb_alloc();
 	void find_ExportFromX();
 	void find_IsKnownDLL();
-	DWORD find_ExportFromOrdinal();
-	DWORD find_ExportFromName();
+	void find_FLoadTreeNotify1();
+	void find_FLoadTreeNotify2();
 	void kill_process(const char* name);
 	DWORD decode_call(DWORD addr, int len);
 	bool is_call_ref(DWORD loc, DWORD target);
