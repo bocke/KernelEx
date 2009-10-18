@@ -43,6 +43,8 @@ static PLONG jtab;
 static LONG old_jtab[JTAB_SIZE];
 static HKEY known_dlls_key;
 
+FLoadTreeNotify_t FLoadTreeNotify;
+
 
 /** Get API configuration for selected module.
  * @param module Target module.
@@ -182,10 +184,10 @@ static WORD resolve_mod_index(IMTE_KEX* target)
  *  (static resolve).
  * @param addr Encoded api library ID + offset in this api library
  * @param caller Module that requests api from api library.
- * @param refmod 
+ * @param is_static True if implicit (static), false if explicit (GetProcAddress) resolve
  * @return Valid address to function for calling process.
  */
-static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
+static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, BOOL is_static)
 {
 	MODREF* mr;
 	WORD idx;
@@ -194,9 +196,8 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	char dllpath[MAX_PATH];
 	ApiLibrary* apilib;
 	IMTE** pmteModTable = *ppmteModTable;
-	static MODREF* buffer[1024];
+	ModuleInitializer* mi = ModuleInitializer::get_instance(true);
 
-	DBGASSERT(addr >= 0xc0000000);
 	api_lib_num = (addr >> 24) - 0xc0;
 	DBGASSERT(api_lib_num > 0); //ensure apilib ID isn't STD's
 	apilib = apilibmgr.get_apilib_by_index(api_lib_num);
@@ -205,19 +206,9 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 	idx = 0xff00 + api_lib_num;
 
 	//first check if api library has already been loaded
-	mr = (*pppdbCur)->MODREFList;
-	do 
-	{
-		IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[mr->mteIndex];
-		if (imte->mod_index == idx)
-		{
-			IMAGE_NT_HEADERS* nthdr = imte->pNTHdr;
-			img_base = nthdr->OptionalHeader.ImageBase;
-			return (PROC)(img_base + (addr & 0x00ffffff));
-		}
-		mr = mr->pNextModRef;
-	} 
-	while (mr);
+	img_base = mi->get_handle_for_index(idx);
+	if (img_base != 0)
+		return (PROC)(img_base + (addr & 0x00ffffff));
 
 	//if not - load it
 
@@ -235,45 +226,15 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
 		_LeaveSysLevel(krnl32lock);
 		return 0;
 	}
+	mi->add_module(mr);
 	_LeaveSysLevel(krnl32lock);
 
-	if (refmod) //static resolve (implicit)
-	{
-		//FIXME: this will cause problems if apilib references another non-shared apilib!!
-		//it is okay to use global buffer because static resolve code is protected by k32 lock
-
-		//not buffered yet?
-		if (!(*refmod >= buffer && *refmod < buffer + countof(buffer)))
-		{
-			//make a copy
-			for (int i = 0 ; i < caller->cImportedModules ; i++)
-				buffer[i] = caller->ImplicitImports[i].pMR;
-
-			//set reference to copy - copy will be seen by continuing resolve process
-			*refmod += buffer - &caller->ImplicitImports[0].pMR;
-		}
-
-		DBGPRINTF(("Implicit load: replacing tree %s => %s [PID=%08x]\n", 
-				(*ppmteModTable)[caller->ImplicitImports[*refmod - buffer].pMR->mteIndex]
-				->pszModName, apilib->apilib_name,
-				GetCurrentProcessId()));
-
-		//remember tree which we overwrite - we will initialize it ourselves
-		//in resolver_process_attach as a result of initializing our tree
-		//requirement: Core is in IAT of the apilib !!!
-		ModuleInitializer* mi = ModuleInitializer::get_instance(true);
-		mi->add_module(caller->ImplicitImports[*refmod - buffer].pMR);
-
-		//modify original - modifications will be seen by dll initializer
-		//which will initialize our mr tree
-		caller->ImplicitImports[*refmod - buffer].pMR = mr;
-	}
-	else //dynamic resolve (GetProcAddress)
+	if (!is_static)
 	{
 		DBGPRINTF(("Explicit load: initializing tree %s [PID=%08x]\n", 
 				apilib->apilib_name, GetCurrentProcessId()));
 
-		if (FLoadTreeNotify(mr, 0))
+		if (FLoadTreeNotify(mr, FALSE))
 		{
 			FreeLibTree(mr);
 			return 0;
@@ -298,17 +259,6 @@ static PROC resolve_nonshared_addr(DWORD addr, MODREF* caller, PMODREF** refmod)
  */
 BOOL resolver_process_attach()
 {
-	//initialize all modules replaced by api libraries
-	ModuleInitializer* mi = ModuleInitializer::get_instance(false);
-	if (!mi)
-		return TRUE;
-
-	bool initialized = mi->initialize_modules();
-	mi->destroy();
-
-	if (!initialized)
-		return FALSE;
-
 	//reference all shared api libraries
 	ApiLibrary* lib;
 	int i = 1;
@@ -318,13 +268,15 @@ BOOL resolver_process_attach()
 		{
 			char dllpath[MAX_PATH];
 			lib->get_dll_path(dllpath);
-			LoadLibrary(dllpath);
+			if (!LoadLibrary(dllpath))
+				return FALSE;
 		}
 	}
 
 	return TRUE;
 }
 
+/** Original ExportFromOrdinal function. @see ExportFromOrdinal */
 static PROC WINAPI OriExportFromOrdinal(IMAGE_NT_HEADERS* PEh, WORD ordinal)
 {
 	DWORD img_base;
@@ -389,6 +341,7 @@ static PROC WINAPI OriExportFromOrdinal(IMAGE_NT_HEADERS* PEh, WORD ordinal)
 	return (PROC) addr;
 }
 
+/** Original ExportFromName function. @see ExportFromName */
 static PROC WINAPI OriExportFromName(IMAGE_NT_HEADERS* PEh, WORD hint, LPCSTR name)
 {
 	DWORD img_base;
@@ -461,6 +414,12 @@ static PROC WINAPI OriExportFromName(IMAGE_NT_HEADERS* PEh, WORD hint, LPCSTR na
 	return 0;
 }
 
+/** Encode function pointer + API library information into single dword.
+ * @see decode_address
+ * @param addr Absolute address.
+ * @param apilib Pointer to API library.
+ * @return Encoded pointer.
+ */
 DWORD encode_address(DWORD addr, const ApiLibrary* apilib)
 {
 	//note: rules have to be the same as in decode_address
@@ -495,7 +454,15 @@ DWORD encode_address(DWORD addr, const ApiLibrary* apilib)
 	return addr;
 }
 
-inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* caller, PMODREF** refmod)
+/** Decodes pointers created with encode_address.
+ * @see encode_address
+ * @param p Encoded pointer.
+ * @param target_NThdr Target module NT header.
+ * @param caller Calling module ref.
+ * @param is_static True if implicit resolve, false if explicit.
+ * @return Decoded function pointer.
+ */
+inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* caller, BOOL is_static)
 {
 	//note: rules have to be the same as in encode_address
 	//zero address
@@ -509,12 +476,19 @@ inline PROC decode_address(DWORD p, IMAGE_NT_HEADERS* target_NThdr, MODREF* call
 		return (PROC)(p + target_NThdr->OptionalHeader.ImageBase);
 	//non-shared api library
 	if (p >= 0xc0000000)
-		return resolve_nonshared_addr(p, caller, refmod);
+		return resolve_nonshared_addr(p, caller, is_static);
 	//shared system or api library
 	return (PROC) p;
 }
 
-PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD ordinal)
+/** Performs function resolve by ordinal number.
+ * @param target Target module, module from which we want function.
+ * @param caller Calling module, module which wants function.
+ * @param is_static True if static resolve, false if dynamic.
+ * @param ordinal Function ordinal number.
+ * @return Function pointer.
+ */
+PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, BOOL is_static, WORD ordinal)
 {
 	PROC ret;
 	
@@ -535,7 +509,7 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 
 		if (!cp.apiconf->is_table_empty(mod_index))
 			ret = decode_address(cp.apiconf->get(mod_index, ordinal), 
-					target->pNTHdr, caller, refmod);
+					target->pNTHdr, caller, is_static);
 		else 
 			ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
 #ifdef _DEBUG
@@ -551,7 +525,7 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 	else 
 		ret = OriExportFromOrdinal(target->pNTHdr, ordinal);
 
-	if (!ret && refmod)
+	if (!ret && is_static)
 	{
 		DBGPRINTF(("%s: unresolved export %s:%d\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
@@ -561,7 +535,15 @@ PROC WINAPI ExportFromOrdinal(IMTE_KEX* target, MODREF* caller, PMODREF** refmod
 	return ret;
 }
 
-PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, WORD hint, LPCSTR name)
+/** Performs function resolve by name.
+ * @param target Target module, module from which we want function.
+ * @param caller Calling module, module which wants function.
+ * @param is_static True if static resolve, false if dynamic.
+ * @param hint Hint number, tells resolver where to start search.
+ * @param name Function name.
+ * @return Function pointer.
+ */
+PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, BOOL is_static, WORD hint, LPCSTR name)
 {
 	PROC ret;
 
@@ -582,7 +564,7 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 
 		if (!cp.apiconf->is_table_empty(mod_index))
 			ret = decode_address(cp.apiconf->get(mod_index, hint, name), 
-					target->pNTHdr, caller, refmod);
+					target->pNTHdr, caller, is_static);
 		else 
 			ret = OriExportFromName(target->pNTHdr, hint, name);
 #ifdef _DEBUG
@@ -598,7 +580,7 @@ PROC WINAPI ExportFromName(IMTE_KEX* target, MODREF* caller, PMODREF** refmod, W
 	else 
 		ret = OriExportFromName(target->pNTHdr, hint, name);
 
-	if (!ret && refmod)
+	if (!ret && is_static)
 	{
 		DBGPRINTF(("%s: unresolved export %s:%s\n", 
 				((*ppmteModTable)[caller->mteIndex])->pszModName,
@@ -651,6 +633,15 @@ static BOOL WINAPI IsKnownKexDLL(char* name, const char* ext)
 		IsKnownDLL_t IsKnownDLL = (IsKnownDLL_t) old_jtab[JTAB_KNO_DLL];
 		return IsKnownDLL(name, NULL);
 	}
+}
+
+static BOOL WINAPI KexLoadTreeNotify(MODREF* mr, BOOL is_static)
+{
+	ModuleInitializer* mi = ModuleInitializer::get_instance(false);
+	if (mi && mi->has_initialize() && !mi->initialize_modules())
+		return TRUE;
+
+	return FLoadTreeNotify(mr, is_static);
 }
 
 PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
@@ -783,6 +774,7 @@ int resolver_init()
 	}
 
 	jtab = (PLONG) dseg->jtab;
+	FLoadTreeNotify = (FLoadTreeNotify_t) jtab[JTAB_FLD_TRN];
 
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
 	RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\KernelEx\\KnownDLLs", &known_dlls_key);
@@ -808,6 +800,7 @@ void resolver_hook()
 	old_jtab[JTAB_EFN_DYN] = InterlockedExchange(jtab + JTAB_EFN_DYN, (LONG) ExportFromNameDynamic_thunk);
 	old_jtab[JTAB_EFN_STA] = InterlockedExchange(jtab + JTAB_EFN_STA, (LONG) ExportFromNameStatic_thunk);
 	old_jtab[JTAB_KNO_DLL] = InterlockedExchange(jtab + JTAB_KNO_DLL, (LONG) IsKnownKexDLL);
+	old_jtab[JTAB_FLD_TRN] = InterlockedExchange(jtab + JTAB_FLD_TRN, (LONG) KexLoadTreeNotify);
 }
 
 void resolver_unhook()

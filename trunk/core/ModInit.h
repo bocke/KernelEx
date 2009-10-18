@@ -30,6 +30,8 @@ class ModuleInitializer
 {
 public:
 	void add_module(MODREF* mr);
+	DWORD get_handle_for_index(WORD idx);
+	bool has_initialize();
 	bool initialize_modules();
 	void destroy();
 	
@@ -37,10 +39,16 @@ public:
 
 private:
 	int size;
+	int init;
 	MODREF* data[64];
 
 	ModuleInitializer();
 	~ModuleInitializer();
 };
+
+inline bool ModuleInitializer::has_initialize()
+{
+	return init < size;
+}
 
 #endif

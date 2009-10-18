@@ -25,6 +25,7 @@
 #include "ModInit.h"
 #include "ProcessStorage.h"
 #include "internals.h"
+#include "resolver.h"
 #include "debug.h"
 
 static int modinit_index;
@@ -38,23 +39,41 @@ bool ModuleInitializer_init()
 ModuleInitializer::ModuleInitializer()
 {
 	size = 0;
+	init = 0;
 	memset(data, 0, sizeof(data));
 }
 
 void ModuleInitializer::add_module(MODREF* mr)
 {
 	data[size++] = mr;
+	DBGASSERT(size < countof(data));
+}
+
+DWORD ModuleInitializer::get_handle_for_index(WORD idx)
+{
+	IMTE** pmteModTable = *ppmteModTable;
+
+	for (int i = 0 ; i < size ; i++)
+	{
+		IMTE_KEX* imte = (IMTE_KEX*) pmteModTable[data[i]->mteIndex];
+		if (imte->mod_index == idx)
+			return imte->pNTHdr->OptionalHeader.ImageBase;
+	}
+	
+	return 0;
 }
 
 bool ModuleInitializer::initialize_modules()
 {
-	for (int i = 0 ; i < size ; i++)
+	while (init < size)
 	{
 		DBGPRINTF(("Post-Initializing %s [PID=%08x]\n", 
-				(*ppmteModTable)[data[i]->mteIndex]->pszModName, 
+				(*ppmteModTable)[data[init]->mteIndex]->pszModName, 
 				GetCurrentProcessId()));
 
-		if (FLoadTreeNotify(data[i], 1))
+		init++;
+
+		if (FLoadTreeNotify(data[init-1], TRUE))
 			return false;
 	}
 	return true;
