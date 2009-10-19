@@ -265,10 +265,6 @@ SOURCE=.\User32\_user32_stubs.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\User32\CallWindowProcA_fix.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\User32\DisableProcessWindowsGhosting.c
 # End Source File
 # Begin Source File
@@ -293,6 +289,10 @@ SOURCE=.\User32\GetNextDlgTabItem_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\User32\hwnd9x.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\User32\IsHungAppWindow.c
 # End Source File
 # Begin Source File
@@ -313,7 +313,31 @@ SOURCE=.\User32\SendMessage_fix.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\User32\UberUSER.c
+SOURCE=.\User32\thuni_conv.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_layer.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_layer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_macro.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_proc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_thunk.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_thunk.h
 # End Source File
 # Begin Source File
 
