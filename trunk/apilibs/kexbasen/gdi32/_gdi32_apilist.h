@@ -33,6 +33,7 @@ int WINAPI GetGlyphIndicesA_new(HDC hdc, LPCSTR lpstr, int c, LPWORD pgi, DWORD 
 BOOL WINAPI GetTextExtentExPointI_new(HDC hdc, LPWORD pgiIn, int cgi, int nMaxExtent, LPINT lpnFit, LPINT alpDx, LPSIZE lpSize);
 BOOL WINAPI GetTextExtentPointI_new(HDC hdc, LPWORD pgiIn, int cgi, LPSIZE lpSize);
 BOOL WINAPI GetCharWidthI_new(HDC hdc, UINT giFirst, UINT cgi, WORD* pgi, INT* lpBuffer);
+BOOL WINAPI GetCharABCWidthsI_new(HDC hdc, UINT giFirst, UINT cgi, LPWORD pgi, LPABC lpabc);
 DWORD WINAPI GetGlyphOutlineW_new(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRICS lpgm, DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2);
 FWDPROC CopyEnhMetaFileW_fwd;
 FWDPROC CopyMetaFileW_fwd;

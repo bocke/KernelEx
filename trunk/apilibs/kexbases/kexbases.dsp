@@ -133,6 +133,10 @@ SOURCE=.\Kernel32\GetFileSizeEx.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\GetModuleHandleEx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\GlobalMemoryStatusEx.c
 # End Source File
 # Begin Source File
@@ -382,6 +386,10 @@ SOURCE=.\Advapi32\RegDisablePredefinedCache.c
 # Begin Source File
 
 SOURCE=.\Advapi32\RegOpenCurrentUser.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Advapi32\RtlGenRandom.c
 # End Source File
 # Begin Source File
 

@@ -37,6 +37,8 @@ BOOL WINAPI ReadFile_fix(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRe
 BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
 HWND WINAPI GetConsoleWindow_new();
 BOOL WINAPI GetFileSizeEx_new(HANDLE hFile, PLARGE_INTEGER lpFileSize);
+BOOL WINAPI GetModuleHandleExA_new(DWORD dwFlags, LPCSTR lpModuleName, HMODULE* phModule);
+BOOL WINAPI GetModuleHandleExW_new(DWORD dwFlags, LPCWSTR lpModuleNameW, HMODULE* phModule);
 BOOL WINAPI GlobalMemoryStatusEx_new(LPMEMORYSTATUSEX lpmemex);
 BOOL WINAPI HeapLock_new(HANDLE hHeap);
 BOOL WINAPI HeapUnlock_new(HANDLE hHeap);

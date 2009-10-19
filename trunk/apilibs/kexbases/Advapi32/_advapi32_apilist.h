@@ -32,6 +32,7 @@ SC_HANDLE WINAPI OpenSCManagerA_stub(LPCSTR lpMachineName, LPCSTR lpDatabaseName
 SC_HANDLE WINAPI OpenSCManagerW_stub(LPCWSTR lpMachineName, LPCWSTR lpDatabaseName, DWORD dwDesiredAccess);
 BOOL WINAPI RegDisablePredefinedCache_new();
 LONG WINAPI RegOpenCurrentUser_new(REGSAM access, PHKEY retkey);
+BOOL WINAPI SystemFunction036_new(PVOID pbBuffer, ULONG dwLen);
 ULONG CDECL TraceMessage_new(ULONG64 LoggerHandle, ULONG MessageFlags, LPGUID MessageGuid, USHORT MessageNumber, ...);
 STUB CryptAcquireContextW_stub;
 STUB CryptEnumProvidersW_stub;
