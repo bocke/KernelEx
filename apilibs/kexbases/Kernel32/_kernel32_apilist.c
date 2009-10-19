@@ -91,6 +91,8 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetFullPathNameW", GetFullPathNameW_new),
 	DECL_API("GetLongPathNameW", GetLongPathNameW_new),
 	DECL_API("GetModuleFileNameW", GetModuleFileNameW_new),
+	DECL_API("GetModuleHandleExA", GetModuleHandleExA_new),
+	DECL_API("GetModuleHandleExW", GetModuleHandleExW_new),
 	DECL_API("GetModuleHandleW", GetModuleHandleW_new),
 	DECL_API("GetNativeSystemInfo", GetSystemInfo),
 	DECL_API("GetProcessIoCounters", GetProcessIoCounters_stub),
