@@ -354,27 +354,6 @@ static FreeLibTree_t find_FreeLibTree()
 	return ret;
 }
 
-static FLoadTreeNotify_t find_FLoadTreeNotify()
-{
-	static const char* pat_name = _D("FLoadTreeNotify");
-	static const short pat[] = {0x56,0xA1,-1,-1,-1,-1,0x6A,0x01,0x8B,0x08,0xFF,0xB1,0x98,0x00,0x00,0x00,0xE8,-2,-2,-2,-2,0x83,0xF8,0x01,0x1B,0xF6,0xF7,0xDE,0x85,0xF6};
-	static const int pat_len = sizeof(pat) / sizeof(short);
-	static const char* sec_name = ".text";
-
-	FLoadTreeNotify_t ret;
-	PEmanip pe(h_kernel32);
-	if (!pe.HasTarget())
-		return NULL;
-
-	DWORD* res = find_unique_pattern(pe.GetSectionByName(sec_name), pe.GetSectionSize(sec_name), pat, pat_len, pat_name);
-	if (!res)
-		return NULL;
-
-	ret = (FLoadTreeNotify_t)decode_calljmp(res);
-	DBGPRINTF(("%s @ 0x%08x\n", pat_name, ret));
-	return ret;
-}
-
 static FreeLibRemove_t find_FreeLibRemove()
 {
 	static const char* pat_name = _D("FreeLibRemove");
@@ -469,7 +448,6 @@ int internals_init()
 	TIDtoTDB = find_TIDtoTDB();
 	MRLoadTree = find_MRLoadTree();
 	FreeLibTree = find_FreeLibTree();
-//	FLoadTreeNotify = find_FLoadTreeNotify();
 	FreeLibRemove = find_FreeLibRemove();
 	AllocHandle = find_AllocHandle();
 	bool instdir_rslt = find_kernelex_install_dir();
@@ -478,7 +456,7 @@ int internals_init()
 
 	if (!h_kernel32 || !ppmteModTable || !krnl32lock || !pppdbCur || !MRFromHLib
 			|| !pimteMax || !TIDtoTDB || !MRLoadTree || !FreeLibTree 
-			|| /*!FLoadTreeNotify ||*/ !FreeLibRemove || !AllocHandle || !instdir_rslt 
+			|| !FreeLibRemove || !AllocHandle || !instdir_rslt 
 			|| !modinit_rslt)
 		return 0;
 	return 1;
