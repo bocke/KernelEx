@@ -141,6 +141,7 @@ BOOL WINAPI RegisterWaitForSingleObject_new(PHANDLE phNewWaitObject, HANDLE hObj
         return FALSE;
 	}
 	
+	if ( dwMilliseconds == 0 ) dwFlags |= WT_EXECUTEONLYONCE;
     wait_work_item->Object = hObject;
     wait_work_item->Callback = Callback;
     wait_work_item->Context = Context;
