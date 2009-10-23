@@ -22,6 +22,7 @@
 
 #include <windows.h>
 
+#define MK_UC(x) ((unsigned char)(x))
 #define UL unsigned long
 #define znew  ((z=36969*(z&65535)+(z>>16))<<16)
 #define wnew  ((w=18000*(w&65535)+(w>>16))&65535)
@@ -29,8 +30,8 @@
 #define SHR3  (jsr=(jsr=(jsr=jsr^(jsr<<17))^(jsr>>13))^(jsr<<5))
 #define CONG  (jcong=69069*jcong+1234567)
 #define KISS  ((MWC^CONG)+SHR3)
-#define LFIB4 (t[c]=t[c]+t[c+58]+t[c+119]+t[++c+178])
-#define SWB   (t[c+237]=(x=t[c+15])-(y=t[++c]+(x<y)))
+#define LFIB4 (t[MK_UC(c)]=t[MK_UC(c)]+t[MK_UC(c+58)]+t[MK_UC(c+119)]+t[MK_UC(++c+178)])
+#define SWB   (t[MK_UC(c+237)]=(x=t[MK_UC(c+15)])-(y=t[MK_UC(++c)]+(x<y)))
 #define UNI   (KISS*2.328306e-10)
 #define VNI   ((long) KISS)*4.656613e-10
 /*  Global static variables: */
@@ -63,7 +64,7 @@ BOOL WINAPI SystemFunction036_new(PVOID pbBuffer, ULONG dwLen)
 	}
 	for (i=0;i<dwLen;i++)
 	{
-		*cBuffer = SWB;
+		*cBuffer = (UCHAR) SWB;
 		cBuffer++;
 	}
 	return TRUE;
