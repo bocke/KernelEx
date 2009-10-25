@@ -21,23 +21,42 @@
 
 #include <objbase.h>
 #include <shlguid.h>
+#include <shlwapi.h>
 #include "server.h"
 #include "factory.h"
 
 long g_LockCount;
 HMODULE g_hModule;
-LPFNGETCLASSOBJECT SHGetClassObject;
+static HMODULE hShell32;
+static LPFNGETCLASSOBJECT SHGetClassObject;
 
 
-void* operator new(unsigned int n)
+static bool is_shell32_v5()
 {
-	return HeapAlloc(GetProcessHeap(), 0, n);
+	DLLGETVERSIONPROC DllGetVersion;
+	DLLVERSIONINFO dvi;
+	HRESULT hr;
+
+	dvi.cbSize = sizeof(dvi);
+
+	DllGetVersion = (DLLGETVERSIONPROC) GetProcAddress(hShell32, "DllGetVersion");
+	if (!DllGetVersion)
+		return false;
+
+	hr = DllGetVersion(&dvi);
+	if (SUCCEEDED(hr) && dvi.dwMajorVersion >= 5)
+		return true;
+
+	return false;
 }
 
 
-void operator delete(void* m)
+static bool is_failsafe_mode()
 {
-	HeapFree(GetProcessHeap(), 0, m);
+	static int s = -1;
+	if (s == -1)
+		s = GetSystemMetrics(SM_CLEANBOOT);
+	return s != 0;
 }
 
 
@@ -51,6 +70,10 @@ STDAPI DllRegisterServer()
 {
 	LONG result;
 	char filename[MAX_PATH];
+
+	// SHELL32 v5.0 and above has ShellLinkW - kexCOM is not needed
+	if (is_shell32_v5())
+		return S_OK;
 
 	GetModuleFileName(g_hModule, filename, sizeof(filename));
 	result = RegSetValue(HKEY_CLASSES_ROOT, 
@@ -78,12 +101,15 @@ STDAPI DllGetClassObject(const CLSID& clsid, const IID& iid, void** ppv)
 {
 	HRESULT hr;
 
+	if (is_failsafe_mode())
+		return SHGetClassObject(clsid, iid, ppv);
+
 	if (clsid == CLSID_ShellLink)
 	{
 		IClassFactory* pcf;
 
 		hr = SHGetClassObject(CLSID_ShellLink, IID_IClassFactory, (void**) &pcf);
-		if (!SUCCEEDED(hr))
+		if (FAILED(hr))
 			return hr;
 
 		CFactory* factory = new CFactory(pcf);
@@ -104,8 +130,6 @@ STDAPI DllGetClassObject(const CLSID& clsid, const IID& iid, void** ppv)
 
 BOOL APIENTRY DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-    static HMODULE hShell32;
-
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
 		g_hModule = hModule;

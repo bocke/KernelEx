@@ -75,7 +75,7 @@ STDMETHODIMP CFactory::CreateInstance(IUnknown* pUnkOuter, const IID& iid, void*
 
 	IUnknown* pUnk;
 	hr = m_prevCF->CreateInstance(NULL, IID_IUnknown, (void**) &pUnk);
-	if (!SUCCEEDED(hr))
+	if (FAILED(hr))
 		return hr;
 
 	CShellLink* pObject = new CShellLink(pUnk);
