@@ -251,6 +251,13 @@ Section "Install"
   StrCpy $R7 $0
   Call UpgradeDLL_Func
   
+  GetTempFileName $0 "$INSTDIR"
+  File /oname=$0 "kexCOM\${FLAVOUR}\kexCOM.dll"
+  StrCpy $R4 "$INSTDIR\kexCOM.dll"
+  StrCpy $R6 "1"
+  StrCpy $R7 $0
+  Call UpgradeDLL_Func
+
   SetOverwrite on
   
   File apilibs\core.ini
@@ -351,6 +358,8 @@ Section "Uninstall"
   Delete "$INSTDIR\core.ini"
   UnRegDLL "$INSTDIR\sheet.dll"
   Delete /REBOOTOK "$INSTDIR\sheet.dll"
+  UnRegDLL "$INSTDIR\kexCOM.dll"
+  Delete /REBOOTOK "$INSTDIR\kexCOM.dll"
   Delete "$INSTDIR\license.txt"
   
   Delete /REBOOTOK "$INSTDIR\msimg32.dll"

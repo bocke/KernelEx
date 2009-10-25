@@ -310,7 +310,7 @@ HRESULT STDMETHODCALLTYPE CShellLink::GetPath(
 
 	pszFileA = (LPSTR) alloca(cch);
 	hr = m_ShellLinkA->GetPath(pszFileA, cch, &fdA, fFlags);
-	if (!SUCCEEDED(hr))
+	if (FAILED(hr))
 		return hr;
 	MultiByteToWideChar(CP_ACP, 0, pszFileA, -1, pszFile, cch);
 
