@@ -36,47 +36,25 @@ LONG WINAPI RegQueryValueExW_new(HKEY hKey, LPCWSTR lpValueNameW, LPDWORD lpRese
 	if (!lpData && lpcbData) *lpcbData = 0;
 	
 	//try with stack buffer first
-	if (lpValueNameW) 
+	ALLOC_WtoA(lpValueName);
+	ret = RegQueryValueExA(hKey, lpValueNameA, lpReserved, &type, ptr, &bufsize);
+	if (lpType) *lpType = type;
+	if (lpcbData && type != REG_SZ && bufsize > *lpcbData && ret == ERROR_MORE_DATA) 
 	{
-		ALLOC_WtoA(lpValueName);
+		*lpcbData = bufsize;
+		return ERROR_MORE_DATA;
+	}
+	//retry with dynamic buffer
+	if (ret == ERROR_MORE_DATA)
+	{
+		ptr = heapbuf = (BYTE*) HeapAlloc(GetProcessHeap(), 0, bufsize);
+		if (!heapbuf) 
+		{
+			return ERROR_NOT_ENOUGH_MEMORY;
+		}
 		ret = RegQueryValueExA(hKey, lpValueNameA, lpReserved, &type, ptr, &bufsize);
-		if (lpType) *lpType = type;
-		if (lpcbData && type != REG_SZ && bufsize > *lpcbData) 
-		{
-			*lpcbData = bufsize;
-			return ERROR_MORE_DATA;
-		}
-		//retry with dynamic buffer
-		if (ret == ERROR_MORE_DATA)
-		{
-			ptr = heapbuf = (BYTE*) HeapAlloc(GetProcessHeap(), 0, bufsize);
-			if (!heapbuf) 
-			{
-				return ERROR_NOT_ENOUGH_MEMORY;
-			}
-			ret = RegQueryValueExA(hKey, lpValueNameA, lpReserved, &type, ptr, &bufsize);
-		}
 	}
-	else
-	{
-		ret = RegQueryValueExA(hKey, 0, lpReserved, &type, ptr, &bufsize);
-		if (lpType) *lpType = type;
-		if (lpcbData && type != REG_SZ && bufsize > *lpcbData) 
-		{
-			*lpcbData = bufsize;
-			return ERROR_MORE_DATA;
-		}
-		//retry with dynamic buffer
-		if (ret == ERROR_MORE_DATA)
-		{
-			ptr = heapbuf = (BYTE*) HeapAlloc(GetProcessHeap(), 0, bufsize);
-			if (!heapbuf) 
-			{
-				return ERROR_NOT_ENOUGH_MEMORY;
-			}
-			ret = RegQueryValueExA(hKey, 0, lpReserved, &type, ptr, &bufsize);
-		}
-	}
+
 	if (ret != ERROR_SUCCESS) goto _end;
 	
 	if (type == REG_SZ)
