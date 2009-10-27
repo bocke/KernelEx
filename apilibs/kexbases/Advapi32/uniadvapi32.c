@@ -39,11 +39,6 @@ LONG WINAPI RegQueryValueExW_new(HKEY hKey, LPCWSTR lpValueNameW, LPDWORD lpRese
 	ALLOC_WtoA(lpValueName);
 	ret = RegQueryValueExA(hKey, lpValueNameA, lpReserved, &type, ptr, &bufsize);
 	if (lpType) *lpType = type;
-	if (lpcbData && type != REG_SZ && bufsize > *lpcbData && ret == ERROR_MORE_DATA) 
-	{
-		*lpcbData = bufsize;
-		return ERROR_MORE_DATA;
-	}
 	//retry with dynamic buffer
 	if (ret == ERROR_MORE_DATA)
 	{
@@ -57,6 +52,12 @@ LONG WINAPI RegQueryValueExW_new(HKEY hKey, LPCWSTR lpValueNameW, LPDWORD lpRese
 
 	if (ret != ERROR_SUCCESS) goto _end;
 	
+	if (lpcbData && type != REG_SZ && bufsize > *lpcbData)
+	{
+		*lpcbData = bufsize;
+		return ERROR_MORE_DATA;
+	}
+
 	if (type == REG_SZ)
 	{
 		if (lpcbData)
