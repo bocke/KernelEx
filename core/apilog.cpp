@@ -30,6 +30,7 @@
 #define APILOG_TLS_INDEX       78
 
 static int apilog_ps_index = -1;
+bool apilog_enabled = true;
 
 void* tls_creator()
 {
@@ -110,8 +111,6 @@ void __stdcall log_stub::pre_log(log_data* lgd)
 {
 	DWORD last_err;
 	DWORD caller_addr;
-	DWORD level;
-	char msg[DEBUGMSG_MAXLEN];
 	
 	caller_addr = *((DWORD*) &lgd + 9);
 	last_err = GetLastError();
@@ -119,19 +118,22 @@ void __stdcall log_stub::pre_log(log_data* lgd)
 	ThreadAddrStack::push_ret_addr(caller_addr);
 	
 	DebugWindow* dw = DebugWindow::get();
-	if (!dw)
-		return;
+	if (dw && apilog_enabled)
+	{
+		DWORD level;
+		char msg[DEBUGMSG_MAXLEN];
 
-	level = ThreadAddrStack::get_level();
+		level = ThreadAddrStack::get_level();
 
-	snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s", 
-			level,
-			GetCurrentThreadId(),
-			(level-1) * 2, "",
-			lgd->source, caller_addr,
-			lgd->target, lgd->api_name);
+		snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s", 
+				level,
+				GetCurrentThreadId(),
+				(level-1) * 2, "",
+				lgd->source, caller_addr,
+				lgd->target, lgd->api_name);
 
-	dw->append(msg);
+		dw->append(msg);
+	}
 
 	SetLastError(last_err);
 }
@@ -140,28 +142,29 @@ void __stdcall log_stub::post_log(log_data* lgd, DWORD retval)
 {
 	DWORD last_err;
 	DWORD& caller_addr = *((DWORD*) &retval + 9);
-	DWORD level;
-	char msg[DEBUGMSG_MAXLEN];
 	
 	last_err = GetLastError();
 	
-	DebugWindow* dw = DebugWindow::get();
-	if (!dw)
-		return;
-
-	level = ThreadAddrStack::get_level();
-
 	caller_addr = ThreadAddrStack::pop_ret_addr();
 
-	snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s|%x", 
-			level,
-			GetCurrentThreadId(),
-			(level-1) * 2, "",
-			lgd->source, caller_addr,
-			lgd->target, lgd->api_name,
-			retval);
+	DebugWindow* dw = DebugWindow::get();
+	if (dw && apilog_enabled)
+	{
+		DWORD level;
+		char msg[DEBUGMSG_MAXLEN];
 
-	dw->append(msg);
+		level = ThreadAddrStack::get_level();
+
+		snprintf(msg, sizeof(msg), "%-2d|%x|%*s[%s]%08x:<%s>%s|%x", 
+				level,
+				GetCurrentThreadId(),
+				(level-1) * 2, "",
+				lgd->source, caller_addr,
+				lgd->target, lgd->api_name,
+				retval);
+
+		dw->append(msg);
+	}
 
 	SetLastError(last_err);
 }

@@ -27,6 +27,8 @@
 #include "internals.h"
 #include "debug.h"
 
+extern bool apilog_enabled;
+
 const unsigned short WM_KEXSTOPDEBUG = 0x6eee;
 const unsigned short WM_KEXAPPENDLOG = 0x6eef;
 
@@ -155,6 +157,10 @@ void DebugWindow::HandleMenu()
 			p.x, p.y, 0, hwnd, NULL);
 	switch (res) 
 	{
+	case IDM_ENABLE:
+		apilog_enabled = !apilog_enabled;
+		CheckMenuItem(menu, IDM_ENABLE, apilog_enabled ? MF_CHECKED : MF_UNCHECKED);
+		break;
 	case IDM_TOFILE:
 		WriteToFile();
 		break;

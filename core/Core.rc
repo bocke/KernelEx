@@ -151,6 +151,8 @@ IDR_LOGMENU MENU DISCARDABLE
 BEGIN
     POPUP ""
     BEGIN
+        MENUITEM "Enabled",                     IDM_ENABLE, CHECKED
+        MENUITEM SEPARATOR
         MENUITEM "Save to file",                IDM_TOFILE
         MENUITEM "Clear",                       IDM_CLEAR
         MENUITEM "Filter",                      IDM_FILTER
