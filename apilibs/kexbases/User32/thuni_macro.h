@@ -12,21 +12,13 @@
 
 #define MAX_STACK 512
 
-#define HEAP_SIGN 0xCABAC00C
-#define STACK_SIGN 0xF00CDEAD
-
-//each day will be DBCS day
-#define g_dbcs 2;
-
-/* Tihiy can't get to love Xeno's macros
-   and vica versa */
-
+//In macroses: convert A<->W on stack
 #define STACK_WtoA(strW,strA) \
 	strA = (LPSTR)strW; \
 	if HIWORD(strW) \
 	{ \
 		int c = lstrlenW((LPWSTR)strW); \
-		c = (c+1)*g_dbcs; \
+		c = (c+1)*2; \
 		strA = (LPSTR)alloca(c); \
 		WideCharToMultiByte(CP_ACP, 0, (LPWSTR)strW, -1, (LPSTR)strA, c, NULL, NULL); \
 	}
@@ -41,32 +33,35 @@
 		MultiByteToWideChar(CP_ACP, 0, (LPSTR)strA, -1, (LPWSTR)strW, c); \
 	}
 
-#define BUFFER_ALLOC(BUFTYPE,buffer,len) \
-	int size = ((len+1) * 2) + sizeof(DWORD); \
-	if (size>MAX_STACK) \
-	{\
-		buffer = (BUFTYPE)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,size); \
-		if ( buffer ) *(DWORD*)buffer = HEAP_SIGN; \
-	}\
-	else \
-	{\
-		buffer = (BUFTYPE)alloca( size ); \
-		ZeroMemory (buffer, size);  \
-		*(DWORD*)buffer = STACK_SIGN; \
-	}\
-	if ( buffer ) buffer = (BUFTYPE)((DWORD)(buffer) + sizeof(DWORD));
-	
-
-#define BUFFER_FREE(buf) \
-	if (HIWORD(buf)) \
+//Out macroses: allocate buffer, call W>-<A function, convert A<->W
+#define ABUFFER_ALLOC(buffer,len) \
+	int buffer##size = ((len+1) * 2); \
+	LPSTR buffer##heap = NULL; \
+	if (buffer##size>MAX_STACK) \
 	{ \
-		if ( *(DWORD*)((DWORD)buf - sizeof(DWORD)) == HEAP_SIGN ) HeapFree(GetProcessHeap(),0,buf); \
-	}
+		buffer##heap = (LPSTR)HeapAlloc(GetProcessHeap(),0,buffer##size); \
+		buffer = buffer##heap; \
+	} \
+	else \
+		buffer = (LPSTR)alloca( buffer##size ); \
+	*buffer='\0';
 
-#define WtoA_len(strW,strA,bufsize) \
-	WideCharToMultiByte(CP_ACP, 0, (LPWSTR)strW, -1, (LPSTR)strA, bufsize, NULL, NULL);
-		
-#define AtoW_len(strA,strW,bufsize) \
-	MultiByteToWideChar(CP_ACP, 0, (LPSTR)strA, -1, (LPWSTR)strW, bufsize);
+#define WBUFFER_ALLOC(buffer,len) \
+	int buffer##size = ((len+1) * sizeof(WCHAR)); \
+	LPWSTR buffer##heap = NULL; \
+	if (buffer##size>MAX_STACK) \
+	{ \
+		buffer##heap = (LPWSTR)HeapAlloc(GetProcessHeap(),0,buffer##size); \
+		buffer = buffer##heap; \
+	} \
+	else \
+		buffer = (LPWSTR)alloca( buffer##size ); \
+	*buffer='\0';
+
+#define ABUFFER_toW(bufferA,bufferW,lenW) MultiByteToWideChar(CP_ACP, 0, bufferA, -1, (LPWSTR)bufferW, lenW);
+#define WBUFFER_toA(bufferW,bufferA,lenA) WideCharToMultiByte(CP_ACP, 0, bufferW, -1, (LPSTR)bufferA, lenA, NULL, NULL);
+
+#define BUFFER_FREE(buffer) \
+	if ( buffer##heap ) HeapFree(GetProcessHeap(),0,buffer##heap); \
 
 #endif
