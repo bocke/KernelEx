@@ -219,9 +219,9 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 			{
 				LPSTR textA;
 				int len = CallWindowProcA( callback, hwnd, msg == LB_GETTEXT ? LB_GETTEXTLEN : CB_GETLBTEXTLEN, wParam, 0 );				
-				BUFFER_ALLOC(LPSTR,textA,len);
+				ABUFFER_ALLOC(textA,len);
 				LRESULT ret = CallWindowProcA( callback, hwnd, msg, wParam,(LPARAM)textA );
-				AtoW_len(textA, lParam, len+1);
+				ABUFFER_toW(textA,lParam,len);
 				BUFFER_FREE(textA);
 				return ret;
 			}			
@@ -236,9 +236,9 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 					return 0L;
 				}			
 				LPSTR textA;
-				BUFFER_ALLOC(LPSTR,textA,wParam);
+				ABUFFER_ALLOC(textA,wParam);
 				LRESULT ret = CallWindowProcA( callback, hwnd, msg, wParam,(LPARAM)textA );
-				AtoW_len(textA,lParam,wParam);
+				ABUFFER_toW(textA,lParam,wParam);
 				BUFFER_FREE(textA);
 				return ret;
 			}
@@ -246,10 +246,10 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 			{
 				WORD len = *(WORD *)lParam;
 				LPSTR textA;
-				BUFFER_ALLOC(LPSTR,textA,len);
+				ABUFFER_ALLOC(textA,len);
 				*(WORD *)textA = len;
 				LRESULT ret = CallWindowProcA( callback, hwnd, msg, wParam,(LPARAM)textA );
-				AtoW_len(textA,lParam,len);
+				ABUFFER_toW(textA,lParam,len);
 				BUFFER_FREE(textA);
 				return ret;				
 			}
@@ -351,9 +351,9 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 			{
 				LPWSTR textW;
 				int len = CallWindowProc_stdcall( callback,hwnd, msg == LB_GETTEXT ? LB_GETTEXTLEN : CB_GETLBTEXTLEN, wParam, 0 );				
-				BUFFER_ALLOC(LPWSTR,textW,len);
+				WBUFFER_ALLOC(textW,len);
 				LRESULT ret = CallWindowProc_stdcall( callback, hwnd, msg, wParam,(LPARAM)textW );
-				WtoA_len(textW, lParam, (len+1)*2);
+				WBUFFER_toA(textW, lParam, len+1);
 				BUFFER_FREE(textW);
 				return ret;
 			}
@@ -368,9 +368,9 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 					return 0L;
 				}
 				LPWSTR textW;
-				BUFFER_ALLOC(LPWSTR,textW,wParam);
+				WBUFFER_ALLOC(textW,wParam);
 				LRESULT ret = CallWindowProc_stdcall( callback, hwnd, msg, wParam,(LPARAM)textW );
-				WtoA_len(textW,lParam,wParam);
+				WBUFFER_toA(textW,lParam,wParam);
 				BUFFER_FREE(textW);
 				return ret;
 			}
@@ -378,10 +378,10 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 			{
 				WORD len = *(WORD *)lParam;
 				LPWSTR textW;
-				BUFFER_ALLOC(LPWSTR,textW,len);
+				WBUFFER_ALLOC(textW,len);
 				*(WORD *)textW = len;
 				LRESULT ret = CallWindowProc_stdcall( callback, hwnd, msg, wParam,(LPARAM)textW );
-				WtoA_len(textW,lParam,len);
+				WBUFFER_toA(textW,lParam,len);
 				BUFFER_FREE(textW);
 				return ret;				
 			}			

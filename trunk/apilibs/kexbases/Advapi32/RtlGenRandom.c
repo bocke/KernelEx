@@ -22,31 +22,15 @@
 
 #include <windows.h>
 
-#define MK_UC(x) ((unsigned char)(x))
-#define UL unsigned long
 #define znew  ((z=36969*(z&65535)+(z>>16))<<16)
 #define wnew  ((w=18000*(w&65535)+(w>>16))&65535)
 #define MWC   (znew+wnew)
 #define SHR3  (jsr=(jsr=(jsr=jsr^(jsr<<17))^(jsr>>13))^(jsr<<5))
 #define CONG  (jcong=69069*jcong+1234567)
 #define KISS  ((MWC^CONG)+SHR3)
-#define LFIB4 (t[MK_UC(c)]=t[MK_UC(c)]+t[MK_UC(c+58)]+t[MK_UC(c+119)]+t[MK_UC(++c+178)])
-#define SWB   (t[MK_UC(c+237)]=(x=t[MK_UC(c+15)])-(y=t[MK_UC(++c)]+(x<y)))
-#define UNI   (KISS*2.328306e-10)
-#define VNI   ((long) KISS)*4.656613e-10
+
 /*  Global static variables: */
- static UL z=362436069, w=521288629, jsr=123456789, jcong=380116160;
- static UL t[256];
- static UL x=0,y=0; static unsigned char c=0;
-
-/* Random seeds must be used to reset z,w,jsr,jcong and
-the table t[256]  Here is an example procedure, using KISS: */
-
-void settable(UL i1,UL i2,UL i3,UL i4)
-{
-	int i; z=i1;w=i2,jsr=i3; jcong=i4;
-	for(i=0;i<256;i++)  t[i]=KISS;
-}
+static unsigned long z=362436069, w=521288629, jsr=123456789, jcong=380116160;
 
 /* MAKE_EXPORT SystemFunction036_new=SystemFunction036 */
 BOOL WINAPI SystemFunction036_new(PVOID pbBuffer, ULONG dwLen)
@@ -59,12 +43,15 @@ BOOL WINAPI SystemFunction036_new(PVOID pbBuffer, ULONG dwLen)
 		return FALSE;
 	if (!bInit) //init once
 	{
-		settable(GetTickCount(),GetCurrentThreadId(),GetCurrentProcessId(),GetSysColor(COLOR_BACKGROUND));
+		z = GetTickCount();
+		w = GetCurrentThreadId();
+		jsr = GetCurrentProcessId();
+		jcong = GetSysColor(COLOR_BACKGROUND);
 		bInit = TRUE;
 	}
 	for (i=0;i<dwLen;i++)
 	{
-		*cBuffer = (UCHAR) SWB;
+		*cBuffer = (UCHAR) KISS;
 		cBuffer++;
 	}
 	return TRUE;
