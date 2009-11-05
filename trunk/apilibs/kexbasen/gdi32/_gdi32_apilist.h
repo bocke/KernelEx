@@ -55,7 +55,6 @@ FWDPROC GetICMProfileW_fwd;
 FWDPROC GetKerningPairsW_fwd;
 FWDPROC GetLogColorSpaceW_fwd;
 FWDPROC GetMetaFileW_fwd;
-FWDPROC GetObjectW_fwd;
 FWDPROC GetOutlineTextMetricsW_fwd;
 FWDPROC GetTextExtentExPointW_fwd;
 FWDPROC GetTextFaceW_fwd;

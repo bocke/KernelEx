@@ -56,7 +56,6 @@ static const apilib_named_api gdi32_named_apis[] =
 	DECL_API("GetKerningPairsW", GetKerningPairsW_fwd),
 	DECL_API("GetLogColorSpaceW", GetLogColorSpaceW_fwd),
 	DECL_API("GetMetaFileW", GetMetaFileW_fwd),
-	DECL_API("GetObjectW", GetObjectW_fwd),
 	DECL_API("GetOutlineTextMetricsW", GetOutlineTextMetricsW_fwd),
 	DECL_API("GetTextExtentExPointI", GetTextExtentExPointI_new),
 	DECL_API("GetTextExtentExPointW", GetTextExtentExPointW_fwd),
