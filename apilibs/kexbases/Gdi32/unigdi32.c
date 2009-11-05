@@ -1,6 +1,7 @@
 /*
  *  KernelEx
  *  Copyright (C) 2009, Xeno86
+ *  Copyright (C) 2009, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -191,4 +192,36 @@ BOOL WINAPI RemoveFontResourceW_new(LPCWSTR strW)
 	file_GetCP();
 	file_ALLOC_WtoA(str);
 	return RemoveFontResourceA(strA);
+}
+
+/* MAKE_EXPORT ExtCreatePen_fix=ExtCreatePen */
+HPEN WINAPI ExtCreatePen_fix(
+  DWORD dwPenStyle,      // pen style
+  DWORD dwWidth,         // pen width
+  CONST LOGBRUSH *lplb,  // brush attributes
+  DWORD dwStyleCount,    // length of custom style array
+  CONST DWORD *lpStyle   // custom style array
+)
+{
+	dwPenStyle &= ~PS_USERSTYLE;
+	return ExtCreatePen(dwPenStyle,dwWidth,lplb,dwStyleCount,lpStyle);
+}
+
+/* MAKE_EXPORT GetObjectW_new=GetObjectW */
+int WINAPI GetObjectW_new(
+  HGDIOBJ hgdiobj,  // handle to graphics object
+  int cbBuffer,     // size of buffer for object information
+  LPVOID lpvObject  // buffer for object information
+)
+{
+	int type = GetObjectType(hgdiobj);
+	if (type != OBJ_FONT) return GetObjectA(hgdiobj,cbBuffer,lpvObject);
+	if (!lpvObject) return sizeof(LOGFONTW);
+	LOGFONTA fontA = {0};
+	LOGFONTW fontW = {0};
+	if (!GetObjectA(hgdiobj,sizeof(LOGFONTA),&fontA)) return 0; //err not font
+	memcpy(&fontW,&fontA,FIELD_OFFSET(LOGFONTA,lfFaceName));
+	MultiByteToWideChar(CP_ACP,0,fontA.lfFaceName,-1,fontW.lfFaceName,LF_FACESIZE);
+	memcpy(lpvObject,&fontW,cbBuffer);
+	return cbBuffer;
 }
