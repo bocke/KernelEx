@@ -30,10 +30,20 @@
 
 #define _E_NOTIMPL 0x80004001
 
-BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, BOOL bLoadStatic)
 {
     if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		if (!bLoadStatic)
+		{
+			OSVERSIONINFO osv;
+			osv.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+			GetVersionEx(&osv);
+			if (osv.dwMajorVersion < 5)
+				return FALSE;
+		}
 		DisableThreadLibraryCalls(hinstDLL);
+	}
     return TRUE;
 }
 
