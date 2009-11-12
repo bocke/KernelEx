@@ -31,6 +31,24 @@ static HMODULE hShell32;
 static LPFNGETCLASSOBJECT SHGetClassObject;
 
 
+/* Hall of shame */
+static const char* blacklist[] = {
+	"COOLTYPE.DLL", /* Adobe Acrobat Reader 5.0.5, Adobe Photoshop 7.0 */
+	NULL,
+};
+
+
+static bool is_blacklisted()
+{
+	for (int i = 0 ; blacklist[i] ; i++)
+	{
+		if (GetModuleHandle(blacklist[i]))
+			return true;
+	}
+	return false;
+}
+
+
 static bool is_shell32_v5()
 {
 	DLLGETVERSIONPROC DllGetVersion;
@@ -132,6 +150,9 @@ BOOL APIENTRY DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpReserved)
 {
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
+		if (is_blacklisted())
+			return FALSE;
+
 		g_hModule = hModule;
 		DisableThreadLibraryCalls(hModule);
 
