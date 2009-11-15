@@ -127,3 +127,8 @@ int kexPsSetValue(int index, void* value)
 {
 	return ProcessStorage::get_instance()->set(index, value);
 }
+
+void* kexGetK32Lock()
+{
+	return krnl32lock;
+}

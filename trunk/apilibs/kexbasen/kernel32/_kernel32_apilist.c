@@ -24,11 +24,12 @@
 #include "_kernel32_apilist.h"
 
 extern BOOL init_jemalloc();
+extern BOOL init_exttls();
 extern void uninit_jemalloc();
 
 BOOL init_kernel32()
 {
-	return init_jemalloc();
+	return init_jemalloc() && init_exttls();
 }
 
 void uninit_kernel32()
@@ -112,6 +113,10 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("SetEnvironmentVariableW", SetEnvironmentVariableW_fwd),
 	DECL_API("SetLocaleInfoW", SetLocaleInfoW_fwd),
 	DECL_API("SetVolumeLabelW", SetVolumeLabelW_fwd),
+	DECL_API("TlsAlloc", TlsAlloc_new),
+	DECL_API("TlsFree", TlsFree_new),
+	DECL_API("TlsGetValue", TlsGetValue_new2),
+	DECL_API("TlsSetValue", TlsSetValue_new2),
 	DECL_API("UnregisterWait", UnregisterWait_new),
 	DECL_API("UnregisterWaitEx", UnregisterWaitEx_new),
 	DECL_API("WaitNamedPipeW", WaitNamedPipeW_fwd),

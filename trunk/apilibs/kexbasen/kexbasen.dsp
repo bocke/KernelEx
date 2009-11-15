@@ -105,6 +105,10 @@ SOURCE=.\kernel32\_kernel32_apilist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\kernel32\allocator.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\kernel32\DelayLoadFailureHook.c
 # End Source File
 # Begin Source File
@@ -113,7 +117,7 @@ SOURCE=.\kernel32\ThreadPool.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\kernel32\allocator.c
+SOURCE=.\kernel32\TlsExt.c
 # End Source File
 # Begin Source File
 
@@ -279,6 +283,41 @@ SOURCE=.\common.c
 # Begin Source File
 
 SOURCE=.\kexbasen.def
+
+!IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
+
+# Begin Custom Build
+OutDir=.\Release
+WkspDir=.
+InputPath=.\kexbasen.def
+
+"$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj "$(WkspDir)\common\k32ord.h" 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:"$(WkspDir)\common\k32ord.def" /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	del $(OutDir)\k32ord.exp 
+	del $(OutDir)\k32ord.obj 
+	del $(OutDir)\k32ord.dll 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
+
+# Begin Custom Build
+OutDir=.\Debug
+WkspDir=.
+InputPath=.\kexbasen.def
+
+"$(OutDir)\k32ord.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cl /nologo /c /TC /DK32ORD_IMPLIB /Fo$(OutDir)\k32ord.obj "$(WkspDir)\common\k32ord.h" 
+	link /DLL /NOENTRY /NOLOGO /IGNORE:4070 /MACHINE:IX86 /DEF:"$(WkspDir)\common\k32ord.def" /OUT:$(OutDir)\k32ord.dll /IMPLIB:$(OutDir)\k32ord.lib $(OutDir)\k32ord.obj 
+	del $(OutDir)\k32ord.exp 
+	del $(OutDir)\k32ord.obj 
+	del $(OutDir)\k32ord.dll 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

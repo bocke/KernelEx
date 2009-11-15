@@ -35,6 +35,12 @@ BOOL WINAPI RegisterWaitForSingleObject_new(PHANDLE phNewWaitObject, HANDLE hObj
 HANDLE WINAPI RegisterWaitForSingleObjectEx_new(HANDLE hObject, WAITORTIMERCALLBACK Callback, PVOID Context, ULONG dwMilliseconds, ULONG dwFlags);
 BOOL WINAPI UnregisterWaitEx_new(HANDLE WaitHandle, HANDLE CompletionEvent);
 BOOL WINAPI UnregisterWait_new(HANDLE WaitHandle);
+DWORD WINAPI TlsAlloc_new(void);
+BOOL WINAPI TlsFree_new(DWORD dwTlsIndex);
+LPVOID WINAPI TlsGetValue_new2(DWORD dwTlsIndex);
+BOOL WINAPI TlsSetValue_new2(DWORD dwTlsIndex, LPVOID lpTlsValue);
+LPVOID WINAPI TlsGetValue_new2(DWORD dwTlsIndex);
+BOOL WINAPI TlsSetValue_new2(DWORD dwTlsIndex, LPVOID lpTlsValue);
 HANDLE WINAPI HeapCreate_new(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize);
 BOOL WINAPI HeapDestroy_new(HANDLE hHeap);
 LPVOID WINAPI HeapAlloc_new(HANDLE hHeap, DWORD dwFlags, DWORD dwBytes);
