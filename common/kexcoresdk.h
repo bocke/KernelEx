@@ -203,6 +203,13 @@ _KEXCOREIMP void* kexPsGetValue(int index);
 _KEXCOREIMP int kexPsSetValue(int index, void* value);
 
 
+/** kexGetK32Lock - obtain pointer to Kernel32 lock object.
+ *
+ * @return Pointer to Kernel32 lock object.
+ */
+_KEXCOREIMP void* kexGetK32Lock();
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

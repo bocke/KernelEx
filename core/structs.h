@@ -160,7 +160,7 @@ typedef struct _PDB98 {                 // Size = 0xC4 (from Kernel32)
     PHANDLE_TABLE pHandleTable;         // 44 Pointer to Handle Table
     struct _PDB98* ParentPDB;           // 48 Pointer to parent process (PDB)
     PMODREF MODREFList;                 // 4C Pointer to list of modules
-    DWORD   ThreadList;                 // 50 Pointer to list of threads
+    PLIST   ThreadList;                 // 50 Pointer to list of threads
     DWORD   DebuggeeCB;                 // 54 Debuggee context block
     DWORD   LocalHeapFreeHead;          // 58 Free list for process default heap
     DWORD   InitialRing0ID;             // 5C Meaning unknown
@@ -201,7 +201,7 @@ typedef struct _TIB98 {        // Size = 0x38
     DWORD   pCurrentPriority;  // 24 Pointer to DWORD containing current priority level
     DWORD   pvQueue;           // 28 Message Queue selector
     DWORD   *pvTLSArray;       // 2C Pointer to TDB.TlsSlots
-    PVOID   *pProcess;         // 30 Pointer to owning process database (PDB)
+    PDB98   *pProcess;         // 30 Pointer to owning process database (PDB)
     DWORD   Unknown;           // 34 Pointer to ???
 } TIB98, *PTIB98;
 
@@ -225,7 +225,7 @@ typedef struct _TDB98 {        // Size = 0x228 (from Kernel32)
     DWORD   un1[3];            // 5C
 	DWORD   LastError;         // 68 GetLastError code value
     DWORD   un2[9];            // 6C
-    DWORD   TlsSlots[80];      // 90 Thread Local Storage
+    LPVOID  TlsSlots[80];      // 90 Thread Local Storage
 	DWORD   un3[16];           // 1D0
     DWORD   APISuspendCount;   // 210 Count of SuspendThread's minus ResumeThread's
 	DWORD   un4[5];            // 214
