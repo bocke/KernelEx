@@ -57,14 +57,19 @@ const apilib_api_table* get_api_table()
 	return api_table;
 }
 
-BOOL init()
+static BOOL init()
 {
 	return common_init() && init_kernel32() && init_gdi32() && init_user32() && init_advapi32() && init_comdlg32() && init_shell32() && init_rpcrt4() && init_winspool() && init_shfolder();
 }
 
-void uninit()
+static void uninit()
 {
 	uninit_kernel32();
+}
+
+static void detach()
+{
+	detach_kernel32();
 }
 
 BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
@@ -72,14 +77,14 @@ BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, BOOL load_static)
 	switch (reason) 
 	{
 	case DLL_PROCESS_ATTACH:
-//		kexDebugPrint("KernelEx Base Non-shared library reporting in action!\n");
-		DisableThreadLibraryCalls(instance);
 		if (!init())
 			return FALSE;
 		break;
 	case DLL_PROCESS_DETACH:
-//		kexDebugPrint("KernelEx Base Non-shared library signing off!\n");
 		uninit();
+		break;
+	case DLL_THREAD_DETACH:
+		detach();
 		break;
 	}
 	return TRUE;

@@ -26,6 +26,7 @@
 extern BOOL init_jemalloc();
 extern BOOL init_exttls();
 extern void uninit_jemalloc();
+extern void detach_exttls();
 
 BOOL init_kernel32()
 {
@@ -35,6 +36,11 @@ BOOL init_kernel32()
 void uninit_kernel32()
 {
 	uninit_jemalloc();
+}
+
+void detach_kernel32()
+{
+	detach_exttls();
 }
 
 static const apilib_named_api kernel32_named_apis[] = 
