@@ -4,12 +4,6 @@
 #ifndef __THUNIMACRO_H
 #define __THUNIMACRO_H
 
-#ifndef _DEBUG
-#define DebugMessage(x) do { } while (0)
-#else
-#define DebugMessage(x) kexDebugPrint x
-#endif
-
 #define MAX_STACK 512
 
 //In macroses: convert A<->W on stack

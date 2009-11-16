@@ -113,7 +113,20 @@ _KEXCOREIMP unsigned long kexGetKEXVersion();
 _KEXCOREIMP int kexIsDebugCore();
 
 
-/** kexDebugPrint - output debug information
+/** DBGPRINTF - convenience macro for including debug messages only in debugs. 
+ * 
+ * Sample usage: DBGPRINTF(("This is a test %d %s\n", 1, "ttt"));
+ */
+#ifndef KEXCORE_EXPORTS
+#ifndef _DEBUG
+#define DBGPRINTF(x) do { } while (0)
+#else
+#define DBGPRINTF(x) kexDebugPrint x
+#endif
+#endif
+
+
+/** kexDebugPrint - output debug message
  *
  * Parameters are compatible with printf command, 
  * maximum output length is limited to 256 bytes.
