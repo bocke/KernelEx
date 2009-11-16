@@ -115,6 +115,20 @@ BOOL init_exttls(void)
 	return ret;
 }
 
+void detach_exttls(void)
+{
+	TDB98* tdb;
+	LPVOID* ext;
+
+	__asm mov eax, fs:18h;
+	__asm sub eax, 8;
+	__asm mov tdb, eax;
+
+	ext = (LPVOID*) tdb->TlsSlots[TLS_SIZE-1];
+	if (ext)
+		HeapFree(GetProcessHeap(), 0, ext);
+}
+
 /* MAKE_EXPORT TlsAlloc_new=TlsAlloc */
 DWORD WINAPI TlsAlloc_new(void)
 {
