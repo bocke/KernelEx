@@ -90,7 +90,7 @@ LRESULT WINAPI PostThreadMessageW_NEW( HWND hWnd, UINT Msg, WPARAM wParam, LPARA
 /* MAKE_EXPORT DefFrameProcW_NEW=DefFrameProcW */
 LRESULT WINAPI DefFrameProcW_NEW( HWND hWnd, HWND hWndMDIClient, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DebugMessage(("DefFrameProcW_NEW: %p, %p, %p, %p, %p",hWnd, hWndMDIClient, uMsg, wParam, lParam));
+	DBGPRINTF(("DefFrameProcW_NEW: %p, %p, %p, %p, %p\n",hWnd, hWndMDIClient, uMsg, wParam, lParam));
 	if ( uMsg == WM_SETTEXT )
 	{
 		LPSTR textA;

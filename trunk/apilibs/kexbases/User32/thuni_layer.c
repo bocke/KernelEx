@@ -68,7 +68,7 @@ static WNDPROC WINAPI _GetWindowProc32(PWND pwnd)
 	PTHUNK16 proc32 = (PTHUNK16)MapSL( (DWORD)pwnd->lpfnWndProc );
 	if ( !proc32 ) return NULL;
 	if ( proc32->push1 != pushl16_code ) return NULL; //NOT 16-bit pushl?
-	DebugMessage(("_GetWindowProc32(%p) = %p",pwnd->hWnd16,proc32->proc));
+	DBGPRINTF(("_GetWindowProc32(%p) = %p\n",pwnd->hWnd16,proc32->proc));
 	return proc32->proc;
 }
 
@@ -155,7 +155,7 @@ static WNDPROC AllocWndProc( PROCESS_THUNKS thunks, WNDPROC oldproc, BOOL AtoW )
 	if (thunk_number == CHUNK_THUNKS) //if chunk is full, grow chunk list (thunks points to last chunk)
 	{		
 		thunks = GrowProcessThunks(thunks);
-		DebugMessage(("Thunks array has grown (new chunk %p)",thunks));
+		DBGPRINTF(("Thunks array has grown (new chunk %p)\n",thunks));
 		if (!thunks) return oldproc;
 		thunk_number = 0;
 	}		
@@ -257,7 +257,7 @@ LONG WINAPI GetWindowLongW_NEW(HWND hWnd, int nIndex)
 			SetLastError(ERROR_ACCESS_DENIED);
 			return 0L;
 		}
-		DebugMessage(("GetWindowProcW: %p(A) -> %p(W)",ret,ConvertWndProcAToW((WNDPROC)ret)));
+		DBGPRINTF(("GetWindowProcW: %p(A) -> %p(W)\n",ret,ConvertWndProcAToW((WNDPROC)ret)));
 		ret = (LONG)ConvertWndProcAToW( (WNDPROC)ret );
 	}
 	return ret;
@@ -274,7 +274,7 @@ LONG WINAPI SetWindowLongW_NEW(HWND hWnd, int nIndex, LONG dwNewLong)
 			SetLastError(ERROR_ACCESS_DENIED);
 			return 0L;
 		}
-		DebugMessage(("SetWindowProcW[(%p)new]: %p(W) => %p(A)",hWnd,dwNewLong,ConvertWndProcWToA((WNDPROC)dwNewLong)));
+		DBGPRINTF(("SetWindowProcW[(%p)new]: %p(W) => %p(A)\n",hWnd,dwNewLong,ConvertWndProcWToA((WNDPROC)dwNewLong)));
 		dwNewLong = (LONG)ConvertWndProcWToA( (WNDPROC)dwNewLong );
 	}
 			
@@ -282,7 +282,7 @@ LONG WINAPI SetWindowLongW_NEW(HWND hWnd, int nIndex, LONG dwNewLong)
 	
 	if ( nIndex == GWL_WNDPROC && ret ) //oh, you're unicode subclassed!
 	{
-		DebugMessage(("SetWindowProcW[(%p)old]: %p(A) => %p(W)",hWnd,ret,ConvertWndProcAToW((WNDPROC)ret)));
+		DBGPRINTF(("SetWindowProcW[(%p)old]: %p(A) => %p(W)\n",hWnd,ret,ConvertWndProcAToW((WNDPROC)ret)));
 		SetWindowUnicode( hWnd, TRUE );
 		ret = (LONG)ConvertWndProcAToW( (WNDPROC)ret );
 	}
@@ -335,7 +335,7 @@ ATOM WINAPI RegisterClassExW_NEW( CONST WNDCLASSEXW *lpwcx )
 	STACK_WtoA(lpwcx->lpszClassName, wnda.lpszClassName);
 	STACK_WtoA(lpwcx->lpszMenuName, wnda.lpszMenuName);
 	wnda.lpfnWndProc = ConvertWndProcWToA( wnda.lpfnWndProc );
-	DebugMessage(("RegisterClassW(%s), %p => %p",wnda.lpszClassName,lpwcx->lpfnWndProc,wnda.lpfnWndProc));
+	DBGPRINTF(("RegisterClassW(%s), %p => %p\n",wnda.lpszClassName,lpwcx->lpfnWndProc,wnda.lpfnWndProc));
 	return RegisterClassExA(&wnda);
 }
 
@@ -402,7 +402,7 @@ ATOM WINAPI GetClassInfoW_NEW(HINSTANCE hinst, LPCWSTR lpszClass, WNDCLASSW *wc)
 static void CALLBACK UnicodeEvent( HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime )
 {		
 	if ( idObject != OBJID_WINDOW ) return;
-	DebugMessage(("Window created: %p",hwnd));
+	DBGPRINTF(("Window created: %p\n",hwnd));
 	//NOTE: we don't grab Win16Lock!! we touch windows only belonging to current thread.
 	BOOL isUnicode = FALSE;
 	PWND pwnd = HWNDtoPWND(hwnd);
@@ -431,7 +431,7 @@ HWND WINAPI CreateWindowExW_NEW(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lp
 	
 	STACK_WtoA(lpClassName, lpClassNameA);
 	STACK_WtoA(lpWindowName, lpWindowNameA);	
-	DebugMessage(("CreateWindowExW(%s)",lpClassNameA));
+	DBGPRINTF(("CreateWindowExW(%s)\n",lpClassNameA));
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
 	ret = CreateWindowExA(dwExStyle,lpClassNameA,lpWindowNameA,dwStyle,x,y,nWidth,nHeight,hWndParent,hMenu,hInstance,lpParam);
 	UnhookWinEvent(uniEvent);
@@ -455,7 +455,7 @@ HWND WINAPI CreateMDIWindowW_NEW( LPCWSTR lpClassName, LPCWSTR lpWindowName, DWO
 	
 	STACK_WtoA(lpClassName, lpClassNameA);
 	STACK_WtoA(lpWindowName, lpWindowNameA);	
-	DebugMessage(("CreateMDIWindowW(%s)",lpClassNameA));
+	DBGPRINTF(("CreateMDIWindowW(%s)\n",lpClassNameA));
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
 	ret = CreateMDIWindowA(lpClassNameA,lpWindowNameA,dwStyle,X,Y,nWidth,nHeight,hWndParent,hInstance,lParam);
 	UnhookWinEvent(uniEvent);
@@ -471,9 +471,9 @@ HWND WINAPI CreateDialogParamW_NEW( HINSTANCE hInstance, LPCTSTR lpTemplateName,
 	
 	STACK_WtoA(lpTemplateName, lpTemplateNameA);
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DebugMessage(("CreateDialogParamW started (proc %p), eventhook %p",lpDialogFunc,uniEvent));
+	DBGPRINTF(("CreateDialogParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = CreateDialogParamA( hInstance, lpTemplateNameA, hWndParent, lpDialogFunc, dwInitParam );
-	DebugMessage(("CreateDialogParamW finished: %p",ret));
+	DBGPRINTF(("CreateDialogParamW finished: %p\n",ret));
 	UnhookWinEvent(uniEvent);
 	return ret;		
 }
@@ -485,7 +485,7 @@ HWND WINAPI CreateDialogIndirectParamW_NEW( HINSTANCE hInstance, LPCDLGTEMPLATE 
 	HWND ret;
 	
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DebugMessage(("CreateDialogIndirectParamW started (proc %p), eventhook %p",lpDialogFunc,uniEvent));
+	DBGPRINTF(("CreateDialogIndirectParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = CreateDialogIndirectParamA( hInstance, lpTemplate, hWndParent, lpDialogFunc, lParamInit );
 	UnhookWinEvent(uniEvent);
 	return ret;	
@@ -500,7 +500,7 @@ INT_PTR WINAPI DialogBoxParamW_NEW( HINSTANCE hInstance,  LPCWSTR lpTemplateName
 
 	STACK_WtoA( lpTemplateName, lpTemplateNameA );
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DebugMessage(("DialogBoxParamW started (proc %p), eventhook %p",lpDialogFunc,uniEvent));
+	DBGPRINTF(("DialogBoxParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = DialogBoxParamA( hInstance, lpTemplateNameA, hWndParent, lpDialogFunc, dwInitParam );
 	UnhookWinEvent(uniEvent);
 	return ret;	
@@ -514,7 +514,7 @@ INT_PTR WINAPI DialogBoxIndirectParamW_NEW( HINSTANCE hInstance, LPCDLGTEMPLATE 
 	
 
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DebugMessage(("DialogBoxIndirectParamW started (proc %p), eventhook %p",lpDialogFunc,uniEvent));
+	DBGPRINTF(("DialogBoxIndirectParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = DialogBoxIndirectParamA( hInstance, hDialogTemplate, hWndParent, lpDialogFunc, dwInitParam );
 	UnhookWinEvent(uniEvent);
 	return ret;
@@ -542,11 +542,11 @@ LRESULT WINAPI SendMessageW_NEW( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		ReleaseWin16Lock();
 		if ( procW )
 		{
-			DebugMessage(("SendMessageW [DIRECT]: %p, %p, %p, %p",hWnd, Msg, wParam, lParam));			
+			DBGPRINTF(("SendMessageW [DIRECT]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));			
 			return CallWindowProc_stdcall( procW, hWnd, Msg, wParam, lParam );
 		}
 	}
-	DebugMessage(("SendMessageW [THUNK]: %p, %p, %p, %p",hWnd, Msg, wParam, lParam));
+	DBGPRINTF(("SendMessageW [THUNK]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));
 	return CallProcAnsiWithUnicode( (WNDPROC)SendMessageA_fix, hWnd, Msg, wParam, lParam );
 }
 
@@ -577,7 +577,7 @@ BOOL WINAPI SetDlgItemTextW_NEW( HWND hDlg, int nIDDlgItem, LPCWSTR lpString )
 /* MAKE_EXPORT SendDlgItemMessageW_NEW=SendDlgItemMessageW */
 LRESULT WINAPI SendDlgItemMessageW_NEW( HWND hDlg, int nIDDlgItem, UINT Msg, WPARAM wParam, LPARAM lParam )
 {
-	DebugMessage(("SendDlgItemMessageW: %p, %n, %p, %p, %p",hDlg, nIDDlgItem, Msg, wParam, lParam));
+	DBGPRINTF(("SendDlgItemMessageW: %p, %n, %p, %p, %p\n",hDlg, nIDDlgItem, Msg, wParam, lParam));
 	HWND hCtl = GetDlgItem(hDlg, nIDDlgItem);
 	if ( hCtl )
 		return SendMessageW_NEW( hCtl, Msg, wParam, lParam );
