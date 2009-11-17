@@ -282,6 +282,49 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dirlist
+
+!IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
+
+# Begin Custom Build
+WkspDir=.
+ProjDir=.
+InputPath=.\dirlist
+
+"&" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist $(WkspDir)\util\prep\Release\prep.exe goto error 
+	$(WkspDir)\util\prep\Release\prep.exe "$(ProjDir)" 
+	goto quit 
+	:error 
+	echo Error - compile PREP (Release) project first 
+	echo 1 | choice /C:1 /N >NUL 
+	:quit 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "KernelEx Base NonShared - Win32 Debug"
+
+# Begin Custom Build
+WkspDir=.
+ProjDir=.
+InputPath=.\dirlist
+
+"&" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist $(WkspDir)\util\prep\Release\prep.exe goto error 
+	$(WkspDir)\util\prep\Release\prep.exe "$(ProjDir)" 
+	goto quit 
+	:error 
+	echo Error - compile PREP (Release) project first 
+	echo 1 | choice /C:1 /N >NUL 
+	:quit 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\kexbasen.def
 
 !IF  "$(CFG)" == "KernelEx Base NonShared - Win32 Release"
