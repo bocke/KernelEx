@@ -1,6 +1,8 @@
 /*
  *  KernelEx
+ *
  *  Copyright (C) 2009, Tihiy
+ *
  *  This file is part of KernelEx source code.
  *
  *  KernelEx is free software; you can redistribute it and/or modify
@@ -90,14 +92,24 @@ LRESULT WINAPI PostThreadMessageW_NEW( HWND hWnd, UINT Msg, WPARAM wParam, LPARA
 /* MAKE_EXPORT DefFrameProcW_NEW=DefFrameProcW */
 LRESULT WINAPI DefFrameProcW_NEW( HWND hWnd, HWND hWndMDIClient, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DBGPRINTF(("DefFrameProcW_NEW: %p, %p, %p, %p, %p\n",hWnd, hWndMDIClient, uMsg, wParam, lParam));
-	if ( uMsg == WM_SETTEXT )
+	switch(uMsg) {
+	case WM_SETTEXT:
 	{
 		LPSTR textA;
 		STACK_WtoA( lParam, textA );
 		return DefFrameProcA( hWnd, hWndMDIClient, uMsg, wParam, (LPARAM)textA );
 	}
-	return DefFrameProcA( hWnd, hWndMDIClient, uMsg, wParam, lParam );
+	case WM_NCACTIVATE:
+	case WM_COMMAND:
+	case WM_SYSCOMMAND:
+	case WM_SIZE:
+	case WM_SETFOCUS:
+	case WM_NEXTMENU:
+	case WM_MENUCHAR:
+		return DefFrameProcA( hWnd, hWndMDIClient, uMsg, wParam, lParam );
+	default:
+		return DefWindowProcW_NEW( hWnd, uMsg, wParam, lParam );
+	}
 }
 
 /* MAKE_EXPORT GetMessageA_NEW=GetMessageA */

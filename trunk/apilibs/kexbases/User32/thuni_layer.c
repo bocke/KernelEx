@@ -1,6 +1,7 @@
 /*
  *  KernelEx Thunking Unicode Layer
- *  Copyright 2009 Tihiy
+ *
+ *  Copyright (C) 2009, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -51,12 +52,12 @@ BOOL InitUniThunkLayer()
 	return TRUE;
 }
 
-static void GrabWin16Lock()
+void GrabWin16Lock()
 {
 	_EnterSysLevel(pWin16Mutex);
 }
 
-static void ReleaseWin16Lock()
+void ReleaseWin16Lock()
 {
 	_LeaveSysLevel(pWin16Mutex);
 }
@@ -68,7 +69,6 @@ static WNDPROC WINAPI _GetWindowProc32(PWND pwnd)
 	PTHUNK16 proc32 = (PTHUNK16)MapSL( (DWORD)pwnd->lpfnWndProc );
 	if ( !proc32 ) return NULL;
 	if ( proc32->push1 != pushl16_code ) return NULL; //NOT 16-bit pushl?
-	DBGPRINTF(("_GetWindowProc32(%p) = %p\n",pwnd->hWnd16,proc32->proc));
 	return proc32->proc;
 }
 
@@ -542,11 +542,11 @@ LRESULT WINAPI SendMessageW_NEW( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		ReleaseWin16Lock();
 		if ( procW )
 		{
-			DBGPRINTF(("SendMessageW [DIRECT]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));			
+			//DBGPRINTF(("SendMessageW [DIRECT]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));			
 			return CallWindowProc_stdcall( procW, hWnd, Msg, wParam, lParam );
 		}
 	}
-	DBGPRINTF(("SendMessageW [THUNK]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));
+	//DBGPRINTF(("SendMessageW [THUNK]: %p, %p, %p, %p\n",hWnd, Msg, wParam, lParam));
 	return CallProcAnsiWithUnicode( (WNDPROC)SendMessageA_fix, hWnd, Msg, wParam, lParam );
 }
 
@@ -577,7 +577,6 @@ BOOL WINAPI SetDlgItemTextW_NEW( HWND hDlg, int nIDDlgItem, LPCWSTR lpString )
 /* MAKE_EXPORT SendDlgItemMessageW_NEW=SendDlgItemMessageW */
 LRESULT WINAPI SendDlgItemMessageW_NEW( HWND hDlg, int nIDDlgItem, UINT Msg, WPARAM wParam, LPARAM lParam )
 {
-	DBGPRINTF(("SendDlgItemMessageW: %p, %n, %p, %p, %p\n",hDlg, nIDDlgItem, Msg, wParam, lParam));
 	HWND hCtl = GetDlgItem(hDlg, nIDDlgItem);
 	if ( hCtl )
 		return SendMessageW_NEW( hCtl, Msg, wParam, lParam );
