@@ -214,7 +214,7 @@ int WINAPI GetObjectW_new(
   LPVOID lpvObject  // buffer for object information
 )
 {
-	int type = GetObjectType(hgdiobj);
+	int type = GetObjectType_fix(hgdiobj);
 	if (type != OBJ_FONT) return GetObjectA(hgdiobj,cbBuffer,lpvObject);
 	if (!lpvObject) return sizeof(LOGFONTW);
 	LOGFONTA fontA = {0};

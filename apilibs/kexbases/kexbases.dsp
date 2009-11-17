@@ -369,7 +369,11 @@ SOURCE=.\Gdi32\FontResourceExA.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Gdi32\gdi9x.h
+SOURCE=.\Gdi32\GdiObjects.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Gdi32\GdiObjects.h
 # End Source File
 # Begin Source File
 

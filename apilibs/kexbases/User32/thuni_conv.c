@@ -185,6 +185,8 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 		case WM_CREATE:
 		case WM_NCCREATE:
 			{
+				if (!VALID_PTR(lParam)) return CallWindowProcA(callback,hwnd,msg,wParam,lParam);
+				
 				LPCREATESTRUCTW csW = (LPCREATESTRUCTW)lParam;
 				CREATESTRUCTA csA;
 				LPMDICREATESTRUCTW mcsW = (LPMDICREATESTRUCTW)csW->lpCreateParams;
@@ -194,7 +196,7 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 				STACK_WtoA(csW->lpszName,csA.lpszName);
 				STACK_WtoA(csW->lpszClass,csA.lpszClass);
 							
-				if ( GetWindowLongA(hwnd, GWL_EXSTYLE) & WS_EX_MDICHILD && mcsW )
+				if ( GetWindowLongA(hwnd, GWL_EXSTYLE) & WS_EX_MDICHILD && VALID_PTR(mcsW) )
 				{
 					//mmm test, i can't understand Wine
 					CopyMemory(&mcsA, mcsW, sizeof(MDICREATESTRUCT));
@@ -206,6 +208,8 @@ LRESULT WINAPI CallProcAnsiWithUnicode( WNDPROC callback, HWND hwnd, UINT msg, W
 			}
 		case WM_MDICREATE:
 			{
+				if (!VALID_PTR(lParam)) return CallWindowProcA(callback,hwnd,msg,wParam,lParam);
+				
 				LPMDICREATESTRUCTW mcsW = (LPMDICREATESTRUCTW)lParam;
 				MDICREATESTRUCTA mcsA;
 				CopyMemory(&mcsA, mcsW, sizeof(MDICREATESTRUCT));
@@ -318,6 +322,8 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 		case WM_CREATE:
 		case WM_NCCREATE:
 			{
+				if (!VALID_PTR(lParam)) return CallWindowProc_stdcall(callback,hwnd,msg,wParam,lParam);
+				
 				LPCREATESTRUCTA csA = (LPCREATESTRUCTA)lParam;
 				CREATESTRUCTW csW;
 				LPMDICREATESTRUCTA mcsA = (LPMDICREATESTRUCTA)csA->lpCreateParams;
@@ -327,7 +333,7 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 				STACK_AtoW(csA->lpszName,csW.lpszName);
 				STACK_AtoW(csA->lpszClass,csW.lpszClass);
 							
-				if ( GetWindowLongA(hwnd, GWL_EXSTYLE) & WS_EX_MDICHILD && mcsA )
+				if ( GetWindowLongA(hwnd, GWL_EXSTYLE) & WS_EX_MDICHILD && VALID_PTR(mcsA) )
 				{
 					CopyMemory(&mcsW, mcsA, sizeof(MDICREATESTRUCT));
 					STACK_AtoW(mcsA->szClass,mcsW.szClass);
@@ -338,6 +344,8 @@ LRESULT WINAPI CallProcUnicodeWithAnsi( WNDPROC callback, HWND hwnd, UINT msg, W
 			}
 		case WM_MDICREATE:
 			{
+				if (!VALID_PTR(lParam)) return CallWindowProc_stdcall(callback,hwnd,msg,wParam,lParam);
+
 				LPMDICREATESTRUCTA mcsA = (LPMDICREATESTRUCTA)lParam;
 				MDICREATESTRUCTW mcsW;
 				CopyMemory(&mcsW, mcsA, sizeof(MDICREATESTRUCT));
