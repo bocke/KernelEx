@@ -30,7 +30,6 @@ http://17slon.com/blogs/gabr/2007/02/four-ways-to-detect-vista.html
 
 void get_cpuinfo();
 BOOL init_tryentercritsec();
-BOOL init_openthread();
 
 BOOL init_kernel32()
 {
@@ -104,6 +103,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetSystemDirectoryW", GetSystemDirectoryW_new),
 	DECL_API("GetSystemWindowsDirectoryA", GetWindowsDirectoryA),
 	DECL_API("GetSystemWindowsDirectoryW", GetWindowsDirectoryW_new),
+	DECL_API("GetTempFileNameA", GetTempFileNameA_fix),
 	DECL_API("GetTempFileNameW", GetTempFileNameW_new),
 	DECL_API("GetTempPathW", GetTempPathW_new),
 	DECL_API("GetUserDefaultUILanguage", GetUserDefaultUILanguage_new),

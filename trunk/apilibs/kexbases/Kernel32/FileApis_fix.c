@@ -121,3 +121,14 @@ BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 	}
 	return FALSE;
 }
+
+/* MAKE_EXPORT GetTempFileNameA_fix=GetTempFileNameA */
+UINT WINAPI GetTempFileNameA_fix(LPCSTR lpPathName, LPCSTR lpPrefixString, UINT uUnique, LPTSTR lpTempFileName)
+{
+	if (!lpPathName) 
+		lpPathName = "\\";
+	if (!lpPrefixString) 
+		lpPrefixString = "0";
+	return GetTempFileNameA(lpPathName,lpPrefixString,uUnique,lpTempFileName);
+}
+

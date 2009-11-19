@@ -335,7 +335,6 @@ ATOM WINAPI RegisterClassExW_NEW( CONST WNDCLASSEXW *lpwcx )
 	STACK_WtoA(lpwcx->lpszClassName, wnda.lpszClassName);
 	STACK_WtoA(lpwcx->lpszMenuName, wnda.lpszMenuName);
 	wnda.lpfnWndProc = ConvertWndProcWToA( wnda.lpfnWndProc );
-	DBGPRINTF(("RegisterClassW(%s), %p => %p\n",wnda.lpszClassName,lpwcx->lpfnWndProc,wnda.lpfnWndProc));
 	return RegisterClassExA(&wnda);
 }
 
@@ -402,7 +401,6 @@ ATOM WINAPI GetClassInfoW_NEW(HINSTANCE hinst, LPCWSTR lpszClass, WNDCLASSW *wc)
 static void CALLBACK UnicodeEvent( HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime )
 {		
 	if ( idObject != OBJID_WINDOW ) return;
-	DBGPRINTF(("Window created: %p\n",hwnd));
 	//NOTE: we don't grab Win16Lock!! we touch windows only belonging to current thread.
 	BOOL isUnicode = FALSE;
 	PWND pwnd = HWNDtoPWND(hwnd);
@@ -431,7 +429,6 @@ HWND WINAPI CreateWindowExW_NEW(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lp
 	
 	STACK_WtoA(lpClassName, lpClassNameA);
 	STACK_WtoA(lpWindowName, lpWindowNameA);	
-	DBGPRINTF(("CreateWindowExW(%s)\n",lpClassNameA));
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
 	ret = CreateWindowExA(dwExStyle,lpClassNameA,lpWindowNameA,dwStyle,x,y,nWidth,nHeight,hWndParent,hMenu,hInstance,lpParam);
 	UnhookWinEvent(uniEvent);
@@ -455,7 +452,6 @@ HWND WINAPI CreateMDIWindowW_NEW( LPCWSTR lpClassName, LPCWSTR lpWindowName, DWO
 	
 	STACK_WtoA(lpClassName, lpClassNameA);
 	STACK_WtoA(lpWindowName, lpWindowNameA);	
-	DBGPRINTF(("CreateMDIWindowW(%s)\n",lpClassNameA));
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
 	ret = CreateMDIWindowA(lpClassNameA,lpWindowNameA,dwStyle,X,Y,nWidth,nHeight,hWndParent,hInstance,lParam);
 	UnhookWinEvent(uniEvent);

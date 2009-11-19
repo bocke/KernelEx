@@ -34,6 +34,7 @@ DWORD WINAPI GetObjectType_fix(HGDIOBJ hgdiobj);
 BOOL WINAPI DeleteObject_fix(HGDIOBJ hObject);
 HGDIOBJ WINAPI SelectObject_fix(HDC hdc, HGDIOBJ hgdiobj);
 BOOL WINAPI DeleteDC_fix(HDC hdc);
+HBITMAP WINAPI CreateDIBSection_fix(HDC hdc, BITMAPINFO *pbmi, UINT iUsage, VOID **ppvBits, HANDLE hSection, DWORD dwOffset);
 DWORD WINAPI GetGlyphOutlineA_fix(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRICS lpgm, DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2);
 DWORD WINAPI GetFontUnicodeRanges_new(HDC hdc, LPGLYPHSET lpgs);
 int WINAPI SetGraphicsMode_NT(HDC hdc, int iMode);
