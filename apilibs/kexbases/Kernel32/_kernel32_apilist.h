@@ -35,6 +35,7 @@ void WINAPI DeleteCriticalSection_new(PCRITICAL_SECTION lpCriticalSection);
 HANDLE WINAPI CreateFileA_fix(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDistribution, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 BOOL WINAPI ReadFile_fix(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped);
 BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
+UINT WINAPI GetTempFileNameA_fix(LPCSTR lpPathName, LPCSTR lpPrefixString, UINT uUnique, LPTSTR lpTempFileName);
 HWND WINAPI GetConsoleWindow_new();
 BOOL WINAPI GetFileSizeEx_new(HANDLE hFile, PLARGE_INTEGER lpFileSize);
 BOOL WINAPI GetModuleHandleExA_new(DWORD dwFlags, LPCSTR lpModuleName, HMODULE* phModule);

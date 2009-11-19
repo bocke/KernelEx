@@ -25,6 +25,7 @@
 #include "k32ord.h"
 #include "kexcoresdk.h"
 
+static BOOL blockkexgdiobj;
 static WORD g_GDILH_addr;
 static DWORD g_GdiBase;
 
@@ -38,6 +39,7 @@ BOOL InitGDIObjects(void)
 {
 	g_GdiBase = MapSL( LoadLibrary16("gdi") << 16 );
 	g_GDILH_addr = ((PINSTANCE16)g_GdiBase)->pLocalHeap;
+	blockkexgdiobj = (BOOL)GetProcAddress(GetModuleHandle("rp10.dll"),"blockkexgdiobj");
 	return (BOOL)g_GdiBase;
 }
 
@@ -122,6 +124,7 @@ static DWORD SwitchGDIObjectType( PGDIOBJ16 obj )
 /* MAKE_EXPORT GetObjectType_fix=GetObjectType */
 DWORD WINAPI GetObjectType_fix( HGDIOBJ hgdiobj )
 {
+	if (blockkexgdiobj) return GetObjectType(hgdiobj);
 	//GetObjectType is rewritten in order to boost it's correctness and speed:
 	//constantly throwing page/segfaults is very bad on virtual machines.
 	PGDIOBJ16 obj = GetGDIObjectPtr( hgdiobj );	
@@ -150,6 +153,7 @@ DWORD WINAPI GetObjectType_fix( HGDIOBJ hgdiobj )
 /* MAKE_EXPORT DeleteObject_fix=DeleteObject */
 BOOL WINAPI DeleteObject_fix( HGDIOBJ hObject )
 {
+	if (blockkexgdiobj) return DeleteObject(hObject);
 	PGDIOBJ16 obj = GetGDIObjectPtr( hObject );
 	if ( !obj || !SwitchGDIObjectType(obj) ) return FALSE;
 	DWORD violated = 0;
@@ -177,6 +181,7 @@ BOOL WINAPI DeleteObject_fix( HGDIOBJ hObject )
 /* MAKE_EXPORT SelectObject_fix=SelectObject */
 HGDIOBJ WINAPI SelectObject_fix( HDC hdc, HGDIOBJ hgdiobj )
 {
+	if (blockkexgdiobj) return SelectObject(hdc,hgdiobj);
 	//9x should do this
 	if ( !hdc ) SetLastError(ERROR_INVALID_HANDLE);
 	if ( !hdc || !hgdiobj ) return NULL;
@@ -203,6 +208,7 @@ HGDIOBJ WINAPI SelectObject_fix( HDC hdc, HGDIOBJ hgdiobj )
 /* MAKE_EXPORT DeleteDC_fix=DeleteDC */
 BOOL WINAPI DeleteDC_fix( HDC hdc )
 {
+	if (blockkexgdiobj) return DeleteDC(hdc);
 	BOOL ret;
 	PGDIOBJ16 obj = GetGDIObjectPtr( hdc );
 	if ( !obj || !SwitchGDIObjectType(obj) ) return FALSE;
@@ -226,4 +232,19 @@ BOOL WINAPI DeleteDC_fix( HDC hdc )
 		}
 	}
 	return ret;
+}
+
+/* MAKE_EXPORT CreateDIBSection_fix=CreateDIBSection */
+HBITMAP WINAPI CreateDIBSection_fix(
+  HDC hdc,                 // handle to DC
+  BITMAPINFO *pbmi,  // bitmap data
+  UINT iUsage,             // data type indicator
+  VOID **ppvBits,          // bit values
+  HANDLE hSection,         // handle to file mapping object
+  DWORD dwOffset           // offset to bitmap bit values
+)
+{
+	if (pbmi && pbmi->bmiHeader.biSize == sizeof(BITMAPINFO)) //9x does not forgive
+		pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER); //9x does not forget
+	return CreateDIBSection(hdc,pbmi,iUsage,ppvBits,hSection,dwOffset);
 }

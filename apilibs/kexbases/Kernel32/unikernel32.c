@@ -510,7 +510,7 @@ UINT WINAPI GetTempFileNameW_new(LPCWSTR lpPathNameW, LPCWSTR lpPrefixStringW, U
 	file_GetCP();
 	file_ALLOC_WtoA(lpPathName);
 	file_ALLOC_WtoA(lpPrefixString);
-	ret = GetTempFileNameA(lpPathNameA, lpPrefixStringA, uUnique, lpTempFileNameA);
+	ret = GetTempFileNameA_fix(lpPathNameA, lpPrefixStringA, uUnique, lpTempFileNameA);
 	if (ret)
 	{
 		file_AtoW(lpTempFileName, MAX_PATH);
