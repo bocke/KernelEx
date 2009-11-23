@@ -58,7 +58,8 @@ static LPVOID* AllocExtTlsSlots()
 
 static CRITICAL_SECTION* find_TlsLock()
 {
-	return *(CRITICAL_SECTION**)((DWORD) TlsAlloc + 2);
+	PROC pTlsAlloc = kexGetProcAddress(GetModuleHandle("KERNEL32"), "TlsAlloc");
+	return *(CRITICAL_SECTION**)((DWORD) pTlsAlloc + 2);
 }
 
 static inline 
