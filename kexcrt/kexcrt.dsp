@@ -202,6 +202,10 @@ SOURCE=.\printf.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\msvc\purecall.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\snprintf.c
 # End Source File
 # Begin Source File

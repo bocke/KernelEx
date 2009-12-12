@@ -19,39 +19,23 @@
  *
  */
 
-#ifndef __SETTINGSDB_H
-#define __SETTINGSDB_H
+/** @file
+ * This file contains workarounds for compiler bugs.
+ * This file is included in every file MSVC compiles via forced includes /FI flag.
+ */
 
-#include "sstring.hpp"
-#include <map>
-#include "resolver.h"
-#include "apiconf.h"
+#ifndef __MSVC_QUIRKS_H
+#define __MSVC_QUIRKS_H
 
-using namespace std;
+/* MSVC 6.0 quirks */
+#if defined(_MSC_VER) && _MSC_VER < 1201
 
-class SettingsDB
-{
-public:
-	static SettingsDB instance;
+/* MSVC 6.0 for-loop workaround. */
+#define for if (0); else for
 
-	~SettingsDB();
-	void clear();
-	void flush_all();
-	appsetting get_appsetting(const char* path);
-	void write_single(const char* path, const char* conf_name, BYTE flags);
-#ifdef _DEBUG
-	void dump_db();
-#endif
+/* disable "identifier was truncated to '255' characters in the debug information" */
+#pragma warning(disable:4786)
 
-private:
-	map<sstring, appsetting> db;
-	map<sstring, appsetting> db_wild;
-	CRITICAL_SECTION cs;
-
-	SettingsDB();
-	void parse_configs();
-	void parse_flags();
-	void add_apilib_excludes();
-};
+#endif /* MSVC 6.0 quirks */
 
 #endif
