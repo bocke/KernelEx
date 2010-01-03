@@ -55,7 +55,7 @@ DebugWindow::DebugWindow()
 	
 	InitializeCriticalSection(&cs);
 	MakeCriticalSectionGlobal(&cs);
-	InitCommonControls();
+	LoadLibrary("COMCTL32.DLL");
 	hThread = CreateThread(NULL, 0, thread, (void*) this, 0, &tid);
 }
 
