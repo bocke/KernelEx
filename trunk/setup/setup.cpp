@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008-2009, Xeno86
+ *  Copyright (C) 2008-2010, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -34,6 +34,7 @@
 
 #define CODE_SEG ".text"
 #define DATA_SEG ".data"
+#define INIT_SEG "_INIT"
 
 
 Setup::Setup(char* _backup_file) : backup_file(strupr(_backup_file))
@@ -229,6 +230,62 @@ void Setup::disable_resource_check()
 		else ShowError(IDS_MULPAT, "disable_resource_check");
 	}
 	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "disable_resource_check",
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	set_pattern(found_loc, after, length);
+}
+
+//no named/rcdata resource types mirroring
+void Setup::disable_named_and_rcdata_resources_mirroring()
+{
+	static const short pattern[] = {
+		0x66,0x8B,0x40,0x0E,0x66,0x89,0x45,0xDA,0x8B,0x45,  -1,0x66,0x8B,0x48,
+		0x0C,0x66,0x89,0x4D,0xD8,0x66,0x8B,0x45,0xE0,0x8B,0x4D,0xD4,0x66,0x89,
+		0x01,0x83,0x45,0xD4,0x02,0x66,0x8B,0x45,0xDA,0x66,0x03,0x45,0xD8,0x66,
+		0x89,0x45,0x8C,0x8B,0x4D,0xD4,0x66,0x89,0x01,0x83,0x45,0xD4,0x02
+	};
+	static const short after[] = {
+		0x66,0x8B,0x48,0x0E,0x66,0x03,0x48,0x0C,0x66,0x89,0x4D,0x8C,0x8B,0x45,
+		0xA4,0x83,0x38,0x0A,0x74,0x40,0x83,0x38,0x00,0x79,0x04,0x3B,0xC0,0xEB,
+		0x37,0x66,0x8B,0x45,0xE0,0x8B,0x4D,0xD4,0x66,0x89,0x01,0x83,0xC1,0x02,
+		0x66,0x8B,0x45,0x8C,0x66,0x89,0x01,0x83,0xC1,0x02,0x89,0x4D,0xD4
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
+	int size = pefile.GetSectionSize(CODE_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size, pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "disable_named_and_rcdata_resources_mirroring");
+		else ShowError(IDS_MULPAT, "disable_named_and_rcdata_resources_mirroring");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "disable_named_and_rcdata_resources_mirroring",
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	set_pattern(found_loc, after, length);
+}
+
+//change obfuscator to non-negative IDs
+void Setup::positive_pids_patch()
+{
+	static const short pattern[] = {
+		0xB9,0x01,0x00,0xFF,0xFF,-1,0x23,0xD1,0x33,0xD1
+	};
+	static const short after[] = {
+		0xB9,0x01,0x00,0xFF,0xFF,-1,0x23,0xD1,0x90,0x90
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(INIT_SEG);
+	int size = pefile.GetSectionSize(INIT_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size, pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "positive_pids_patch");
+		else ShowError(IDS_MULPAT, "positive_pids_patch");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "positive_pids_patch",
 			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
 	set_pattern(found_loc, after, length);
 }
@@ -519,9 +576,14 @@ void Setup::install()
 	if (version >= 0)
 	{
 		if (version == KEX_STUB_VER)
+		{
+			DBGPRINTF(("No need to upgrade\n"));
 			return;
+		}
 		else
+		{
 			upgrade = true;
+		}
 	}
 
 	char kernel32path[MAX_PATH];
@@ -542,6 +604,8 @@ void Setup::install()
 	find_FLoadTreeNotify2();
 	disable_platform_check();
 	disable_resource_check();
+	disable_named_and_rcdata_resources_mirroring();
+	positive_pids_patch();
 	mod_imte_alloc();
 	mod_mr_alloc();
 	mod_pdb_alloc();
