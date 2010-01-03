@@ -75,7 +75,7 @@ BEGIN
             VALUE "FileDescription", "sheet\0"
             VALUE "FileVersion", "1, 0, 0, 4\0"
             VALUE "InternalName", "sheet\0"
-            VALUE "LegalCopyright", "Copyright © 2009, Xeno86\0"
+            VALUE "LegalCopyright", "Copyright © 2009-2010, Xeno86\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "sheet.dll\0"
             VALUE "PrivateBuild", "\0"
