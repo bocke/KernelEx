@@ -595,6 +595,7 @@ bool are_extensions_enabled()
 {
 	config_params cp;
 	MODREF* exe = (*pppdbCur)->pExeMODREF;
+	DBGASSERT(exe != NULL);
 	return get_config(exe, cp);
 }
 
@@ -608,6 +609,9 @@ static BOOL WINAPI IsKnownKexDLL(char* name, const char* ext)
 	DWORD size = sizeof(path);
 
 	if (ext && strcmp(ext, "DLL") != 0)
+		return FALSE;
+	
+	if ((*pppdbCur)->pExeMODREF == NULL)
 		return FALSE;
 	
 	if (are_extensions_enabled())
