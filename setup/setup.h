@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008-2009, Xeno86
+ *  Copyright (C) 2008-2010, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -57,6 +57,8 @@ private:
 	void set_pattern(DWORD loc, const short* new_pattern, int pat_len);
 	void disable_platform_check();
 	void disable_resource_check();
+	void disable_named_and_rcdata_resources_mirroring();
+	void positive_pids_patch();
 	void mod_imte_alloc();
 	void mod_mr_alloc();
 	void mod_pdb_alloc();

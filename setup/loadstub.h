@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2008-2010, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -23,7 +23,8 @@
 #define __LOADSTUB_H
 
 #define KEX_SIGNATURE "KrnlEx"
-#define KEX_STUB_VER 3
+/* Update this whenever patching functions are changed. */
+#define KEX_STUB_VER 5
 
 #define JTAB_SIZE 6
 #define JTAB_EFO_DYN 0
