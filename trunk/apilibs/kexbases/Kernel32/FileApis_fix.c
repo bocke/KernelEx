@@ -38,6 +38,8 @@ HANDLE WINAPI CreateFileA_fix(LPCSTR lpFileName, DWORD dwDesiredAccess,
 		if (oldaccess & FILE_EXECUTE)
 			dwDesiredAccess |= GENERIC_EXECUTE;
 	}
+	//FILE_SHARE_DELETE is not supported
+	dwShareMode &= ~FILE_SHARE_DELETE;
 	// hTemplate has to be NULL on 9x
 	hTemplateFile = NULL;
 	// special case: overlapped I/O
@@ -125,10 +127,58 @@ BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesTo
 /* MAKE_EXPORT GetTempFileNameA_fix=GetTempFileNameA */
 UINT WINAPI GetTempFileNameA_fix(LPCSTR lpPathName, LPCSTR lpPrefixString, UINT uUnique, LPTSTR lpTempFileName)
 {
+	static int g_tempprefix = 0;
+
 	if (!lpPathName) 
 		lpPathName = "\\";
-	if (!lpPrefixString) 
-		lpPrefixString = "0";
+	if (!lpPrefixString)
+	{
+		char temppref[2];
+		g_tempprefix++;
+		g_tempprefix %= 5;
+		temppref[0] = '0' + g_tempprefix;
+		temppref[1] = '\0';
+		lpPrefixString = temppref;
+	}
 	return GetTempFileNameA(lpPathName,lpPrefixString,uUnique,lpTempFileName);
 }
 
+/* MAKE_EXPORT GetDiskFreeSpaceA_fix=GetDiskFreeSpaceA */
+BOOL WINAPI GetDiskFreeSpaceA_fix(LPCSTR lpRootPathName, LPDWORD lpSectorsPerCluster, 
+								  LPDWORD lpBytesPerSector, LPDWORD lpNumberOfFreeClusters,
+								  LPDWORD lpTotalNumberOfClusters)
+{
+	char newRootPath[4] = { "X:\\" };
+	if (lstrlenA(lpRootPathName) == 2 && lpRootPathName[1] == ':') //GetDiskFreeSpace fails on paths like C:
+	{
+		newRootPath[0] = lpRootPathName[0];
+		lpRootPathName = newRootPath;
+	}
+	BOOL ret = GetDiskFreeSpaceA(lpRootPathName,lpSectorsPerCluster,lpBytesPerSector,lpNumberOfFreeClusters,lpTotalNumberOfClusters);
+	if (!ret) //more suprisingly, it may fail on paths with two extensions (e.g. c:\game.exe.lnk)
+	{
+		char shortPath[MAX_PATH];
+		if (GetShortPathName(lpRootPathName,shortPath,MAX_PATH))
+		{
+			//GetDiskFreeSpace will still fail on short path name, so we check drive root, having path validated
+			newRootPath[0] = shortPath[0];
+			ret = GetDiskFreeSpaceA(newRootPath,lpSectorsPerCluster,lpBytesPerSector,lpNumberOfFreeClusters,lpTotalNumberOfClusters);
+		}
+	}
+	return ret;
+}
+
+/* MAKE_EXPORT GetDiskFreeSpaceExA_fix=GetDiskFreeSpaceExA */
+BOOL WINAPI GetDiskFreeSpaceExA_fix(LPCSTR lpDirectoryName, PULARGE_INTEGER lpFreeBytesAvailable, 
+									PULARGE_INTEGER lpTotalNumberOfBytes, PULARGE_INTEGER lpTotalNumberOfFreeBytes)
+{
+	//GetDiskFreeSpaceEx does not fail on paths like C: but still fails on on paths with two extensions
+	BOOL ret = GetDiskFreeSpaceExA(lpDirectoryName,lpFreeBytesAvailable,lpTotalNumberOfBytes,lpTotalNumberOfFreeBytes);
+	if (!ret)
+	{
+		char shortPath[MAX_PATH];
+		if (GetShortPathName(lpDirectoryName,shortPath,MAX_PATH))
+			ret = GetDiskFreeSpaceExA(shortPath,lpFreeBytesAvailable,lpTotalNumberOfBytes,lpTotalNumberOfFreeBytes);
+	}
+	return ret;
+}
