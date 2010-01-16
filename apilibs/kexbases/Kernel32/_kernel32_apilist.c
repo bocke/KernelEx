@@ -81,6 +81,8 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetConsoleWindow", GetConsoleWindow_new),
 	DECL_API("GetCurrentDirectoryW", GetCurrentDirectoryW_new),
 	DECL_API("GetDefaultCommConfigW", GetDefaultCommConfigW_new),
+	DECL_API("GetDiskFreeSpaceA", GetDiskFreeSpaceA_fix),
+	DECL_API("GetDiskFreeSpaceExA", GetDiskFreeSpaceExA_fix),
 	DECL_API("GetDiskFreeSpaceExW", GetDiskFreeSpaceExW_new),
 	DECL_API("GetDiskFreeSpaceW", GetDiskFreeSpaceW_new),
 	DECL_API("GetEnvironmentStringsW", GetEnvironmentStringsW_new),

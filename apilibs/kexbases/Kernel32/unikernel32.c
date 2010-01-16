@@ -302,7 +302,7 @@ BOOL WINAPI GetDiskFreeSpaceExW_new(LPCWSTR lpDirectoryNameW, PULARGE_INTEGER lp
 {
 	file_GetCP();
 	file_ALLOC_WtoA(lpDirectoryName);
-	return GetDiskFreeSpaceExA(lpDirectoryNameA, lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
+	return GetDiskFreeSpaceExA_fix(lpDirectoryNameA, lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
 }
 
 //MAKE_EXPORT GetDiskFreeSpaceW_new=GetDiskFreeSpaceW
@@ -310,7 +310,7 @@ BOOL WINAPI GetDiskFreeSpaceW_new(LPCWSTR lpRootPathNameW, LPDWORD lpSectorsPerC
 {
 	file_GetCP();
 	file_ALLOC_WtoA(lpRootPathName);
-	return GetDiskFreeSpaceA(lpRootPathNameA, lpSectorsPerCluster, lpBytesPerSector, lpNumberOfFreeClusters, lpTotalNumberOfClusters);
+	return GetDiskFreeSpaceA_fix(lpRootPathNameA, lpSectorsPerCluster, lpBytesPerSector, lpNumberOfFreeClusters, lpTotalNumberOfClusters);
 }
 
 //MAKE_EXPORT GetEnvironmentStringsW_new=GetEnvironmentStringsW
