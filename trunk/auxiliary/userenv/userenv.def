@@ -4,6 +4,8 @@ EXPORTS
 	DestroyEnvironmentBlock
 	ExpandEnvironmentStringsForUserA
 	ExpandEnvironmentStringsForUserW
+	GetAllUsersProfileDirectoryA
+	GetAllUsersProfileDirectoryW
 	GetProfilesDirectoryA
 	GetProfilesDirectoryW
 	GetProfileType
