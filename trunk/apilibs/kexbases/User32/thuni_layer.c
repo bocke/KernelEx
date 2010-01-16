@@ -119,11 +119,7 @@ LONG WINAPI GetWindowLongA_NEW(HWND hWnd, int nIndex)
 /* MAKE_EXPORT IsWindowUnicode_NEW=IsWindowUnicode */
 BOOL WINAPI IsWindowUnicode_NEW( HWND hWnd )
 {
-	BOOL ret;
-	GrabWin16Lock();
-	ret = GetWindowLongA(hWnd, GWL_EXSTYLE) & WS_EX_UNICODE ? TRUE : FALSE;
-	ReleaseWin16Lock();
-	return ret;
+	return GetWindowLongA(hWnd, GWL_EXSTYLE) & WS_EX_UNICODE ? TRUE : FALSE;
 }
 
 /* MAKE_EXPORT SetWindowLongA_NEW=SetWindowLongA */
