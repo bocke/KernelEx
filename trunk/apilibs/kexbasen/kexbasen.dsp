@@ -257,7 +257,15 @@ SOURCE=.\winspool\_winspool_apilist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\winspool\_winspool_stubs.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\winspool\DefaultPrinter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\winspool\uniwinspool.c
 # End Source File
 # End Group
 # Begin Group "shfolder"
@@ -381,6 +389,15 @@ SOURCE=.\unifwd.c
 # Begin Source File
 
 SOURCE=.\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\k32ord.def
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\k32ord.h
 # End Source File
 # Begin Source File
 
