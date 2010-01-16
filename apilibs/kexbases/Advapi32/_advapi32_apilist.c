@@ -58,6 +58,8 @@ static const apilib_named_api advapi32_named_apis[] =
 	DECL_API("DeleteAce", DeleteAce_new),
 	DECL_API("DuplicateToken", DuplicateToken_new),
 	DECL_API("DuplicateTokenEx", DuplicateTokenEx_new),
+	DECL_API("EnumServicesStatusExA", EnumServicesStatusExA_stub),
+	DECL_API("EnumServicesStatusExW", EnumServicesStatusExW_stub),
 	DECL_API("EqualPrefixSid", EqualPrefixSid_new),
 	DECL_API("EqualSid", EqualSid_new),
 	DECL_API("FreeSid", FreeSid_new),

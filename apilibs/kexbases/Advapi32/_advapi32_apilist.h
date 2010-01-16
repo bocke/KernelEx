@@ -56,6 +56,8 @@ STUB QueryServiceStatusEx_stub;
 STUB NotifyBootConfigStatus_stub;
 STUB QueryWindows31FilesMigration_stub;
 STUB SynchronizeWindows31FilesAndWindowsNTRegistry_stub;
+STUB EnumServicesStatusExA_stub;
+STUB EnumServicesStatusExW_stub;
 BOOL WINAPI OpenProcessToken_new(HANDLE ProcessHandle, DWORD DesiredAccess, HANDLE *TokenHandle);
 BOOL WINAPI OpenThreadToken_new(HANDLE ThreadHandle, DWORD DesiredAccess, BOOL OpenAsSelf, HANDLE *TokenHandle);
 BOOL WINAPI DuplicateTokenEx_new(HANDLE ExistingTokenHandle, DWORD dwDesiredAccess, LPSECURITY_ATTRIBUTES lpTokenAttributes, SECURITY_IMPERSONATION_LEVEL ImpersonationLevel, TOKEN_TYPE TokenType, PHANDLE DuplicateTokenHandle);
