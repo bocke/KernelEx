@@ -25,6 +25,10 @@
 #include <windows.h>
 #include <malloc.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int __stdcall STUB(void);
 typedef int __stdcall FWDPROC(void);
 
@@ -34,6 +38,9 @@ int WINAPI CommonUnimpStub(void);
 char* file_fixWprefix(char* in);
 void fatal_error(const char* msg);
 
+#ifdef __cplusplus
+};
+#endif
 
 #ifdef __GNUC__
 #define UNIMPL_FUNC(name,params) \
