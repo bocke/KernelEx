@@ -18,14 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
-#include <stdarg.h>
-
-#include <ntstatus.h>
-#define WIN32_NO_STATUS
 #include <windows.h>
+#include <Shlobj.h>
+#include <Shlwapi.h>
 #include <profinfo.h>
 
-//#include "wine/debug.h"
 
 #ifdef _MSC_VER
 
@@ -94,30 +91,75 @@ BOOL WINAPI ExpandEnvironmentStringsForUserW( HANDLE hToken, LPCWSTR lpSrc,
     return ret;
 }
 
-BOOL WINAPI GetUserProfileDirectoryA( HANDLE hToken, LPSTR lpProfileDir,
+static int getsubdirpath(int nFolder, LPSTR lpBuffer, LPSTR lpSubDir)
+{
+	if ( FAILED(SHGetSpecialFolderPathA(NULL,lpBuffer,CSIDL_APPDATA,TRUE)) )
+		return 0;
+	PathAppendA(lpBuffer,lpSubDir);
+	return lstrlenA(lpBuffer) + 1;
+}
+
+static int GetSpecialSubdirPathA(int nFolder, LPSTR lpSubDir, LPSTR lpDir, LPDWORD lpcchSize )
+{
+	char buffer[MAX_PATH];
+	DWORD bufsize = getsubdirpath(nFolder,buffer,lpSubDir);
+	if (!lpDir || !lpcchSize || !bufsize) return 0;
+	if (*lpcchSize<bufsize)
+	{
+		*lpcchSize = bufsize;
+		return 0;
+	}
+	*lpcchSize = bufsize;
+	lstrcpyA(lpDir,buffer);
+	return bufsize;	
+}
+
+static int GetSpecialSubdirPathW(int nFolder, LPSTR lpSubDir, LPWSTR lpDir, LPDWORD lpcchSize )
+{
+	char buffer[MAX_PATH];
+	DWORD bufsize = getsubdirpath(nFolder,buffer,lpSubDir);
+	if (!lpDir || !lpcchSize || !bufsize) return 0;
+	bufsize = MultiByteToWideChar(CP_ACP,0,buffer,-1,NULL,0);
+	if (*lpcchSize<bufsize)
+	{
+		*lpcchSize = bufsize;
+		return 0;
+	}
+	*lpcchSize = bufsize;
+	return MultiByteToWideChar(CP_ACP,0,buffer,-1,lpDir,bufsize);
+}
+
+
+int WINAPI GetUserProfileDirectoryA( HANDLE hToken, LPSTR lpProfileDir,
                      LPDWORD lpcchSize )
 {
-    FIXME("%p %p %p\n", hToken, lpProfileDir, lpcchSize );
-    return FALSE;
+	return GetSpecialSubdirPathA(CSIDL_APPDATA,"..",lpProfileDir,lpcchSize);
 }
 
-BOOL WINAPI GetUserProfileDirectoryW( HANDLE hToken, LPWSTR lpProfileDir,
+int WINAPI GetUserProfileDirectoryW( HANDLE hToken, LPWSTR lpProfileDir,
                      LPDWORD lpcchSize )
 {
-    FIXME("%p %p %p\n", hToken, lpProfileDir, lpcchSize );
-    return FALSE;
+	return GetSpecialSubdirPathW(CSIDL_APPDATA,"..",lpProfileDir,lpcchSize);
 }
 
-BOOL WINAPI GetProfilesDirectoryA( LPSTR lpProfilesDir, LPDWORD lpcchSize )
+int WINAPI GetAllUsersProfileDirectoryA( LPSTR lpProfileDir, LPDWORD lpcchSize )
 {
-    FIXME("%p %p\n", lpProfilesDir, lpcchSize );
-    return FALSE;
+	return GetSpecialSubdirPathA(CSIDL_COMMON_APPDATA,"..",lpProfileDir,lpcchSize);
 }
 
-BOOL WINAPI GetProfilesDirectoryW( LPWSTR lpProfilesDir, LPDWORD lpcchSize )
+int WINAPI GetAllUsersProfileDirectoryW( LPWSTR lpProfileDir, LPDWORD lpcchSize )
 {
-    FIXME("%p %p\n", lpProfilesDir, lpcchSize );
-    return FALSE;
+	return GetSpecialSubdirPathW(CSIDL_COMMON_APPDATA,"..",lpProfileDir,lpcchSize);
+}
+
+int WINAPI GetProfilesDirectoryA( LPSTR lpProfilesDir, LPDWORD lpcchSize )
+{
+    return GetSpecialSubdirPathA(CSIDL_APPDATA,"..\\..",lpProfilesDir,lpcchSize);
+}
+
+int WINAPI GetProfilesDirectoryW( LPWSTR lpProfilesDir, LPDWORD lpcchSize )
+{
+    return GetSpecialSubdirPathW(CSIDL_APPDATA,"..\\..",lpProfilesDir,lpcchSize);
 }
 
 BOOL WINAPI GetProfileType( DWORD *pdwFlags )
