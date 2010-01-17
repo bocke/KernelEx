@@ -199,6 +199,14 @@ SectionEnd
 Section "Install"
 
   SetDetailsView show
+
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
+  IfErrors +5
+    DetailPrint "Detected unfinished previous installation."
+    DetailPrint "You have to restart the system in order to complete it before you can proceed."
+    MessageBox MB_ICONSTOP|MB_OK "You have to restart the system first."
+    Abort
+
   SetOutPath "$INSTDIR"
     
   SetOverwrite on
@@ -333,6 +341,7 @@ Section "Install"
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
   SetRebootFlag true
 
 SectionEnd
@@ -343,15 +352,21 @@ SectionEnd
 Section "Uninstall"
 
   SetDetailsView show
-  
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(DESC_SETTINGS_PRESERVE)" IDYES +2 IDNO 0
-    DeleteRegKey HKLM "Software\KernelEx"
-  
-  DeleteRegKey HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx"
-  DeleteRegKey /ifempty HKLM "System\CurrentControlSet\Control\MPRServices"
+
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
+  IfErrors +5
+    DetailPrint "Detected unfinished previous installation."
+    DetailPrint "You have to restart the system in order to complete it before you can proceed."
+    MessageBox MB_ICONSTOP|MB_OK "You have to restart the system first."
+    Abort
   
   ;Files to uninstall
-  Rename /REBOOTOK "$INSTDIR\kernel32.bak" "$SYSDIR\kernel32.dll"
+  IfFileExists "$INSTDIR\kernel32.bak" 0 +5
+    GetTempFileName $0 "$SYSDIR"
+    Delete $0
+    Rename "$INSTDIR\kernel32.bak" $0
+    Rename /REBOOTOK $0 "$SYSDIR\kernel32.dll"
+
   Delete /REBOOTOK "$INSTDIR\KernelEx.dll"
   Delete /REBOOTOK "$INSTDIR\kexbases.dll"
   Delete /REBOOTOK "$INSTDIR\kexbasen.dll"
@@ -383,8 +398,15 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\MSLU"
   WriteINIStr $WINDIR\wininit.ini Rename DIRNUL $INSTDIR
 
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(DESC_SETTINGS_PRESERVE)" IDYES +2 IDNO 0
+    DeleteRegKey HKLM "Software\KernelEx"
+  
+  DeleteRegKey HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx"
+  DeleteRegKey /ifempty HKLM "System\CurrentControlSet\Control\MPRServices"
+  
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\KernelEx"
   
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
   SetRebootFlag true
 
 SectionEnd
