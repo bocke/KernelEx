@@ -453,13 +453,14 @@ void KexShlExt::OnInitDialog(HWND hwnd, ModuleSetting* ms)
 			ver>>24, (ver>>16) & 0xff, ver & 0xffff, debug ? "DEBUG" : "");
 	SendMessage(GetDlgItem(hwnd, IDC_KEXVER), WM_SETTEXT, 0, (LPARAM) ver_s);
 
+	ShowWindow(GetDlgItem(hwnd, IDC_OVERRIDE), debug ? SW_SHOW : SW_HIDE);
 	ShowWindow(GetDlgItem(hwnd, IDC_LOG), debug ? SW_SHOW : SW_HIDE);
 	if (!debug)
 	{
 		RECT r;
 		HWND h = GetDlgItem(hwnd, IDC_GADVAN);
 		GetWindowRect(h, &r);
-		r.bottom -= 20; //height between IDC_LOG and element above
+		r.bottom -= 40; //height between IDC_LOG and element above
 		SetWindowPos(h, NULL, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE);
 	}
 

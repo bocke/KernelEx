@@ -21,6 +21,8 @@ REGEDIT4
 "*\\GIMP-2.6*-SETUP.EXE"="WIN2K"
 ;-Webkit
 "*\\QTWEBKIT4.DLL"="WINXP"
+;-AbiWord
+"*\\BIN\\ABIWORD.EXE"="WINXP"
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:

@@ -45,6 +45,8 @@ BOOL WINAPI GetModuleHandleExW_new(DWORD dwFlags, LPCWSTR lpModuleNameW, HMODULE
 BOOL WINAPI GlobalMemoryStatusEx_new(LPMEMORYSTATUSEX lpmemex);
 BOOL WINAPI HeapLock_new(HANDLE hHeap);
 BOOL WINAPI HeapUnlock_new(HANDLE hHeap);
+LPVOID WINAPI GlobalLock_fix(HGLOBAL hMem);
+BOOL WINAPI GlobalUnlock_fix(HGLOBAL hMem);
 BOOL WINAPI InitializeCriticalSectionAndSpinCount_new(LPCRITICAL_SECTION lpCriticalSection, DWORD dwSpinCount);
 BOOL WINAPI IsProcessorFeaturePresent_new(DWORD feature);
 BOOL WINAPI IsWow64Process_new(HANDLE hProcess, PBOOL Wow64Process);
