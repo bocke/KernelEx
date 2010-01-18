@@ -22,9 +22,9 @@
 #ifndef __VERSION_H
 #define __VERSION_H
 
-#define VERSION_STR      "4.1 Beta 1"
-#define VERSION_CODE     0x04010001
-#define RCVERSION        4, 1, 0, 1
-#define _RCVERSION_      "4, 1, 0, 1"
+#define VERSION_STR      "4.5 Beta 1"
+#define VERSION_CODE     0x04050001
+#define RCVERSION        4, 5, 0, 1
+#define _RCVERSION_      "4, 5, 0, 1"
 
 #endif
