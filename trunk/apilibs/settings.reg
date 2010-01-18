@@ -22,7 +22,7 @@ REGEDIT4
 ;-Webkit
 "*\\QTWEBKIT4.DLL"="WINXP"
 ;-AbiWord
-"*\\BIN\\ABIWORD.EXE"="WINXP"
+"*\\BIN\\ABIWORD.EXE"="VISTA"
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:
