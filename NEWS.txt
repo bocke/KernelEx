@@ -48,7 +48,7 @@ Notes:
 Please test the apps which were working before. Compare the performance and memory usage of any heavy apps you use.
 Pay attention to possible national language input problems.
 * If you want to downgrade to Final 2, you have to uninstall this beta first.
-* Please don't whine.
+* Enjoy this great release. win9x 4ever.
 
 #################################################
 
