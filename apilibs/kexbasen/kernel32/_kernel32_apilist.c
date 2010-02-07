@@ -23,6 +23,7 @@
 #include "kexcoresdk.h"
 #include "_kernel32_apilist.h"
 
+extern BOOL init_threadpool();
 extern BOOL init_jemalloc();
 extern BOOL init_exttls();
 extern void uninit_jemalloc();
@@ -30,7 +31,7 @@ extern void detach_exttls();
 
 BOOL init_kernel32()
 {
-	return init_jemalloc() && init_exttls();
+	return init_jemalloc() && init_exttls() && init_threadpool();
 }
 
 void uninit_kernel32()

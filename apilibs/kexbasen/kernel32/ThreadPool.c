@@ -42,8 +42,6 @@
 
 /*	RegisterWait/TimerQueues are implemented using waitable timers, 
  *  unlike wine/shlwapi/whatever implementations exist.
- *  
- *	TODO: unugly wait-CS and timerqueue-default initialization
  */
 
 
@@ -117,8 +115,13 @@ typedef struct
 } ASYNC_CALL, *PASYNC_CALL;
 
 static PWAIT_THREAD waitthreads[MAX_WAIT_THREADS] = {0};
-static CRITICAL_SECTION threads_cs;
-static LONG init_cs = 0;
+static CRITICAL_SECTION wait_cs;
+
+BOOL init_threadpool()
+{
+	InitializeCriticalSection(&wait_cs);
+	return TRUE;
+}
 
 static VOID ActivateTimer(PWAIT_WORK_ITEM workItem)
 {
@@ -217,7 +220,7 @@ static DWORD CALLBACK AsyncWaiterCall(LPVOID Arg)
 static VOID TerminateWaitThread(PWAIT_THREAD threadinfo)
 {
 	int i;
-	EnterCriticalSection(&threads_cs);
+	EnterCriticalSection(&wait_cs);
 	for (i=0;i<MAX_WAIT_THREADS;i++)
 	{
 		if (waitthreads[i] == threadinfo)
@@ -226,7 +229,7 @@ static VOID TerminateWaitThread(PWAIT_THREAD threadinfo)
 			break;
 		}
 	}
-	LeaveCriticalSection(&threads_cs);
+	LeaveCriticalSection(&wait_cs);
 	//if thread died of failure, mark all wait items abandoned
 	for (i=0;i<threadinfo->nItems;i++)
 		InterlockedCompareExchange(&threadinfo->waitItems[i]->State,WAIT_STATE_ABANDONED,WAIT_STATE_ACTIVE);
@@ -295,9 +298,7 @@ static DWORD CALLBACK WaitThreadProc(LPVOID Arg)
 
 static BOOL RegisterWaitItem(PWAIT_WORK_ITEM workItem)
 {
-	if (InterlockedIncrement(&init_cs) == 1)
-		InitializeCriticalSection(&threads_cs);
-	EnterCriticalSection(&threads_cs);
+	EnterCriticalSection(&wait_cs);
 	BOOL success = FALSE;
 	int i;
 	for (i=0;i<MAX_WAIT_THREADS;i++)
@@ -333,7 +334,7 @@ static BOOL RegisterWaitItem(PWAIT_WORK_ITEM workItem)
 			if (success) break;
 		}
 	}
-	LeaveCriticalSection(&threads_cs);
+	LeaveCriticalSection(&wait_cs);
 	return success;
 }
 
@@ -611,8 +612,10 @@ static VOID CALLBACK FinishTimerQueue(ULONG_PTR Arg)
 {
 	int i;
 	PTIMER_QUEUE timerqueue = (PTIMER_QUEUE)Arg;
+	EnterCriticalSection(&wait_cs);
 	if (defaultTimerQueue == timerqueue)
 		defaultTimerQueue = NULL;
+	LeaveCriticalSection(&wait_cs);
 	//delete all timers, waiting
 	for (i=timerqueue->nItems-1;i>=0;i--)
 		DeleteTimerQueueTimer_new( timerqueue, timerqueue->timers[i], INVALID_HANDLE_VALUE );
@@ -684,9 +687,11 @@ BOOL WINAPI CreateTimerQueueTimer_new( PHANDLE phNewTimer, HANDLE TimerQueue, WA
 	*phNewTimer = NULL;
 	if (TimerQueue == NULL)	
 	{
+		EnterCriticalSection(&wait_cs);
 		if (defaultTimerQueue == NULL)
 			defaultTimerQueue = (PTIMER_QUEUE)CreateTimerQueue_new();
 		TimerQueue = defaultTimerQueue;
+		LeaveCriticalSection(&wait_cs);
 		if (TimerQueue == NULL)	return FALSE;
 	}
 	PTIMER_ITEM timer = (PTIMER_ITEM)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(*timer));
