@@ -83,6 +83,8 @@ BOOL WINAPI QueueUserWorkItem_new( LPTHREAD_START_ROUTINE Function, PVOID Contex
 #define WAIT_STATE_GAMEOVER 4		//item is destroyed
 #define WAIT_STATE_ABANDONED 5		//item expired and removed from wait thread but not yet unregistered
 
+#define NONSENSE	10000
+
 //	RegisterWaitForSingleObject routines.
 
 typedef struct
@@ -103,6 +105,7 @@ typedef struct
 typedef struct 
 {
 	HANDLE hThread;
+	HANDLE WaitEvent;
 	BOOL InSyncCallback;
 	LONG nItems;
 	PWAIT_WORK_ITEM waitItems[MAX_WAIT_ITEMS];	
@@ -110,7 +113,7 @@ typedef struct
 
 typedef struct
 {
-	PVOID item;
+	PWAIT_WORK_ITEM item;
 	BOOLEAN TimerOrWaitFired;
 } ASYNC_CALL, *PASYNC_CALL;
 
@@ -159,7 +162,6 @@ static VOID CALLBACK AddWaitItem(ULONG_PTR Arg)
 	waitThread->nItems++;
 	SetEvent(workItem->CompletionEvent);
 	//what if callback will fire before RegisterWait... returns?
-	Sleep(0);
 	ActivateTimer(workItem);
 }
 
@@ -196,7 +198,7 @@ static VOID CALLBACK RemoveWaitItem(ULONG_PTR Arg)
 static DWORD CALLBACK AsyncWaiterCall(LPVOID Arg)
 {
 	PASYNC_CALL waiter = (PASYNC_CALL)Arg;
-	PWAIT_WORK_ITEM workItem = (PWAIT_WORK_ITEM)waiter->item;
+	PWAIT_WORK_ITEM workItem = waiter->item;
 	if (workItem->State == WAIT_STATE_ACTIVE || workItem->State == WAIT_STATE_ABANDONED)
 		workItem->Callback(workItem->Context,waiter->TimerOrWaitFired);
 	LONG CallbacksPending = InterlockedDecrement(&workItem->CallbacksPending);
@@ -236,7 +238,21 @@ static VOID TerminateWaitThread(PWAIT_THREAD threadinfo)
 	//make sure there aren't any outstanding APCs
 	SleepEx(0,TRUE);
 	CloseHandle(threadinfo->hThread);
+	CloseHandle(threadinfo->WaitEvent);
 	HeapFree(GetProcessHeap(),0,threadinfo);
+}
+
+static DWORD WaitThreadWait(PWAIT_THREAD threadinfo)
+{
+	int i;
+	int nCount = threadinfo->nItems * 2;
+	HANDLE* handles = (HANDLE*)alloca(sizeof(HANDLE)*nCount);
+	for (i=0;i<threadinfo->nItems;i++)
+	{
+		handles[i*2] = threadinfo->waitItems[i]->Object;
+		handles[(i*2)+1] = threadinfo->waitItems[i]->TimerObject;
+	}
+	return WaitForMultipleObjectsEx(nCount,handles,FALSE,INFINITE,TRUE);
 }
 
 static DWORD CALLBACK WaitThreadProc(LPVOID Arg)
@@ -246,30 +262,26 @@ static DWORD CALLBACK WaitThreadProc(LPVOID Arg)
 	SleepEx(INFINITE,TRUE);
 	while (TRUE)
 	{
-		int i;
-		int nCount = threadinfo->nItems * 2;
-		if (!nCount) //no things to do, wait 3 seconds and leave
+		SetEvent(threadinfo->WaitEvent);
+		if (!threadinfo->nItems) //no things to do, wait 3 seconds and leave
 		{
 			if (SleepEx(3000,TRUE)!=WAIT_IO_COMPLETION)
 				break;
 			else
 				continue;
 		}
-		HANDLE* handles = (HANDLE*)alloca(sizeof(HANDLE)*nCount);
-		for (i=0;i<threadinfo->nItems;i++)
-		{
-			handles[i*2] = threadinfo->waitItems[i]->Object;
-			handles[(i*2)+1] = threadinfo->waitItems[i]->TimerObject;
-		}
-		DWORD status = WaitForMultipleObjectsEx(nCount,handles,FALSE,INFINITE,TRUE);
+		DWORD status = WaitThreadWait(threadinfo);
+		ResetEvent(threadinfo->WaitEvent);
 		if (status == WAIT_FAILED) break; //FFFFFUUUU
 		if (status >= WAIT_OBJECT_0 && status <= WAIT_OBJECT_0+MAXIMUM_WAIT_OBJECTS )
 		{
 			status -= WAIT_OBJECT_0;
 			PWAIT_WORK_ITEM workItem = threadinfo->waitItems[status/2];
 			BOOL TimerFired = (status & 1);
-			if (workItem->Flags & WT_EXECUTEINWAITTHREAD)
+			if (workItem->State != WAIT_STATE_ACTIVE) continue; //don't run if removed
+			if (workItem->CallbackEvent == NULL) //sync callback
 			{
+				SetEvent(threadinfo->WaitEvent);
 				threadinfo->InSyncCallback = TRUE;
 				workItem->Callback(workItem->Context,TimerFired);
 				threadinfo->InSyncCallback = FALSE;
@@ -285,7 +297,6 @@ static DWORD CALLBACK WaitThreadProc(LPVOID Arg)
 					QueueUserWorkItem_new(AsyncWaiterCall,waiter,workItem->Flags);
 				}
 			}
-			if (workItem->State != WAIT_STATE_ACTIVE) continue; //don't know you anymore :'(
 			if (workItem->Flags & WT_EXECUTEONLYONCE || workItem->Milliseconds == 0)
 				RemoveWaitItem((ULONG_PTR)workItem);
 			else
@@ -315,6 +326,7 @@ static BOOL RegisterWaitItem(PWAIT_WORK_ITEM workItem)
 				waitthreads[i]=NULL;
 				break;
 			}
+			waitthreads[i]->WaitEvent = CreateEvent(NULL,TRUE,TRUE,NULL);
 		}
 		if (waitthreads[i]->nItems == MAX_WAIT_ITEMS || waitthreads[i]->InSyncCallback) //full or busy, gtfo
 			continue;
@@ -363,7 +375,8 @@ BOOL WINAPI RegisterWaitForSingleObject_new(
 	newWorkItem->Context = Context;
 	newWorkItem->Milliseconds = dwMilliseconds;
 	newWorkItem->Flags = dwFlags;
-	newWorkItem->CallbackEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
+	if (!(dwFlags & WT_EXECUTEINWAITTHREAD))
+		newWorkItem->CallbackEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
 	newWorkItem->State = WAIT_STATE_ACTIVE;
 	if (dwMilliseconds != INFINITE)
 		newWorkItem->TimerObject = CreateWaitableTimer(NULL,FALSE,NULL);
@@ -390,9 +403,14 @@ BOOL WINAPI UnregisterWaitEx_new( HANDLE WaitHandle, HANDLE CompletionEvent)
 		return FALSE;
 	}
 	//9x dies if we queue an apc into dead thread so avoid it at all costs
-	if ( InterlockedCompareExchange(&workItem->State,WAIT_STATE_UNREGISTERED,WAIT_STATE_ACTIVE)==WAIT_STATE_ACTIVE
-		&& !QueueUserAPC(RemoveWaitItem,((PWAIT_THREAD)workItem->waitThread)->hThread,(ULONG_PTR)workItem) )
-		return FALSE;
+	if ( InterlockedCompareExchange(&workItem->State,WAIT_STATE_UNREGISTERED,WAIT_STATE_ACTIVE)==WAIT_STATE_ACTIVE )
+	{
+		PWAIT_THREAD waitthread = (PWAIT_THREAD)workItem->waitThread;
+		if (!QueueUserAPC(RemoveWaitItem,waitthread->hThread,(ULONG_PTR)workItem))
+			return FALSE;
+		//make sure thread is in wait state and isn't doing sth with item we delete
+		WaitForSingleObject(waitthread->WaitEvent,NONSENSE);
+	}
 	InterlockedCompareExchange(&workItem->State,WAIT_STATE_REMOVED,WAIT_STATE_ABANDONED);
 	BOOL pending = FALSE;
 	if (workItem->CallbacksPending)
@@ -412,7 +430,7 @@ BOOL WINAPI UnregisterWaitEx_new( HANDLE WaitHandle, HANDLE CompletionEvent)
 		}
 	}
 	//all async callbacks are finished for sure?
-	if (!pending && WaitForSingleObject(workItem->CallbackEvent,0) == WAIT_OBJECT_0)
+	if (!pending)
 	{
 		//yes? and the item is removed from thread?
 		if (InterlockedCompareExchange(&workItem->State,WAIT_STATE_GAMEOVER,WAIT_STATE_REMOVED) == WAIT_STATE_REMOVED)
@@ -420,8 +438,7 @@ BOOL WINAPI UnregisterWaitEx_new( HANDLE WaitHandle, HANDLE CompletionEvent)
 		else //not removed? okay, it will be destroyed with removal
 			InterlockedCompareExchange(&workItem->State,WAIT_STATE_DELETESYNC,WAIT_STATE_UNREGISTERED);
 	}
-	//otherwise, there are still pending callbacks and item will be destroyed as soon as all callbacks end
-	
+	//otherwise, there are still pending callbacks and item will be destroyed as soon as all callbacks end	
 	if (pending)
 	{
 		SetLastError(ERROR_IO_PENDING);
@@ -470,6 +487,7 @@ typedef struct
 typedef struct 
 {
 	HANDLE hThread;
+	HANDLE WaitEvent;
 	HANDLE CompletionEvent;
 	LONG nItems;
 	PTIMER_ITEM timers[MAX_TIMERS];	
@@ -482,6 +500,14 @@ static VOID DestroyTimerItem(PTIMER_ITEM timer)
 	CloseHandle(timer->CallbackEvent);
 	CloseHandle(timer->TimerObject);
 	HeapFree(GetProcessHeap(),0,timer);
+}
+
+static VOID CALLBACK ChangeTimerItem(PTIMER_ITEM timer)
+{
+	//(re)activate waitable timer
+	LARGE_INTEGER timeout;
+	timeout.QuadPart = timer->DueTime * (LONGLONG)-10000;
+	SetWaitableTimer(timer->TimerObject,&timeout,(timer->Flags & WT_EXECUTEONLYONCE) ? 0 : timer->Period,NULL,NULL,FALSE);
 }
 
 static VOID CALLBACK AddTimerItem(ULONG_PTR Arg)
@@ -497,11 +523,7 @@ static VOID CALLBACK AddTimerItem(ULONG_PTR Arg)
 	timerqueue->timers[timerqueue->nItems] = timer;
 	timerqueue->nItems++;
 	SetEvent(timer->CompletionEvent);
-	Sleep(0);
-	//activate waitable timer
-	LARGE_INTEGER timeout;
-	timeout.QuadPart = timer->DueTime * (LONGLONG)-10000;
-	SetWaitableTimer(timer->TimerObject,&timeout,(timer->Flags & WT_EXECUTEONLYONCE) ? 0 : timer->Period,NULL,NULL,FALSE);
+	ChangeTimerItem(timer);
 }
 
 static VOID CALLBACK RemoveTimerItem(ULONG_PTR Arg)
@@ -564,11 +586,13 @@ BOOL WINAPI DeleteTimerQueueTimer_new( HANDLE TimerQueue, HANDLE Timer, HANDLE C
 	}
 	PTIMER_ITEM timer = (PTIMER_ITEM)Timer;
 	PTIMER_QUEUE timerqueue = (PTIMER_QUEUE)timer->TimerQueue;
-
-	if ( InterlockedCompareExchange(&timer->State,WAIT_STATE_UNREGISTERED,WAIT_STATE_ACTIVE)==WAIT_STATE_ACTIVE
-		&& !QueueUserAPC(RemoveTimerItem,timerqueue->hThread,(ULONG_PTR)timer) )
-		return FALSE;
-
+	if ( InterlockedCompareExchange(&timer->State,WAIT_STATE_UNREGISTERED,WAIT_STATE_ACTIVE)==WAIT_STATE_ACTIVE )
+	{
+		if (!QueueUserAPC(RemoveTimerItem,timerqueue->hThread,(ULONG_PTR)timer))
+			return FALSE;
+		//make sure thread is in wait state and isn't doing sth with item we delete
+		WaitForSingleObject(timerqueue->WaitEvent,NONSENSE);
+	}
 	BOOL pending = FALSE;
 	if (timer->CallbacksPending)
 	{
@@ -585,7 +609,7 @@ BOOL WINAPI DeleteTimerQueueTimer_new( HANDLE TimerQueue, HANDLE Timer, HANDLE C
 				InterlockedExchangePointer(&timer->CompletionEvent, CompletionEvent);
 		}
 	}
-	if (!pending && WaitForSingleObject(timer->CallbackEvent,0) == WAIT_OBJECT_0)
+	if (!pending)
 	{
 		if (InterlockedCompareExchange(&timer->State,WAIT_STATE_GAMEOVER,WAIT_STATE_REMOVED) == WAIT_STATE_REMOVED)
 			DestroyTimerItem(timer);
@@ -604,6 +628,7 @@ static VOID CALLBACK TerminateTimerQueue(ULONG_PTR Arg)
 {
 	PTIMER_QUEUE timerqueue = (PTIMER_QUEUE)Arg;
 	CloseHandle(timerqueue->hThread);
+	CloseHandle(timerqueue->WaitEvent);
 	HeapFree(GetProcessHeap(),0,timerqueue);
 	ExitThread(0);
 }
@@ -625,35 +650,44 @@ static VOID CALLBACK FinishTimerQueue(ULONG_PTR Arg)
 	QueueUserAPC(TerminateTimerQueue,GetCurrentThread(),Arg);
 }
 
+static DWORD TimerQueueWait(PTIMER_QUEUE timerqueue)
+{
+	int i;
+	HANDLE* handles = (HANDLE*)alloca(sizeof(HANDLE)*timerqueue->nItems);
+	for (i=0;i<timerqueue->nItems;i++)
+		handles[i] = timerqueue->timers[i]->TimerObject;
+
+	return WaitForMultipleObjectsEx(timerqueue->nItems,handles,FALSE,INFINITE,TRUE);
+}
 
 static DWORD CALLBACK TimerQueueProc(LPVOID Arg)
 {
 	PTIMER_QUEUE timerqueue = (PTIMER_QUEUE)Arg;
 	while (TRUE)
 	{
-		int i;
+		SetEvent(timerqueue->WaitEvent);
 		if (!timerqueue->nItems) //wait for items
 		{
 			SleepEx(INFINITE,TRUE);
 			continue;
 		}
-		HANDLE* handles = (HANDLE*)alloca(sizeof(HANDLE)*timerqueue->nItems);
-		for (i=0;i<timerqueue->nItems;i++)
-			handles[i] = timerqueue->timers[i]->TimerObject;
-
-		DWORD status = WaitForMultipleObjectsEx(timerqueue->nItems,handles,FALSE,INFINITE,TRUE);
+		DWORD status = TimerQueueWait(timerqueue);
+		ResetEvent(timerqueue->WaitEvent);
 		if (status == WAIT_FAILED) break; //uberfail
 		if (status >= WAIT_OBJECT_0 && status <= WAIT_OBJECT_0+MAXIMUM_WAIT_OBJECTS )
 		{
 			PTIMER_ITEM timer = timerqueue->timers[status-WAIT_OBJECT_0];
-			if (timer->Flags & WT_EXECUTEINTIMERTHREAD)
+			if (timer->State != WAIT_STATE_ACTIVE) continue;
+			if (timer->CallbackEvent == NULL) //sync callback
+			{
+				SetEvent(timerqueue->WaitEvent);
 				timer->Callback(timer->Parameter,TRUE);
+			}
 			else
 			{
 				InterlockedIncrement(&timer->CallbacksPending);
 				QueueUserWorkItem_new(AsyncTimerCall,timer,timer->Flags);
 			}
-			if (timer->State != WAIT_STATE_ACTIVE) continue;
 		}
 	}
 	FinishTimerQueue((ULONG_PTR)timerqueue);
@@ -665,12 +699,16 @@ static DWORD CALLBACK TimerQueueProc(LPVOID Arg)
 HANDLE WINAPI CreateTimerQueue_new(VOID)
 {
 	PTIMER_QUEUE timerqueue = (PTIMER_QUEUE)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(*timerqueue));
-	DWORD dummy;
-	timerqueue->hThread = CreateThread(NULL,0,TimerQueueProc,timerqueue,0,&dummy);
-	if (!timerqueue)
+	if (timerqueue != NULL)
 	{
-		HeapFree(GetProcessHeap(),HEAP_ZERO_MEMORY,timerqueue);
-		timerqueue = NULL;
+		DWORD dummy;
+		timerqueue->WaitEvent = CreateEvent(NULL,TRUE,TRUE,NULL);
+		timerqueue->hThread = CreateThread(NULL,0,TimerQueueProc,timerqueue,0,&dummy);
+		if (!timerqueue->hThread)
+		{
+			HeapFree(GetProcessHeap(),HEAP_ZERO_MEMORY,timerqueue);
+			timerqueue = NULL;
+		}
 	}
 	return (HANDLE)timerqueue;
 }
@@ -703,7 +741,8 @@ BOOL WINAPI CreateTimerQueueTimer_new( PHANDLE phNewTimer, HANDLE TimerQueue, WA
 	timer->Flags = Flags;
 	timer->State = WAIT_STATE_ACTIVE;
 	timer->TimerObject = CreateWaitableTimer(NULL,FALSE,NULL);
-	timer->CallbackEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
+	if (!(Flags & WT_EXECUTEINTIMERTHREAD))
+		timer->CallbackEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
 	timer->CompletionEvent = CreateEvent(NULL,FALSE,FALSE,NULL);	
 	BOOL success = (BOOL)QueueUserAPC(AddTimerItem,((PTIMER_QUEUE)TimerQueue)->hThread,(ULONG_PTR)timer);
 	if (success)
@@ -746,4 +785,40 @@ BOOL WINAPI DeleteTimerQueueEx_new( HANDLE TimerQueue, HANDLE CompletionEvent)
 BOOL WINAPI DeleteTimerQueue_new( HANDLE TimerQueue)
 {
 	return DeleteTimerQueueEx_new(TimerQueue,NULL);
+}
+
+/* MAKE_EXPORT ChangeTimerQueueTimer_new=ChangeTimerQueueTimer */
+BOOL WINAPI ChangeTimerQueueTimer_new( HANDLE TimerQueue, HANDLE Timer, ULONG DueTime, ULONG Period)
+{
+	PTIMER_ITEM timer = (PTIMER_ITEM)Timer;
+	if (!timer || timer->State != WAIT_STATE_ACTIVE)
+	{
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	timer->DueTime = DueTime;
+	timer->Period = Period;	
+	return (BOOL)QueueUserAPC((PAPCFUNC)ChangeTimerItem,((PTIMER_QUEUE)timer->TimerQueue)->hThread,(ULONG_PTR)timer);
+}
+
+//some undocumented APIs too...
+
+/* MAKE_EXPORT CancelTimerQueueTimer_new=CancelTimerQueueTimer */
+BOOL WINAPI CancelTimerQueueTimer_new( HANDLE TimerQueue, HANDLE Timer)
+{
+	PTIMER_ITEM timer = (PTIMER_ITEM)Timer;
+	if (!timer || timer->State != WAIT_STATE_ACTIVE)
+	{
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	return CancelWaitableTimer(timer->TimerObject);
+}
+
+/* MAKE_EXPORT SetTimerQueueTimer_new=SetTimerQueueTimer */
+HANDLE WINAPI SetTimerQueueTimer_new( HANDLE TimerQueue, WAITORTIMERCALLBACK Callback, PVOID Parameter, DWORD DueTime, DWORD Period, BOOL PreferIo )
+{
+	HANDLE newHandle = NULL;
+	CreateTimerQueueTimer_new(&newHandle,TimerQueue,Callback,Parameter,DueTime,Period,PreferIo ? WT_EXECUTEINIOTHREAD : WT_EXECUTEDEFAULT);
+	return newHandle;
 }
