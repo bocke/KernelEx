@@ -32,3 +32,18 @@ BOOL WINAPI RemoveFontResourceExA_new(LPCSTR str, DWORD fl, PVOID pdv)
 {
 	return RemoveFontResourceA(str);
 }
+
+/* MAKE_EXPORT AddFontMemResourceEx_stub=AddFontMemResourceEx */
+HANDLE WINAPI AddFontMemResourceEx_stub(PVOID pbFont, DWORD cbFont, PVOID pdv, DWORD *pcFonts)
+{
+	if (!pbFont || !cbFont || !pcFonts)
+		return NULL;
+	*pcFonts = 1;
+	return (HANDLE) 0x10000;
+}
+
+/* MAKE_EXPORT RemoveFontMemResourceEx_stub=RemoveFontMemResourceEx */
+BOOL WINAPI RemoveFontMemResourceEx_stub(HANDLE fh)
+{
+	return (fh == (HANDLE) 0x10000) ? TRUE : FALSE;
+}
