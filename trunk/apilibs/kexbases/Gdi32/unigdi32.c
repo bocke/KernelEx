@@ -115,6 +115,11 @@ static int CALLBACK EnumFontFamExConv(const LOGFONTA *plfA,
 		tmW->ntmTm.ntmAvgWidth = tmA->ntmTm.ntmAvgWidth;
 		memset(&tmW->ntmFontSig, 0, sizeof(FONTSIGNATURE));
 	}
+	else
+	{
+		memset(&tmW->ntmTm.ntmFlags, 0, sizeof(NEWTEXTMETRICEXW) 
+				- FIELD_OFFSET(NEWTEXTMETRICEXW, ntmTm.ntmFlags));
+	}
 
 	return pef->EnumProcW((LOGFONTW*) &elfeW, (TEXTMETRICW*) &ntmeW, FontType, pef->lParam);
 }
