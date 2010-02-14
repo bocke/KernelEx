@@ -153,6 +153,14 @@ SOURCE=.\gdi32\_gdi32_apilist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\gdi32\ScriptCache.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\gdi32\ScriptCache.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\gdi32\UberGDI.c
 # End Source File
 # Begin Source File
