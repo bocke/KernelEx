@@ -1,6 +1,7 @@
 KernelEx v4.5 Beta 2 by Xeno86
 2010-02-14
 
+fixed incompatibility with Japanese WinME
 implemented USP font cache
 fix: kexFlushAppSettings didn't clear wildcard app settings
 fix: EnumFontFamiliesEx should only fill TEXTMETRIC structure if font is not TrueType
