@@ -55,4 +55,6 @@ REGEDIT4
 ;-DirectX installer
 "*\\DXSETUP.EXE"=dword:00000001
 "*\\DXWEBSETUP.EXE"=dword:00000001
+;-OpenOffice.org
+"*\\PROGRAM\\CRASHREP.EXE"=dword:00000001
 
