@@ -23,6 +23,9 @@ REGEDIT4
 "*\\QTWEBKIT4.DLL"="WINXP"
 ;-AbiWord
 "*\\BIN\\ABIWORD.EXE"="VISTA"
+;-Flash Player
+"*\\NPSWF32.DLL"="WINXP"
+"*\\FLASH10F.OCX"="WINXP"
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:
