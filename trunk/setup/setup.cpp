@@ -265,31 +265,6 @@ void Setup::disable_named_and_rcdata_resources_mirroring()
 	set_pattern(found_loc, after, length);
 }
 
-//change obfuscator to non-negative IDs
-void Setup::positive_pids_patch()
-{
-	static const short pattern[] = {
-		0xB9,0x01,0x00,0xFF,0xFF,-1,0x23,0xD1,0x33,0xD1
-	};
-	static const short after[] = {
-		0xB9,0x01,0x00,0xFF,0x4F,-1,0x23,0xD1,0x2B,0xD1
-	};
-
-	DWORD offset = (DWORD) pefile.GetSectionByName(INIT_SEG);
-	int size = pefile.GetSectionSize(INIT_SEG);
-	int length = sizeof(pattern) / sizeof(short);
-	DWORD found_loc;
-	int found = find_pattern(offset, size, pattern, length, &found_loc);
-	if (found != 1)
-	{
-		if (!found) ShowError(IDS_NOPAT, "positive_pids_patch");
-		else ShowError(IDS_MULPAT, "positive_pids_patch");
-	}
-	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "positive_pids_patch",
-			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
-	set_pattern(found_loc, after, length);
-}
-
 void Setup::mod_imte_alloc()
 {
 	//VA BFF8745C, RVA 1745C, file 15A5C, sec E45C
@@ -605,7 +580,6 @@ void Setup::install()
 	disable_platform_check();
 	disable_resource_check();
 	disable_named_and_rcdata_resources_mirroring();
-	positive_pids_patch();
 	mod_imte_alloc();
 	mod_mr_alloc();
 	mod_pdb_alloc();
