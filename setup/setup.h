@@ -58,7 +58,6 @@ private:
 	void disable_platform_check();
 	void disable_resource_check();
 	void disable_named_and_rcdata_resources_mirroring();
-	void positive_pids_patch();
 	void mod_imte_alloc();
 	void mod_mr_alloc();
 	void mod_pdb_alloc();
