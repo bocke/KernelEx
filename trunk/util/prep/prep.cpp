@@ -491,10 +491,10 @@ bool is_uptodate_dir(const string& path)
 	struct _stat st;
 	time_t mintime;
 
-	ff.search_for(path + "_*_apilist.c");
+	ff.search_for(path + ".timestamp");
 	file = ff.get_next_file();
 	if (file.empty())
-		throw Exception("Couldn't find output def file");
+		return false;
 
 	_stat((path + file).c_str(), &st);
 	mintime = st.st_mtime;
@@ -680,6 +680,8 @@ void work()
 
 		out_file.close();
 		replace(file, file + ".tmp");
+
+		ofstream timestamp((path + ".timestamp").c_str(), ios::out | ios::trunc);
 	}
 
 }
