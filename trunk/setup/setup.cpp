@@ -568,7 +568,7 @@ void Setup::install()
 	if (!pefile.HasTarget())
 	{
 		if (upgrade)
-			ShowError(IDS_FAILOPENBACKUP, backup_file, kernel32path);
+			ShowError(IDS_FAILOPENBACKUP, (const char*) backup_file, kernel32path);
 		else
 			ShowError(IDS_FAILOPEN, kernel32path);
 	}
@@ -669,7 +669,7 @@ void Setup::install()
 	if (!upgrade)
 	{
 		if (!CopyFile(kernel32path, backup_file, FALSE))
-			ShowError(IDS_FAILBAK, backup_file);
+			ShowError(IDS_FAILBAK, (const char*) backup_file);
 	}
 
 	// save patched file
