@@ -66,7 +66,11 @@ int WINAPI GetGlyphIndicesW_new(
 		int i;
 		SCRIPT_FONTPROPERTIES fpr;
 		fpr.cBytes = sizeof(SCRIPT_FONTPROPERTIES);
-		if (FAILED(ScriptGetFontProperties(hdc,&cache,&fpr))) return GDI_ERROR;
+		if (FAILED(ScriptGetFontProperties(hdc,&cache,&fpr)))
+		{
+			ScriptCache::instance.Unlock();
+			return GDI_ERROR;
+		}
 		for (i = 0; i < c; i++)
 		{
 			if (*checkglyph == fpr.wgDefault) *checkglyph = 0xFFFF;
