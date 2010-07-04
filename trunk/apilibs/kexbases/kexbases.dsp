@@ -109,6 +109,10 @@ SOURCE=.\Kernel32\_kernel32_stubs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\CompletionPorts.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\CopyFileEx.c
 # End Source File
 # Begin Source File
