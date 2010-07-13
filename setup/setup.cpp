@@ -182,15 +182,10 @@ int Setup::get_signature_ver()
 	return dseg->version;
 }
 
-void Setup::disable_platform_check()
+void Setup::find_subsystem_check()
 {
 	static const short pattern[] = {
 		0x66,0x8b,0x46,0x48,0x66,0x3d,0x04,0x00,0x0f,0x87,0x9c,0x01,0x00,0x00,
-		0x75,0x0b,0x66,0x83,0x7e,0x4a,0x0a,0x0f,0x87,0x8f,0x01,0x00,0x00,0x66,
-		0x81,0x7e,0x04,0x4c,0x01,
-	};
-	static const short after[] = {
-		0xeb,0x19,0x46,0x48,0x66,0x3d,0x04,0x00,0x0f,0x87,0x9c,0x01,0x00,0x00,
 		0x75,0x0b,0x66,0x83,0x7e,0x4a,0x0a,0x0f,0x87,0x8f,0x01,0x00,0x00,0x66,
 		0x81,0x7e,0x04,0x4c,0x01,
 	};
@@ -202,12 +197,15 @@ void Setup::disable_platform_check()
 	int found = find_pattern(offset, size, pattern, length, &found_loc);
 	if (found != 1)
 	{
-		if (!found) ShowError(IDS_NOPAT, "disable_platform_check");
-		else ShowError(IDS_MULPAT, "disable_platform_check");
+		if (!found) ShowError(IDS_NOPAT, "subsystem_check");
+		else ShowError(IDS_MULPAT, "subsystem_check");
 	}
-	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "disable_platform_check",
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "subsystem_check", 
 			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
-	set_pattern(found_loc, after, length);
+	
+	SubsysCheck_jmp1 = found_loc + 0x08;
+	SubsysCheck_jmp2 = found_loc + 0x15;
+	_SubsysCheckFault = decode_jmp(SubsysCheck_jmp1, 6);
 }
 
 void Setup::disable_resource_check()
@@ -478,15 +476,57 @@ DWORD Setup::decode_call(DWORD addr, int len)
 {
 	unsigned char* code = (unsigned char*)addr;
 
-	if (len == 5 && *code == 0xe8) /* call rel32 */
+	/* CALL rel32 */
+	if (code[0] == 0xe8)
 	{
-		return (DWORD)(pefile.PointerToRva(code) + 5 + *(DWORD*)(code + 1));
+		if (len && len == 5 || !len)
+		return (DWORD)(pefile.PointerToRva(code) + 5 + *(INT32*)(code + 1));
 	}
-	else if (len == 6 && code[0] == 0xff 
-			&& code[1] == 0x15) /* call m32 */
+	/* CALL imm32 */
+	else if (code[0] == 0xff && code[1] == 0x15)
 	{
+		if (len && len == 6 || !len)
 		return *(DWORD*)(code + 2);
 	}
+	/* unmatched */
+	else return 0;
+}
+
+DWORD Setup::decode_jmp(DWORD addr, int len)
+{
+	unsigned char* code = (unsigned char*)addr;
+
+	/* JMP rel8 */
+	if (code[0] == 0xeb)
+	{
+		if (len && len == 2 || !len)
+		return (DWORD)(pefile.PointerToRva(code) + 2 + *(INT8*)(code + 1));
+	}
+	/* JMP rel32 */
+	else if (code[0] == 0xe9)
+	{
+		if (len && len == 5 || !len)
+		return (DWORD)(pefile.PointerToRva(code) + 5 + *(INT32*)(code + 1));
+	}
+	/* JMP imm32 */
+	else if (code[0] == 0xff && code[1] == 0x25)
+	{
+		if (len && len == 6 || !len)
+		return *(DWORD*)(code + 2);
+	}
+	/* Jxx rel8 */
+	else if (code[0] >= 0x70 && code[0] < 0x7f || code[0] == 0xe3)
+	{
+		if (len && len == 2 || !len)
+		return (DWORD)(pefile.PointerToRva(code) + 2 + *(INT8*)(code + 1));
+	}
+	/* Jxx rel32 */
+	else if (code[0] == 0x0f && code[1] >= 0x80 && code[1] <= 0x8f)
+	{
+		if (len && len == 6 || !len)
+		return (DWORD)(pefile.PointerToRva(code) + 6 + *(INT32*)(code + 2));
+	}
+	/* unmatched */
 	else return 0;
 }
 
@@ -507,6 +547,25 @@ void Setup::set_call_ref(DWORD loc, DWORD target)
 
 	rel = target - (loc + 5);
 	*(DWORD*)(loc + 1) = rel;
+}
+
+// Both addresses have to be from the same section!
+void Setup::set_jmp_ref(DWORD loc, DWORD target)
+{
+	DWORD rel;
+	unsigned char* code = (unsigned char*)loc;
+
+	if (code[0] == 0xe9)
+	{
+		rel = target - (loc + 5);
+		*(DWORD*)(loc + 1) = rel;
+	}
+	else if (code[0] == 0x0f && code[1] >= 0x80 && code[1] <= 0x8f)
+	{
+		rel = target - (loc + 6);
+		*(DWORD*)(loc + 2) = rel;
+	}
+	else assert(false);
 }
 
 bool Setup::is_fixupc(DWORD addr)
@@ -577,7 +636,7 @@ void Setup::install()
 	find_IsKnownDLL();
 	find_FLoadTreeNotify1();
 	find_FLoadTreeNotify2();
-	disable_platform_check();
+	find_subsystem_check();
 	disable_resource_check();
 	disable_named_and_rcdata_resources_mirroring();
 	mod_imte_alloc();
@@ -611,6 +670,7 @@ void Setup::install()
 	dseg->jtab[JTAB_EFN_STA] = _ExportFromName + pefile.GetImageBase();
 	dseg->jtab[JTAB_KNO_DLL] = _IsKnownDLL + pefile.GetImageBase();
 	dseg->jtab[JTAB_FLD_TRN] = _FLoadTreeNotify + pefile.GetImageBase();
+	dseg->jtab[JTAB_SYS_CHK] = _SubsysCheckFault + pefile.GetImageBase();
 
 	//exportfromx patch
 	DWORD code = (DWORD) pefile.GetSectionByName(CODE_SEG);
@@ -630,7 +690,7 @@ void Setup::install()
 				set_call_ref(file_loc, (DWORD) &cseg->jmp_stub[JTAB_EFO_DYN]);
 			else
 				set_call_ref(file_loc, (DWORD) &cseg->jmp_stub[JTAB_EFO_STA]);
-			DBGPRINTF(("EFO: address %08x\n", pefile.PointerToRva((void*) a) 
+			DBGPRINTF(("%s: address 0x%08x\n", "EFO", pefile.PointerToRva((void*) a) 
 					+ pefile.GetImageBase()));
 			efo_cnt++;
 		}
@@ -643,7 +703,7 @@ void Setup::install()
 				set_call_ref(file_loc, (DWORD) &cseg->jmp_stub[JTAB_EFN_DYN]);
 			else
 				set_call_ref(file_loc, (DWORD) &cseg->jmp_stub[JTAB_EFN_STA]);
-			DBGPRINTF(("EFN: address %08x\n", pefile.PointerToRva((void*) a) 
+			DBGPRINTF(("%s: address 0x%08x\n", "EFN", pefile.PointerToRva((void*) a) 
 					+ pefile.GetImageBase()));
 			efn_cnt++;
 		}
@@ -654,15 +714,23 @@ void Setup::install()
 
 	//isknowndll patch
 	set_call_ref(IsKnownDLL_call, (DWORD) &cseg->jmp_stub[JTAB_KNO_DLL]);
-	DBGPRINTF(("KNO_DLL: address %08x\n", pefile.PointerToRva((void*) IsKnownDLL_call) 
+	DBGPRINTF(("%s: address 0x%08x\n", "KNO_DLL", pefile.PointerToRva((void*) IsKnownDLL_call) 
 			+ pefile.GetImageBase()));
 
 	//FLoadTreeNotify patch
 	set_call_ref(FLoadTreeNotify_call1, (DWORD) &cseg->jmp_stub[JTAB_FLD_TRN]);
-	DBGPRINTF(("FLD_TRN: address %08x\n", pefile.PointerToRva((void*) FLoadTreeNotify_call1)
+	DBGPRINTF(("%s: address 0x%08x\n", "FLD_TRN1", pefile.PointerToRva((void*) FLoadTreeNotify_call1)
 			+ pefile.GetImageBase()));
 	set_call_ref(FLoadTreeNotify_call2, (DWORD) &cseg->jmp_stub[JTAB_FLD_TRN]);
-	DBGPRINTF(("FLD_TRN: address %08x\n", pefile.PointerToRva((void*) FLoadTreeNotify_call2)
+	DBGPRINTF(("%s: address 0x%08x\n", "FLD_TRN2", pefile.PointerToRva((void*) FLoadTreeNotify_call2)
+			+ pefile.GetImageBase()));
+
+	//subsys check patch
+	set_jmp_ref(SubsysCheck_jmp1, (DWORD) &cseg->jmp_stub[JTAB_SYS_CHK]);
+	DBGPRINTF(("%s: address 0x%08x\n", "SYS_CHK1", pefile.PointerToRva((void*) SubsysCheck_jmp1)
+			+ pefile.GetImageBase()));
+	set_jmp_ref(SubsysCheck_jmp2, (DWORD) &cseg->jmp_stub[JTAB_SYS_CHK]);
+	DBGPRINTF(("%s: address 0x%08x\n", "SYS_CHK2", pefile.PointerToRva((void*) SubsysCheck_jmp2)
 			+ pefile.GetImageBase()));
 
 	// backup original file
