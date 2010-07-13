@@ -38,6 +38,7 @@ private:
 	DWORD _ExportFromName;
 	DWORD _IsKnownDLL;
 	DWORD _FLoadTreeNotify;
+	DWORD _SubsysCheckFault;
 	HMODULE h_kernel32;
 	PEmanip pemem;
 	PEmanip pefile;
@@ -47,6 +48,8 @@ private:
 	DWORD IsKnownDLL_call;
 	DWORD FLoadTreeNotify_call1;
 	DWORD FLoadTreeNotify_call2;
+	DWORD SubsysCheck_jmp1;
+	DWORD SubsysCheck_jmp2;
 	int version;
 	bool is_winme;
 	bool upgrade;
@@ -55,7 +58,7 @@ private:
 	void detect_downgrade();
 	int find_pattern(DWORD offset, int size, const short* pattern, int pat_len, DWORD* found_loc);
 	void set_pattern(DWORD loc, const short* new_pattern, int pat_len);
-	void disable_platform_check();
+	void find_subsystem_check();
 	void disable_resource_check();
 	void disable_named_and_rcdata_resources_mirroring();
 	void mod_imte_alloc();
@@ -66,9 +69,11 @@ private:
 	void find_FLoadTreeNotify1();
 	void find_FLoadTreeNotify2();
 	void kill_process(const char* name);
-	DWORD decode_call(DWORD addr, int len);
+	DWORD decode_call(DWORD addr, int len = 0);
+	DWORD decode_jmp(DWORD addr, int len = 0);
 	bool is_call_ref(DWORD loc, DWORD target);
 	void set_call_ref(DWORD loc, DWORD target);
+	void set_jmp_ref(DWORD loc, DWORD target);
 	bool is_fixupc(DWORD addr);
 	sstring get_temp_file_name();
 	void ShowError(UINT id, ...);

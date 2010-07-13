@@ -40,7 +40,7 @@ char system_path[MAX_PATH];
 int system_path_len;
 
 static PLONG jtab;
-static LONG old_jtab[JTAB_SIZE];
+LONG old_jtab[JTAB_SIZE];
 static HKEY known_dlls_key;
 
 FLoadTreeNotify_t FLoadTreeNotify;
@@ -56,6 +56,7 @@ static bool get_config(MODREF* moduleMR, config_params& cp)
 	IMTE** pmteModTable = *ppmteModTable;
 	PDB98* ppdbCur = *pppdbCur;
 	volatile MODREF_KEX module(moduleMR);
+	DBGASSERT(ppdbCur->pExeMODREF != NULL);
 	MODREF_KEX process(ppdbCur->pExeMODREF);
 
 	//shared modules should use standard api
@@ -599,6 +600,24 @@ bool are_extensions_enabled()
 	return get_config(exe, cp);
 }
 
+/** Determines whether process has API extensions enabled.
+ * @param path Full path of the module (uppercase).
+ */
+bool are_extensions_enabled_path(const char* path)
+{
+	appsetting as = SettingsDB::instance.get_appsetting(path);
+	if (!(as.flags & LDR_VALID_FLAG))
+	{
+		as.flags = LDR_VALID_FLAG;
+		if (apiconfmgr.are_extensions_disabled())
+			as.flags |= LDR_KEX_DISABLE;
+	}
+
+	if (as.flags & LDR_KEX_DISABLE)
+		return false;
+	return true;
+}
+
 typedef BOOL (__stdcall *IsKnownDLL_t)(char*, const char*);
 
 static BOOL WINAPI IsKnownKexDLL(char* name, const char* ext)
@@ -805,6 +824,7 @@ void resolver_hook()
 	old_jtab[JTAB_EFN_STA] = InterlockedExchange(jtab + JTAB_EFN_STA, (LONG) ExportFromNameStatic_thunk);
 	old_jtab[JTAB_KNO_DLL] = InterlockedExchange(jtab + JTAB_KNO_DLL, (LONG) IsKnownKexDLL);
 	old_jtab[JTAB_FLD_TRN] = InterlockedExchange(jtab + JTAB_FLD_TRN, (LONG) KexLoadTreeNotify);
+	old_jtab[JTAB_SYS_CHK] = InterlockedExchange(jtab + JTAB_SYS_CHK, (LONG) SubSysCheck);
 }
 
 void resolver_unhook()
