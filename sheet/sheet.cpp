@@ -20,7 +20,6 @@
  */
 
 #include <windows.h>
-#include <stdio.h>
 #include <shlwapi.h>
 #include "sheet.h"
 #include "server.h"
@@ -136,23 +135,24 @@ bool KexShlExt::IsPEModule(const char* path)
 {
 	IMAGE_DOS_HEADER MZh;
 	IMAGE_NT_HEADERS PEh;
-	FILE* f;
+	HANDLE f;
 	bool result = false;
+	DWORD bytes_read;
 
-	f = fopen(path, "rb");
-	if (!f)
+	f = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (f == INVALID_HANDLE_VALUE)
 		return false;
 
-	if (fread(&MZh, sizeof(MZh), 1, f) != 1)
+	if (!ReadFile(f, &MZh, sizeof(MZh), &bytes_read, NULL) || bytes_read != sizeof(MZh))
 		goto __end;
-	
+
 	if (MZh.e_magic != IMAGE_DOS_SIGNATURE)
 		goto __end;
 
-	if (fseek(f, MZh.e_lfanew, SEEK_SET))
+	if (SetFilePointer(f, MZh.e_lfanew, NULL, FILE_BEGIN) == 0xffffffff)
 		goto __end;
 
-	if (fread(&PEh, sizeof(PEh), 1, f) != 1)
+	if (!ReadFile(f, &PEh, sizeof(PEh), &bytes_read, NULL) || bytes_read != sizeof(PEh))
 		goto __end;
 
 	if ((PEh.Signature != IMAGE_NT_SIGNATURE) 
@@ -163,8 +163,8 @@ bool KexShlExt::IsPEModule(const char* path)
 	result = true;
 
 __end:
-	fclose(f);
-	
+	CloseHandle(f);
+
 	return result;
 }
 
