@@ -79,6 +79,8 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("FoldStringW", FoldStringW_new),
 	DECL_API("FreeEnvironmentStringsW", FreeEnvironmentStringsW_new),
 	DECL_API("GetAtomNameW", GetAtomNameW_new),
+	DECL_API("GetComputerNameExA", GetComputerNameExA_stub),
+	DECL_API("GetComputerNameExW", GetComputerNameExW_stub),
 	DECL_API("GetConsoleWindow", GetConsoleWindow_new),
 	DECL_API("GetCurrentDirectoryW", GetCurrentDirectoryW_new),
 	DECL_API("GetDefaultCommConfigW", GetDefaultCommConfigW_new),

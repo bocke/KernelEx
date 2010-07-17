@@ -83,6 +83,8 @@ STUB FindFirstFileExW_stub;
 STUB HeapSetInformation_stub;
 STUB GetProcessIoCounters_stub;
 STUB RtlCaptureStackBackTrace_stub;
+STUB GetComputerNameExA_stub;
+STUB GetComputerNameExW_stub;
 INT WINAPI CompareStringW_new(LCID lcid, DWORD style, LPCWSTR str1, INT len1, LPCWSTR str2, INT len2);
 BOOL WINAPI GetStringTypeW_new(DWORD type, LPCWSTR src, INT count, LPWORD chartype);
 BOOL WINAPI GetStringTypeExW_new(LCID locale, DWORD type, LPCWSTR src, INT count, LPWORD chartype);
