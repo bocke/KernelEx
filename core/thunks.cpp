@@ -104,18 +104,26 @@ __asm {
 	}
 }
 
+BYTE mod_ext_ena;
+
 __declspec(naked)
 void SubSysCheck()
 {
 __asm {
+	seta    al    /* is subsystem value above supported by OS? */
+	push	eax
+	
 	push    [ebp+8]
-	call    are_extensions_enabled_path
+	call    are_extensions_enabled_module
 	add     esp, 4
-	test    al, al
-	mov     ecx, [old_jtab+4*JTAB_SYS_CHK] /* fault */
-	jz      z1
-	sub     ecx, 18fh /* fault - machine_check */
-z1:
-	jmp     ecx
+	mov     mod_ext_ena, al
+	cmp     al, 1
+	clc
+
+	pop     ecx
+	jz      __done	
+	cmp     cl, 0
+__done:
+	jmp     [old_jtab+4*JTAB_SYS_CHK]
 	}
 }

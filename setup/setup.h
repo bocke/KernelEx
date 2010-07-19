@@ -34,22 +34,24 @@ public:
 protected:
 private:
 	sstring backup_file;
+	DWORD _GetOrdinal;
 	DWORD _ExportFromOrdinal;
 	DWORD _ExportFromName;
 	DWORD _IsKnownDLL;
 	DWORD _FLoadTreeNotify;
-	DWORD _SubsysCheckFault;
+	DWORD _SubsysCheckPerform;
 	HMODULE h_kernel32;
 	PEmanip pemem;
 	PEmanip pefile;
+	DWORD GetOrdinal_call1;
+	DWORD GetOrdinal_call2;
 	DWORD gpa_ExportFromOrdinal_call;
 	DWORD gpa_ExportFromName_call;
 	DWORD EFN_EFO_call;
 	DWORD IsKnownDLL_call;
 	DWORD FLoadTreeNotify_call1;
 	DWORD FLoadTreeNotify_call2;
-	DWORD SubsysCheck_jmp1;
-	DWORD SubsysCheck_jmp2;
+	DWORD SubsysCheck_jmp;
 	int version;
 	bool is_winme;
 	bool upgrade;
@@ -58,8 +60,9 @@ private:
 	void detect_downgrade();
 	int find_pattern(DWORD offset, int size, const short* pattern, int pat_len, DWORD* found_loc);
 	void set_pattern(DWORD loc, const short* new_pattern, int pat_len);
-	void find_subsystem_check();
-	void disable_resource_check();
+	void prepare_subsystem_check();
+	void find_resource_check1();
+	void find_resource_check2();
 	void disable_named_and_rcdata_resources_mirroring();
 	void mod_imte_alloc();
 	void mod_mr_alloc();

@@ -27,5 +27,6 @@ PROC ExportFromNameStatic_thunk(IMAGE_NT_HEADERS* PEh, WORD hint, LPCSTR name);
 PROC ExportFromOrdinalDynamic_thunk(IMAGE_NT_HEADERS* PEh, WORD ordinal);
 PROC ExportFromNameDynamic_thunk(IMAGE_NT_HEADERS* PEh, WORD hint, LPCSTR name);
 void SubSysCheck();
+extern BYTE mod_ext_ena;
 
 #endif

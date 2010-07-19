@@ -182,11 +182,16 @@ int Setup::get_signature_ver()
 	return dseg->version;
 }
 
-void Setup::find_subsystem_check()
+void Setup::prepare_subsystem_check()
 {
 	static const short pattern[] = {
 		0x66,0x8b,0x46,0x48,0x66,0x3d,0x04,0x00,0x0f,0x87,0x9c,0x01,0x00,0x00,
 		0x75,0x0b,0x66,0x83,0x7e,0x4a,0x0a,0x0f,0x87,0x8f,0x01,0x00,0x00,0x66,
+		0x81,0x7e,0x04,0x4c,0x01,
+	};
+	static const short after[] = {
+		0x66,0x83,0x7E,0x48,0x04,0x75,0x05,0x66,0x83,0x7E,0x4A,0x0A,0xE9,0x00,
+		0x00,0x00,0x00,0x0F,0x87,0x93,0x01,0x00,0x00,0x90,0x90,0x90,0x90,0x66,
 		0x81,0x7e,0x04,0x4c,0x01,
 	};
 
@@ -202,34 +207,56 @@ void Setup::find_subsystem_check()
 	}
 	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "subsystem_check", 
 			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	set_pattern(found_loc, after, length);
 	
-	SubsysCheck_jmp1 = found_loc + 0x08;
-	SubsysCheck_jmp2 = found_loc + 0x15;
-	_SubsysCheckFault = decode_jmp(SubsysCheck_jmp1, 6);
+	SubsysCheck_jmp = found_loc + 12;
+	_SubsysCheckPerform = decode_jmp(SubsysCheck_jmp, 5);
 }
 
-void Setup::disable_resource_check()
+void Setup::find_resource_check1()
 {
 	static const short pattern[] = {
-		0x3d,0x00,0x80,0x00,0x00,0x72,
-	};
-	static const short after[] = {
-		0x3d,0x00,0x80,0x00,0x00,0xeb,
+		0x6A,0x00,0x8D,0x45,0xE0,0x50,0xFF,0x75,0xA4,0xFF,0x75,0xD0,0x8D,0x45,
+		0xCC,0x50,0xFF,0x75,0x08,0xE8,-2,-2,-2,-2,0x85,0xC0
 	};
 
 	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
 	int size = pefile.GetSectionSize(CODE_SEG);
 	int length = sizeof(pattern) / sizeof(short);
 	DWORD found_loc;
-	int found = find_pattern(offset, size, pattern, length, &found_loc);
+	int found = find_pattern(offset, size,pattern, length, &found_loc);
 	if (found != 1)
 	{
-		if (!found) ShowError(IDS_NOPAT, "disable_resource_check");
-		else ShowError(IDS_MULPAT, "disable_resource_check");
+		if (!found) ShowError(IDS_NOPAT, "resource_check1");
+		else ShowError(IDS_MULPAT, "resource_check1");
 	}
-	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "disable_resource_check",
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "resource_check1", 
 			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
-	set_pattern(found_loc, after, length);
+	GetOrdinal_call1 = found_loc + 19;
+	_GetOrdinal = decode_call(GetOrdinal_call1, 5);
+}
+
+void Setup::find_resource_check2()
+{
+	static const short pattern[] = {
+		0x66,0x8B,0x45,0xE0,0x66,0x2D,0x06,0x80,0x66,0x3D,0x01,0x00,0x1B,0xC0,
+		0xF7,0xD8,0x50,0x8D,0x45,0xDE,0x50,0xFF,0x75,  -1,0xFF,0x75,0xD0,0x8D,
+		0x45,0xCC,0x50,0xFF,0x75,0x08,0xE8,  -2,  -2,  -2,  -2,0x85,0xC0
+	};
+
+	DWORD offset = (DWORD) pefile.GetSectionByName(CODE_SEG);
+	int size = pefile.GetSectionSize(CODE_SEG);
+	int length = sizeof(pattern) / sizeof(short);
+	DWORD found_loc;
+	int found = find_pattern(offset, size,pattern, length, &found_loc);
+	if (found != 1)
+	{
+		if (!found) ShowError(IDS_NOPAT, "resource_check2");
+		else ShowError(IDS_MULPAT, "resource_check2");
+	}
+	DBGPRINTF(("%s: pattern found @ 0x%08x\n", "resource_check2", 
+			pefile.PointerToRva((void*) found_loc) + pefile.GetImageBase()));
+	GetOrdinal_call2 = found_loc + 34;
 }
 
 //no named/rcdata resource types mirroring
@@ -489,7 +516,7 @@ DWORD Setup::decode_call(DWORD addr, int len)
 		return *(DWORD*)(code + 2);
 	}
 	/* unmatched */
-	else return 0;
+	return 0;
 }
 
 DWORD Setup::decode_jmp(DWORD addr, int len)
@@ -527,7 +554,7 @@ DWORD Setup::decode_jmp(DWORD addr, int len)
 		return (DWORD)(pefile.PointerToRva(code) + 6 + *(INT32*)(code + 2));
 	}
 	/* unmatched */
-	else return 0;
+	return 0;
 }
 
 bool Setup::is_call_ref(DWORD loc, DWORD target)
@@ -636,8 +663,9 @@ void Setup::install()
 	find_IsKnownDLL();
 	find_FLoadTreeNotify1();
 	find_FLoadTreeNotify2();
-	find_subsystem_check();
-	disable_resource_check();
+	prepare_subsystem_check();
+	find_resource_check1();
+	find_resource_check2();
 	disable_named_and_rcdata_resources_mirroring();
 	mod_imte_alloc();
 	mod_mr_alloc();
@@ -670,7 +698,8 @@ void Setup::install()
 	dseg->jtab[JTAB_EFN_STA] = _ExportFromName + pefile.GetImageBase();
 	dseg->jtab[JTAB_KNO_DLL] = _IsKnownDLL + pefile.GetImageBase();
 	dseg->jtab[JTAB_FLD_TRN] = _FLoadTreeNotify + pefile.GetImageBase();
-	dseg->jtab[JTAB_SYS_CHK] = _SubsysCheckFault + pefile.GetImageBase();
+	dseg->jtab[JTAB_SYS_CHK] = _SubsysCheckPerform + pefile.GetImageBase();
+	dseg->jtab[JTAB_RES_CHK] = _GetOrdinal + pefile.GetImageBase();
 
 	//exportfromx patch
 	DWORD code = (DWORD) pefile.GetSectionByName(CODE_SEG);
@@ -726,11 +755,16 @@ void Setup::install()
 			+ pefile.GetImageBase()));
 
 	//subsys check patch
-	set_jmp_ref(SubsysCheck_jmp1, (DWORD) &cseg->jmp_stub[JTAB_SYS_CHK]);
-	DBGPRINTF(("%s: address 0x%08x\n", "SYS_CHK1", pefile.PointerToRva((void*) SubsysCheck_jmp1)
+	set_jmp_ref(SubsysCheck_jmp, (DWORD) &cseg->jmp_stub[JTAB_SYS_CHK]);
+	DBGPRINTF(("%s: address 0x%08x\n", "SYS_CHK", pefile.PointerToRva((void*) SubsysCheck_jmp)
 			+ pefile.GetImageBase()));
-	set_jmp_ref(SubsysCheck_jmp2, (DWORD) &cseg->jmp_stub[JTAB_SYS_CHK]);
-	DBGPRINTF(("%s: address 0x%08x\n", "SYS_CHK2", pefile.PointerToRva((void*) SubsysCheck_jmp2)
+
+	//resource check patch
+	set_call_ref(GetOrdinal_call1, (DWORD) &cseg->jmp_stub[JTAB_RES_CHK]);
+	DBGPRINTF(("%s: address 0x%08x\n", "RES_CHK1", pefile.PointerToRva((void*) GetOrdinal_call1)
+			+ pefile.GetImageBase()));
+	set_call_ref(GetOrdinal_call2, (DWORD) &cseg->jmp_stub[JTAB_RES_CHK]);
+	DBGPRINTF(("%s: address 0x%08x\n", "RES_CHK2", pefile.PointerToRva((void*) GetOrdinal_call2)
 			+ pefile.GetImageBase()));
 
 	// backup original file
