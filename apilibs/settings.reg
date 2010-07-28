@@ -28,6 +28,8 @@ REGEDIT4
 "*\\FLASH10F.OCX"="WINXP"
 ;-GTA:SA
 "*\\GTA_SA.EXE"="NOHEAP"
+;-Rally Championship '99
+"*\\RAL.EXE"="NOHEAP"
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:
