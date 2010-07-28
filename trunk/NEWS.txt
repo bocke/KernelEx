@@ -1,3 +1,27 @@
+KernelEx v4.5 RC 1 by Xeno86
+2010-07-28
+
+What's new:
+----------------------------------
+* Reworked 'Compatibility' tab to allow resetting compatibility settings to default values
+* Disallow resources with high ID (>32767) when KernelEx is disabled
+* Re-enable platform check when KernelEx is disabled
+* Fixed problem with national characters in paths where custom settings could not be set
+* Added get-post I/O completion ports functionality
+
+Apps now working / fixed:
+-------------------------
+* Adobe Flash 10 plugin
+* MSYS (was misfuctioning)
+* Rally Championship '99 (fixed crashes)
+* GTA: San Andreas (fixed crashes)
+* Artweaver ????
+* VLC ????
+* Firefox 3.6.4 ????
+* MPC-HC ????
+
+#################################################
+
 KernelEx v4.5 Beta 2 by Xeno86
 2010-02-14
 
