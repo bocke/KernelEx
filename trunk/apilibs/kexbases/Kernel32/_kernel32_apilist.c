@@ -187,6 +187,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("ReplaceFileA", ReplaceFileA_stub),
 	DECL_API("ReplaceFileW", ReplaceFileW_stub),
 	DECL_API("RestoreLastError", SetLastError),
+	DECL_API("RtlCaptureContext", RtlCaptureContext_new),
 	DECL_API("RtlCaptureStackBackTrace", RtlCaptureStackBackTrace_stub),
 	DECL_API("SearchPathW", SearchPathW_new),
 	DECL_API("SetConsoleTitleW", SetConsoleTitleW_new),

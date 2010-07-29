@@ -70,6 +70,7 @@ BOOL WINAPI MoveFileWithProgressA_new(LPCSTR lpExistingFileName, LPCSTR lpNewFil
 HANDLE WINAPI OpenThread_new(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId);
 BOOL WINAPI ProcessIdToSessionId_new(DWORD dwProcessId, DWORD *pSessionId);
 DWORD WINAPI WTSGetActiveConsoleSessionId_new(void);
+void WINAPI RtlCaptureContext_new(void* cr);
 BOOL WINAPI SetFilePointerEx_new(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod);
 BOOL WINAPI TryEnterCriticalSection_new(CRITICAL_SECTION* cs);
 LPVOID WINAPI VirtualAllocEx_new(HANDLE hProcess, LPVOID lpAddress, DWORD dwSize, DWORD flAllocationType, DWORD flProtect);
