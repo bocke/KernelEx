@@ -582,6 +582,10 @@ InputPath=.\kexbases.def
 
 SOURCE=.\main.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\RtlCaptureContext.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
