@@ -36,6 +36,7 @@ extern int acp_mcs;
 BOOL common_init(void);
 int WINAPI CommonUnimpStub(void);
 char* file_fixWprefix(char* in);
+void fatal_error(const char* msg);
 
 #ifdef __cplusplus
 };
