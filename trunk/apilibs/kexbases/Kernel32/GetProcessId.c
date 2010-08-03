@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2010, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -19,40 +19,28 @@
  *
  */
 
+#include <windows.h>
 #include "common.h"
 
-int acp_mcs;
-
-static int GetMaxCharSize(UINT CodePage)
+/* MAKE_EXPORT GetProcessId_new=GetProcessId */
+DWORD WINAPI GetProcessId_new(
+  HANDLE hProcess
+)
 {
-	CPINFO cpi;
-	if (!GetCPInfo(CodePage, &cpi))
-		return 2;
-	return cpi.MaxCharSize;
-}
-
-BOOL common_init(void)
-{
-	acp_mcs = GetMaxCharSize(CP_ACP);
-	return TRUE;
-}
-
-char* file_fixWprefix(char* in)
-{
-	if (*(int *)in == 0x5c3f5c5c) //if (!strncmp(in, "\\?\", 4))
+	typedef DWORD (WINAPI *MPH) (HANDLE hProcess);
+	static MPH MapProcessHandle = 0;
+	
+	if (!MapProcessHandle)
 	{
-		in += 4;
-		if (*(int *)in == 0x5c434e55) //if (!strncmp(in, "UNC\", 4))
-		{
-			in += 2;
-			*in = '\\';
-		}
+		DWORD *faddr;
+		DWORD addr;
+		
+		faddr = (DWORD *) ( (DWORD)SetFilePointer + 0x1D ); //there is jmp _SetFilePointer	
+		addr = (DWORD) faddr + *faddr + 4 - 0x16; //0x16 bytes before _SetFilePointer there is MapProcessHandle, just what we need	
+		faddr = (DWORD *) addr;
+		if (*faddr != 0x206A006A)
+			fatal_error("GetProcessId: ASSERTION FAILED"); //push 0; push 0x20
+		MapProcessHandle = (MPH) addr;
 	}
-	return in;
-}
-
-void fatal_error(const char* msg)
-{
-	MessageBox(NULL, msg, "KernelEx error", MB_OK | MB_ICONERROR);
-	ExitProcess(1);
+	return MapProcessHandle(hProcess);
 }

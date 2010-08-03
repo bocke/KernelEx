@@ -117,6 +117,10 @@ SOURCE=.\Kernel32\CopyFileEx.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\CreateFiberEx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\CreateThread_fix.c
 # End Source File
 # Begin Source File
@@ -138,6 +142,10 @@ SOURCE=.\Kernel32\GetFileSizeEx.c
 # Begin Source File
 
 SOURCE=.\Kernel32\GetModuleHandleEx.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\Kernel32\GetProcessId.c
 # End Source File
 # Begin Source File
 

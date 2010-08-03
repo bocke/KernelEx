@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2010, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -18,41 +18,17 @@
  *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+ 
+#include <windows.h>
 
-#include "common.h"
-
-int acp_mcs;
-
-static int GetMaxCharSize(UINT CodePage)
+/* MAKE_EXPORT CreateFiberEx_new=CreateFiberEx */
+LPVOID WINAPI CreateFiberEx_new(
+  SIZE_T dwStackCommitSize,
+  SIZE_T dwStackReserveSize,
+  DWORD dwFlags,
+  LPFIBER_START_ROUTINE lpStartAddress,
+  LPVOID lpParameter
+)
 {
-	CPINFO cpi;
-	if (!GetCPInfo(CodePage, &cpi))
-		return 2;
-	return cpi.MaxCharSize;
-}
-
-BOOL common_init(void)
-{
-	acp_mcs = GetMaxCharSize(CP_ACP);
-	return TRUE;
-}
-
-char* file_fixWprefix(char* in)
-{
-	if (*(int *)in == 0x5c3f5c5c) //if (!strncmp(in, "\\?\", 4))
-	{
-		in += 4;
-		if (*(int *)in == 0x5c434e55) //if (!strncmp(in, "UNC\", 4))
-		{
-			in += 2;
-			*in = '\\';
-		}
-	}
-	return in;
-}
-
-void fatal_error(const char* msg)
-{
-	MessageBox(NULL, msg, "KernelEx error", MB_OK | MB_ICONERROR);
-	ExitProcess(1);
+	return CreateFiber( dwStackCommitSize ? dwStackCommitSize : dwStackReserveSize, lpStartAddress, lpParameter );
 }
