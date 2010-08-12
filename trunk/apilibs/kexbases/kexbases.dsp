@@ -229,6 +229,10 @@ SOURCE=.\Kernel32\RemoteDesktop.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\RtlCaptureContext.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\SetFilePointerEx.c
 # End Source File
 # Begin Source File
@@ -322,6 +326,10 @@ SOURCE=.\User32\MapVirtualKey_fix.c
 # Begin Source File
 
 SOURCE=.\User32\SendMessage_fix.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\SetParent_fix.c
 # End Source File
 # Begin Source File
 
@@ -589,10 +597,6 @@ InputPath=.\kexbases.def
 # Begin Source File
 
 SOURCE=.\main.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\Kernel32\RtlCaptureContext.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
