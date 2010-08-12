@@ -66,6 +66,12 @@ static BOOL TestChild(HWND hwnd, HWND hwndNewParent)
 /* MAKE_EXPORT SetParent_new=SetParent */
 HWND WINAPI SetParent_new(HWND hWndChild, HWND hWndNewParent)
 {
+	//forbid changing parent of system windows
+	if (IS_SYSTEM_HWND(hWndChild))
+	{
+		SetLastError(ERROR_ACCESS_DENIED);
+		return NULL;
+	}
 	//test to avoid circular references
 	if (TestChild(hWndChild, hWndNewParent))
 	{
