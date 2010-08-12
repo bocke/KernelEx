@@ -27,6 +27,8 @@
 IsHungThread_t IsHungThread_pfn;
 DrawCaptionTempA_t DrawCaptionTempA_pfn;
 
+BOOL SetParent_fix_init();
+
 BOOL init_user32()
 {
 	HMODULE hUser32 = GetModuleHandle("USER32.DLL");
@@ -35,7 +37,8 @@ BOOL init_user32()
 	DrawCaptionTempA_pfn = (DrawCaptionTempA_t)GetProcAddress(hUser32, "DrawCaptionTempA");
 	GetMouseMovePoints_pfn = (GetMouseMovePoints_t)GetProcAddress(hUser32, "GetMouseMovePoints");
 	
-	return IsHungThread_pfn && DrawCaptionTempA_pfn && GetMouseMovePoints_pfn && InitUniThunkLayer();
+	return IsHungThread_pfn && DrawCaptionTempA_pfn && GetMouseMovePoints_pfn
+			&& InitUniThunkLayer() && SetParent_fix_init();
 }
 
 /* APIs which don't require Unicode implementations in thuni model
@@ -148,6 +151,7 @@ static const apilib_named_api user32_named_apis[] =
 	DECL_API("SetClassLongW", SetClassLongW_NEW),
 	DECL_API("SetDlgItemTextW", SetDlgItemTextW_NEW),
 	DECL_API("SetLayeredWindowAttributes", SetLayeredWindowAttributes_stub),
+	DECL_API("SetParent", SetParent_new),
 	DECL_API("SetWindowLongA", SetWindowLongA_NEW),
 	DECL_API("SetWindowLongW", SetWindowLongW_NEW),
 	DECL_API("SetWindowTextW", SetWindowTextW_NEW),

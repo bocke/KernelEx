@@ -107,4 +107,6 @@ typedef struct _MSGQUEUE
 } MSGQUEUE, *PMSGQUEUE;
 #pragma pack()
 
+typedef PWND (WINAPI *HTOP_API) (HWND hwnd);
+
 #endif
