@@ -31,6 +31,8 @@ REGEDIT4
 "*\\GTA_SA.EXE"="NOHEAP"
 ;-Rally Championship '99
 "*\\RAL.EXE"="NOHEAP"
+;-Wizard101
+"*\\BIN\\WIZARDGRAPHICALCLIENT.EXE"="NOHEAP"
 ;-MPC Home Cinema Setup
 "*\\MPC-HOMECINEMA.1.*.EXE"="WINXP"
 
