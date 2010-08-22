@@ -22,6 +22,7 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <malloc.h>
 
