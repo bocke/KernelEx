@@ -23,6 +23,7 @@
 #define _WINMM_APILIST_H
 
 #include "kexcoresdk.h"
+#include <mmsystem.h>
 
 BOOL init_winmm();
 extern const apilib_api_table apitable_winmm;

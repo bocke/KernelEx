@@ -23,6 +23,8 @@
 #define _COMDLG32_APILIST_H
 
 #include "kexcoresdk.h"
+#include <ole2.h>
+#include <commdlg.h>
 
 BOOL init_comdlg32();
 extern const apilib_api_table apitable_comdlg32;

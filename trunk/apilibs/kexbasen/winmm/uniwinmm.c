@@ -20,6 +20,7 @@
  */
 
 #include "common.h"
+#include <mmsystem.h>
 
 /* MAKE_EXPORT waveInGetDevCapsW_new=waveInGetDevCapsW */
 MMRESULT WINAPI waveInGetDevCapsW_new(
