@@ -41,7 +41,7 @@ BOOL SetParent_fix_init()
 }
 
 /* returns TRUE if hwnd is a parent of hwndNewParent */
-static BOOL TestChild(HWND hwnd, HWND hwndNewParent)
+static BOOL WINAPI TestChild(HWND hwnd, HWND hwndNewParent)
 {
 	BOOL ret = FALSE;
 	PWND pwnd, pwndT;
@@ -63,20 +63,44 @@ static BOOL TestChild(HWND hwnd, HWND hwndNewParent)
 	return ret;
 }
 
-/* MAKE_EXPORT SetParent_new=SetParent */
-HWND WINAPI SetParent_new(HWND hWndChild, HWND hWndNewParent)
+/* MAKE_EXPORT SetParent_fix=SetParent */
+__declspec(naked)
+HWND WINAPI SetParent_fix(HWND hWndChild, HWND hWndNewParent)
 {
-	//forbid changing parent of system windows
-	if (IS_SYSTEM_HWND(hWndChild))
-	{
-		SetLastError(ERROR_ACCESS_DENIED);
-		return NULL;
+__asm {
+
+	/* forbid changing parent of system windows */
+	mov     ecx, [esp+4]     /* hWndChild */
+	cmp     ecx, 0x88
+	ja      __hwndok
+	cmp     ecx, 0x80
+	jb      __hwndok
+
+	/* hwnd is system one - disallow */
+	push    ERROR_ACCESS_DENIED
+	jmp     __error
+
+__hwndok:
+	/* test hwnds to avoid circular references */
+	mov     eax, [esp+8]     /* hWndNewParent */
+	push    eax
+	push    ecx
+	call    TestChild
+	test    eax, eax
+	jnz     __childfail
+
+	/* return control to SetParent */
+	jmp     dword ptr [SetParent]
+
+__childfail:
+	/* circular reference detected - stop! */
+	push    ERROR_INVALID_PARAMETER
+
+__error:
+	/* return error */
+	call    dword ptr [SetLastError]
+	xor     eax, eax
+	retn    8
+
 	}
-	//test to avoid circular references
-	if (TestChild(hWndChild, hWndNewParent))
-	{
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return NULL;
-	}
-	return SetParent(hWndChild, hWndNewParent);
 }
