@@ -151,7 +151,7 @@ static const apilib_named_api user32_named_apis[] =
 	DECL_API("SetClassLongW", SetClassLongW_NEW),
 	DECL_API("SetDlgItemTextW", SetDlgItemTextW_NEW),
 	DECL_API("SetLayeredWindowAttributes", SetLayeredWindowAttributes_stub),
-	DECL_API("SetParent", SetParent_new),
+	DECL_API("SetParent", SetParent_fix),
 	DECL_API("SetWindowLongA", SetWindowLongA_NEW),
 	DECL_API("SetWindowLongW", SetWindowLongW_NEW),
 	DECL_API("SetWindowTextW", SetWindowTextW_NEW),
