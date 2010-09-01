@@ -24,6 +24,7 @@
 
 #include "kexcoresdk.h"
 #include <winsock2.h>
+#define _WSPIAPI_COUNTOF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #include <ws2tcpip.h>
 
 BOOL init_ws2_32();
