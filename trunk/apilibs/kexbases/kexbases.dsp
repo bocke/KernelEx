@@ -237,6 +237,10 @@ SOURCE=.\Kernel32\SetFilePointerEx.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\time.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\TryEnterCriticalSection.c
 # End Source File
 # Begin Source File
