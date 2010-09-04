@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+void* __cdecl recalloc(void* ptr, size_t size);
+
 typedef int __stdcall STUB(void);
 typedef int __stdcall FWDPROC(void);
 

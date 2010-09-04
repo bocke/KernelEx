@@ -512,6 +512,26 @@ SOURCE=.\shell32\CommandLineToArgvW.c
 SOURCE=.\shell32\IsUserAnAdmin.c
 # End Source File
 # End Group
+# Begin Group "comctl32"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\comctl32\_comctl32_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\comctl32\_comctl32_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\comctl32\newclassreg.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\comctl32\syslink.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\common.c
