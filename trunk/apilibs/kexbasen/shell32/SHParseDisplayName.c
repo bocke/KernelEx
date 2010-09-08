@@ -19,6 +19,7 @@
  *
  */
 
+#define CINTERFACE
 #include <shlobj.h>
 #include <shlwapi.h>
 
@@ -31,9 +32,9 @@ HRESULT WINAPI SHParseDisplayName_new(PCWSTR pszName, IBindCtx *pbc, LPITEMIDLIS
 	{
 		ULONG attrs = sfgaoIn;
 		LPOLESTR pszNameCopyW = StrDupW(pszName);
-		ret = psf->ParseDisplayName(NULL,pbc,pszNameCopyW,NULL,ppidl,&attrs);
+		ret = psf->lpVtbl->ParseDisplayName(psf,NULL,pbc,pszNameCopyW,NULL,ppidl,&attrs);
 		if (psfgaoOut) *psfgaoOut = attrs;
-		psf->Release();
+		psf->lpVtbl->Release(psf);
 		LocalFree(pszNameCopyW);
 	}
 	return ret;
