@@ -1,3 +1,10 @@
+KernelEx v4.5 RC 3 by Xeno86
+2010-09-10
+
+hotfix to prevent DLL circular-references causing crashes on certain configurations
+
+---------------------------------------
+
 KernelEx v4.5 RC 2 by Xeno86
 2010-09-08
 
