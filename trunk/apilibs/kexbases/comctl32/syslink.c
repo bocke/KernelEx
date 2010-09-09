@@ -58,7 +58,7 @@ int WINAPI StrCmpNIW(LPCWSTR lpStr1,LPCWSTR lpStr2,int nChar)
 	static CC361 StrCmpNIW_dld;
 
 	if (!StrCmpNIW_dld)
-		StrCmpNIW_dld = (CC361)GetProcAddress(GetModuleHandle("COMCTL32.DLL"),(LPSTR)361);
+		StrCmpNIW_dld = (CC361)kexGetProcAddress(GetModuleHandle("COMCTL32.DLL"),(LPSTR)361);
 	
 	return StrCmpNIW_dld(lpStr1,lpStr2,nChar);
 }
