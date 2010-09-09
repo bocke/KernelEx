@@ -174,7 +174,7 @@ BOOL WINAPI DeleteObject_fix( HGDIOBJ hObject )
 			DeleteUSPFontCache_fn DeleteUSPFontCache = (DeleteUSPFontCache_fn) kexPsGetValue(script_cache_psidx);
 			if (!DeleteUSPFontCache)
 			{
-				DeleteUSPFontCache = (DeleteUSPFontCache_fn)GetProcAddress(LoadLibrary("KEXBASEN.DLL"), "DeleteUSPFontCache");
+				DeleteUSPFontCache = (DeleteUSPFontCache_fn)kexGetProcAddress(LoadLibrary("KEXBASEN.DLL"), "DeleteUSPFontCache");
 				kexPsSetValue(script_cache_psidx, DeleteUSPFontCache);
 			}
 			if (DeleteUSPFontCache)

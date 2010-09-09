@@ -53,7 +53,7 @@ BOOL WINAPI InitCommonControlsEx_new(LPINITCOMMONCONTROLSEX lpInitCtrls)
 		lpInitCtrls->dwICC &= ~ICC_LINK_CLASS;
 	}
 	if (!InitCommonControlsEx_dld)
-		InitCommonControlsEx_dld = (ICCEX)GetProcAddress(GetModuleHandle("COMCTL32.DLL"),"InitCommonControlsEx");
+		InitCommonControlsEx_dld = (ICCEX)kexGetProcAddress(GetModuleHandle("COMCTL32.DLL"),"InitCommonControlsEx");
 
 	return InitCommonControlsEx_dld(lpInitCtrls);
 }

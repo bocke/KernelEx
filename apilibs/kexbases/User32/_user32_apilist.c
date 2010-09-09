@@ -33,9 +33,9 @@ BOOL init_user32()
 {
 	HMODULE hUser32 = GetModuleHandle("USER32.DLL");
 	
-	IsHungThread_pfn = (IsHungThread_t)GetProcAddress(hUser32, "IsHungThread");
-	DrawCaptionTempA_pfn = (DrawCaptionTempA_t)GetProcAddress(hUser32, "DrawCaptionTempA");
-	GetMouseMovePoints_pfn = (GetMouseMovePoints_t)GetProcAddress(hUser32, "GetMouseMovePoints");
+	IsHungThread_pfn = (IsHungThread_t)kexGetProcAddress(hUser32, "IsHungThread");
+	DrawCaptionTempA_pfn = (DrawCaptionTempA_t)kexGetProcAddress(hUser32, "DrawCaptionTempA");
+	GetMouseMovePoints_pfn = (GetMouseMovePoints_t)kexGetProcAddress(hUser32, "GetMouseMovePoints");
 	
 	return IsHungThread_pfn && DrawCaptionTempA_pfn && GetMouseMovePoints_pfn
 			&& InitUniThunkLayer() && SetParent_fix_init();

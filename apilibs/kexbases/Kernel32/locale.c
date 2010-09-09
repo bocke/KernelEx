@@ -140,7 +140,7 @@ BOOL WINAPI GetStringTypeW_new( DWORD type, LPCWSTR src, INT count, LPWORD chart
 			return FALSE;
 		}
 		GetStringType3ExW = (BOOL (WINAPI*)(LPCWSTR, INT, LPWORD)) 
-				GetProcAddress(hShlwapi, (LPSTR) 35);
+				kexGetProcAddress(hShlwapi, (LPSTR) 35);
 		return GetStringType3ExW(src, count, chartype);
 #endif
     }
