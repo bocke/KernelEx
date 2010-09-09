@@ -19,7 +19,7 @@
  *
  */
 
-#include <windows.h>
+#include "common.h"
 
 typedef struct
 {
