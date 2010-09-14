@@ -725,13 +725,31 @@ static BOOL WINAPI KexResourceCheck(DWORD un0, DWORD un1, DWORD un2, DWORD* pNam
 	return GetOrdinal(un0, un1, un2, pNameOrId, pResult, un3);
 }
 
+/** Retrieves address of kernel32 function exported by ordinal.
+ * @param [in] ord function ordinal number
+ * @return function address or NULL if not found
+ */
+PROC WINAPI GetK32OrdinalAddress(WORD wOrd)
+{
+	IMAGE_DOS_HEADER* dosh = (IMAGE_DOS_HEADER*) h_kernel32;
+	IMAGE_NT_HEADERS* nth = (IMAGE_NT_HEADERS*)((LONG)dosh + dosh->e_lfanew);
+	return OriExportFromOrdinal(nth, wOrd);
+}
+
+/** GetProcAddress variant used to bypass CORE's resolver hook 
+ *  (get real procedure address not overridden one).
+ * @param [in] hModule module handle
+ * @param [in] lpProcName procedure name or ordinal number (high word zeroed)
+ * @return function address or NULL if not found
+ */
 PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
-	IMAGE_DOS_HEADER* dos_hdr;
-	IMAGE_NT_HEADERS* nt_hdr;
+	DBGASSERT(MRFromHLib != NULL);
+	DBGASSERT(ppmteModTable != NULL);
 
-	dos_hdr = (IMAGE_DOS_HEADER*) hModule;
-	nt_hdr = (IMAGE_NT_HEADERS*)((int)dos_hdr + dos_hdr->e_lfanew);
+	MODREF* mr = MRFromHLib(hModule);
+	IMTE* imte = (*ppmteModTable)[mr->mteIndex];
+	IMAGE_NT_HEADERS* nt_hdr = imte->pNTHdr;
 
 	if ((DWORD)lpProcName < 0x10000) 
 		return OriExportFromOrdinal(nt_hdr, LOWORD(lpProcName));
