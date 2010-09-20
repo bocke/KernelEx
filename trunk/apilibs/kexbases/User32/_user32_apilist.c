@@ -157,6 +157,7 @@ static const apilib_named_api user32_named_apis[] =
 	DECL_API("SetWindowTextW", SetWindowTextW_NEW),
 	DECL_API("SetWindowsHookExW", SetWindowsHookExA),
 	DECL_API("SetWindowsHookW", SetWindowsHookA),
+	DECL_API("SystemParametersInfoA", SystemParametersInfoA_fix),
 	DECL_API("ToUnicode", ToUnicode_new),
 	DECL_API("ToUnicodeEx", ToUnicodeEx_new),
 	DECL_API("TranslateAcceleratorW", TranslateAcceleratorA),

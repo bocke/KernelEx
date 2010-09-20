@@ -337,6 +337,10 @@ SOURCE=.\User32\SetParent_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\User32\SystemParametersInfo_fix.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\User32\thuni_conv.c
 # End Source File
 # Begin Source File
