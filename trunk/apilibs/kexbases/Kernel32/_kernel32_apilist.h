@@ -96,6 +96,7 @@ INT WINAPI FoldStringW_new(DWORD dwFlags, LPCWSTR src, INT srclen, LPWSTR dst, I
 INT WINAPI FoldStringA_new(DWORD dwFlags, LPCSTR src, INT srclen, LPSTR dst, INT dstlen);
 int WINAPI lstrcmpW_new(LPCWSTR str1, LPCWSTR str2);
 int WINAPI lstrcmpiW_new(LPCWSTR str1, LPCWSTR str2);
+PVOID WINAPI XorPointer(PVOID ptr);
 BOOL WINAPI SystemTimeToTzSpecificLocalTime_new(const TIME_ZONE_INFORMATION *lpTimeZoneInformation, const SYSTEMTIME *lpUniversalTime, LPSYSTEMTIME lpLocalTime);
 BOOL WINAPI TzSpecificLocalTimeToSystemTime_new(const TIME_ZONE_INFORMATION *lpTimeZoneInformation, const SYSTEMTIME *lpLocalTime, LPSYSTEMTIME lpUniversalTime);
 LANGID WINAPI GetUserDefaultUILanguage_new(void);
