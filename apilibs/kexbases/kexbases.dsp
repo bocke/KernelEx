@@ -225,6 +225,10 @@ SOURCE=.\Kernel32\OpenThread.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\pointer.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\RemoteDesktop.c
 # End Source File
 # Begin Source File
