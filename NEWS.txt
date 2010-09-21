@@ -1,9 +1,21 @@
+KernelEx v4.5 RC 4 by Xeno86
+2010-09-21
+
+What's new:
+-----------
+* Fixed: missing background colors and images in Mozilla Firefox 3.6.9/3.6.10
+* Fixed: MSIMG32 warning and menu icon transparency issues in Opera 10.62
+* Fixed: crashes introduced in RC 3
+* KernelEx auxiliary libraries weren't loaded when full path to system file was passed in call to LoadLibary
+
+#################################################
+
 KernelEx v4.5 RC 3 by Xeno86
 2010-09-10
 
 hotfix to prevent DLL circular-references causing crashes on certain configurations
 
----------------------------------------
+#################################################
 
 KernelEx v4.5 RC 2 by Xeno86
 2010-09-08

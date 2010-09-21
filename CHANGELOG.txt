@@ -1,3 +1,13 @@
+KernelEx v4.5 RC 4 by Xeno86
+2010-09-21
+
+added kernel32.EncodePointer, DecodePointer, EncodeSystemPointer, DecodeSystemPointer
+SystemParametersInfo/SPI_GETHIGHCONTRAST call doesn't fail now when accessability pack is not installed or wrong uiParam parameter is passed (fixes Firefox 3.6.9/3.6.10)
+force usage of KernelEx's 'Known DLLs' when full system path is passed to LoadLibrary call
+fixed iGetProcAddress/kexGetProcAddress not taking into account relocation - fixes crashes revealed by RC 3
+
+---------------------------------------
+
 KernelEx v4.5 RC 3 by Xeno86
 2010-09-10
 
