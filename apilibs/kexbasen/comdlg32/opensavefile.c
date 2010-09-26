@@ -140,7 +140,7 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 	//File filters
 	STACK_WWtoAA(lpofn->lpstrFilter,ofnA.lpstrFilter);
 	//Custom filter [NOBODY USES LOL]
-	lpofn->lpstrCustomFilter = NULL;
+	ofnA.lpstrCustomFilter = NULL;
 	if (lpofn->lpstrCustomFilter && lpofn->nMaxCustFilter)
 	{		
 		ofnA.nMaxCustFilter = lpofn->nMaxCustFilter * 2;
