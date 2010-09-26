@@ -20,6 +20,7 @@
  */
 
 #include <malloc.h>
+#include "kexcoresdk.h"
 
 /*
  *	stlenAA: returns length of string list, including terminators;
@@ -146,7 +147,6 @@ typedef struct
 	BYTE        jmp_func;       /* jmp relay*/
 	DWORD       relay_offset;	/* relative func addr */
 } OFN_THUNK, *POFN_THUNK;
-#include "poppack.h"
 
 #define ALLOC_OFNTHUNK(thunk,ofn,hook,func) \
 		thunk = (POFN_THUNK)alloca(sizeof(OFN_THUNK)); \
@@ -159,6 +159,4 @@ typedef struct
 		thunk->jmp_func = jmp_func_code; \
 		thunk->relay_offset = (DWORD)func - (DWORD)&thunk->relay_offset - sizeof(DWORD)
 
-	
-
-
+#include "poppack.h"
