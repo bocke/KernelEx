@@ -201,6 +201,14 @@ SOURCE=.\comdlg32\openfilename_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\comdlg32\opensavefile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\comdlg32\opensavefile.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\comdlg32\unicomdlg32.c
 # End Source File
 # End Group
