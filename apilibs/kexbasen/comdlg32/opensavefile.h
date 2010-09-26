@@ -123,7 +123,7 @@ static SWU SetWindowUnicode_dld;
 static void SetWindowUnicode(HWND hwnd, BOOL bUnicode)
 {
 	if (!SetWindowUnicode_dld)
-		SetWindowUnicode_dld = (SWU)GetProcAddress(GetModuleHandle("KEXBASES.DLL"),"SetWindowUnicode");
+		SetWindowUnicode_dld = (SWU)kexGetProcAddress(GetModuleHandle("KEXBASES.DLL"),"SetWindowUnicode");
 	SetWindowUnicode_dld(hwnd,bUnicode);
 }
 
