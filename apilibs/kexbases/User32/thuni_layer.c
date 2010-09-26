@@ -100,8 +100,11 @@ BOOL IsWindowReallyUnicode(HWND hwnd)
 	return FALSE;
 }
 
-/* maybe we'll export this for comdlg32 */
-void WINAPI SetWindowUnicode(HWND hWnd, BOOL bUnicode)
+#ifdef __cplusplus
+extern "C"
+#endif
+__declspec(dllexport)
+void SetWindowUnicode(HWND hWnd, BOOL bUnicode)
 {
 	GrabWin16Lock();
 	_SetWindowUnicode( HWNDtoPWND(hWnd), bUnicode );
