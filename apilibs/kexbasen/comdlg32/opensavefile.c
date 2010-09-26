@@ -20,7 +20,6 @@
  */
 
 #include <windows.h>
-#include "kexcoresdk.h"
 #include "opensavefile.h"
 
 static UINT WM_HELPMSGSTRING;
@@ -66,7 +65,7 @@ static UINT_PTR CALLBACK OFNHookProcWAdapter( LPOFNHOOKPROC pfnhook, LPOPENFILEN
 		}
 	//old style hooks messages
 	default:
-		if ( uiMsg == WM_HELPMSGSTRING || uiMsg == WM_FILEOKSTRING || WM_SHAREVISTRING )
+		if ( uiMsg == WM_HELPMSGSTRING || uiMsg == WM_FILEOKSTRING || uiMsg == WM_SHAREVISTRING )
 		{
 			LPOPENFILENAMEA lpofnA = (LPOPENFILENAMEA)lParam;
 			lpofnW->nFilterIndex = lpofnA->nFilterIndex;
@@ -146,7 +145,7 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 	{		
 		ofnA.nMaxCustFilter = lpofn->nMaxCustFilter * 2;
 		ofnA.lpstrCustomFilter = StrAllocA(ofnA.nMaxCustFilter);
-		WideCharToMultiByte(CP_ACP,0,lpofn->lpstrFile,strlenWW(lpofn->lpstrFile),ofnA.lpstrCustomFilter,ofnA.nMaxCustFilter,NULL,NULL);
+		WideCharToMultiByte(CP_ACP,0,lpofn->lpstrCustomFilter,-1,ofnA.lpstrCustomFilter,ofnA.nMaxCustFilter,NULL,NULL);
 	}
 	//File path buffer - nMaxFile is byte count
 	if (lpofn->lpstrFile)
@@ -197,7 +196,7 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 	//translate buffers back
 	if (ofnA.lpstrCustomFilter)
 	{
-		MultiByteToWideChar(CP_ACP,0,ofnA.lpstrCustomFilter,strlenAA(ofnA.lpstrCustomFilter),lpofn->lpstrCustomFilter,lpofn->nMaxCustFilter);
+		MultiByteToWideChar(CP_ACP,0,ofnA.lpstrCustomFilter,-1,lpofn->lpstrCustomFilter,lpofn->nMaxCustFilter);
 		StrFree(ofnA.lpstrCustomFilter);
 	}
 	if (ofnA.lpstrFile)
