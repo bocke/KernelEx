@@ -20,6 +20,7 @@
  */
 
 #include <windows.h>
+#include "kexcoresdk.h"
 #include "opensavefile.h"
 
 static UINT WM_HELPMSGSTRING;
