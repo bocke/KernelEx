@@ -187,35 +187,31 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 
 	UnhookWinEvent(eventhook);
 
-	if (!ret)
-		return FALSE;
-
-	//copy stuff back
-	lpofn->nFilterIndex = ofnA.nFilterIndex;
-	lpofn->Flags = ofnA.Flags;
-	//translate buffers back
-	if (ofnA.lpstrCustomFilter)
+	if (ret)
 	{
-		MultiByteToWideChar(CP_ACP,0,ofnA.lpstrCustomFilter,-1,lpofn->lpstrCustomFilter,lpofn->nMaxCustFilter);
-		StrFree(ofnA.lpstrCustomFilter);
+		//copy stuff back
+		lpofn->nFilterIndex = ofnA.nFilterIndex;
+		lpofn->Flags = ofnA.Flags;
+		//translate buffers back
+		if (ofnA.lpstrCustomFilter)
+			MultiByteToWideChar(CP_ACP,0,ofnA.lpstrCustomFilter,-1,lpofn->lpstrCustomFilter,lpofn->nMaxCustFilter);
+		if (ofnA.lpstrFile)
+		{
+			if (ofnA.Flags & (OFN_EXPLORER|OFN_ALLOWMULTISELECT)) //many files could be selected, convert \0-separated list
+				MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,strlenAA(ofnA.lpstrFile),lpofn->lpstrFile,lpofn->nMaxFile);
+			else
+				MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,-1,lpofn->lpstrFile,lpofn->nMaxFile);		
+			//translate buffer offsets
+			lpofn->nFileOffset = MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,ofnA.nFileOffset,NULL,0);
+			lpofn->nFileExtension = MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,ofnA.nFileExtension,NULL,0);
+		}
+		if (ofnA.lpstrFileTitle)
+			MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFileTitle,-1,lpofn->lpstrFileTitle,lpofn->nMaxFileTitle);			
 	}
-	if (ofnA.lpstrFile)
-	{
-		if (ofnA.Flags & (OFN_EXPLORER|OFN_ALLOWMULTISELECT)) //many files could be selected, convert \0-separated list
-			MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,strlenAA(ofnA.lpstrFile),lpofn->lpstrFile,lpofn->nMaxFile);
-		else
-			MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,-1,lpofn->lpstrFile,lpofn->nMaxFile);		
-		//translate buffer offsets
-		lpofn->nFileOffset = MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,ofnA.nFileOffset,NULL,0);
-		lpofn->nFileExtension = MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFile,ofnA.nFileExtension,NULL,0);
-		//free buffer
-		StrFree(ofnA.lpstrFile);
-	}
-	if (ofnA.lpstrFileTitle)
-	{
-		MultiByteToWideChar(CP_ACP,0,ofnA.lpstrFileTitle,-1,lpofn->lpstrFileTitle,lpofn->nMaxFileTitle);
-		StrFree(ofnA.lpstrFileTitle);
-	}
+	//free buffers
+	StrFree(ofnA.lpstrCustomFilter);
+	StrFree(ofnA.lpstrFile);
+	StrFree(ofnA.lpstrFileTitle);
 	
 	return ret;
 }
