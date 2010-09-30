@@ -333,6 +333,10 @@ SOURCE=.\User32\MapVirtualKey_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\User32\RawInput.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\User32\SendMessage_fix.c
 # End Source File
 # Begin Source File
