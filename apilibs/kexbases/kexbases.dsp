@@ -125,7 +125,7 @@ SOURCE=.\Kernel32\CreateThread_fix.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\Kernel32\DeleteCriticalSection.c
+SOURCE=.\Kernel32\CriticalSection_fix.c
 # End Source File
 # Begin Source File
 
