@@ -51,10 +51,10 @@ static int strlenWW(LPWSTR strWW)
 	return len;
 }
 
-//W<->A macroses
+//W<->A macros
 #define MAX_STACK 512
 
-//Out macroses: allocate buffer, call W>-<A function, convert A<->W
+//Out macros: allocate buffer, call W>-<A function, convert A<->W
 #define ABUFFER_ALLOC(buffer,len) \
 	int buffer##size = ((len+1) * 2); \
 	LPSTR buffer##heap = NULL; \
@@ -82,16 +82,18 @@ static int strlenWW(LPWSTR strWW)
 	buffer[0]='\0'; \
 	buffer[len]='\0';
 
-#define ABUFFER_toW(bufferA,bufferW,lenW) MultiByteToWideChar(CP_ACP, 0, bufferA, -1, (LPWSTR)bufferW, lenW);
-#define WBUFFER_toA(bufferW,bufferA,lenA) WideCharToMultiByte(CP_ACP, 0, bufferW, -1, (LPSTR)bufferA, lenA, NULL, NULL);
+#define ABUFFER_toW(bufferA,bufferW,lenW) \
+	MultiByteToWideChar(CP_ACP, 0, bufferA, -1, (LPWSTR)bufferW, lenW);
+#define WBUFFER_toA(bufferW,bufferA,lenA) \
+	WideCharToMultiByte(CP_ACP, 0, bufferW, -1, (LPSTR)bufferA, lenA, NULL, NULL);
 
 #define BUFFER_FREE(buffer) \
 	if ( buffer##heap ) HeapFree(GetProcessHeap(),0,buffer##heap); \
 
-//In macroses: allocate buffer on stack, convert input
+//In macros: allocate buffer on stack, convert input
 #define STACK_WtoA(strW,strA) \
 	strA = (LPSTR)strW; \
-	if HIWORD(strW) \
+	if (HIWORD(strW)) \
 	{ \
 		int c = lstrlenW((LPWSTR)strW); \
 		c = (c+1)*2; \
@@ -101,7 +103,7 @@ static int strlenWW(LPWSTR strWW)
 	
 #define STACK_WWtoAA(strWW,strAA) \
 	strAA = (LPSTR)strWW; \
-	if HIWORD(strWW) \
+	if (HIWORD(strWW)) \
 	{ \
 		int c = strlenWW((LPWSTR)strWW); \
 		strAA = (LPSTR)alloca(c*2); \
@@ -135,7 +137,7 @@ static void SetWindowUnicode(HWND hwnd, BOOL bUnicode)
 #define push_func_code 0x68
 #define jmp_func_code 0xE9
 
-#include "pshpack1.h"
+#include <pshpack1.h>
 typedef struct
 {
 	BYTE        pop_eax;        /* pop eax (return address) */
@@ -159,4 +161,4 @@ typedef struct
 		thunk->jmp_func = jmp_func_code; \
 		thunk->relay_offset = (DWORD)func - (DWORD)&thunk->relay_offset - sizeof(DWORD)
 
-#include "poppack.h"
+#include <poppack.h>
