@@ -37,6 +37,7 @@ LPVOID WINAPI CreateFiberEx_new(SIZE_T dwStackCommitSize, SIZE_T dwStackReserveS
 HANDLE WINAPI CreateThread_fix(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId);
 void WINAPI DeleteCriticalSection_fix(PCRITICAL_SECTION lpCriticalSection);
 void WINAPI EnterCriticalSection_fix(LPCRITICAL_SECTION lpCriticalSection);
+VOID WINAPI ExitProcess_fix(UINT uExitCode);
 HANDLE WINAPI CreateFileA_fix(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDistribution, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 BOOL WINAPI ReadFile_fix(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped);
 BOOL WINAPI WriteFile_fix(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);

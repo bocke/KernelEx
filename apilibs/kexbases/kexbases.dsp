@@ -129,6 +129,10 @@ SOURCE=.\Kernel32\CriticalSection_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\ExitProcess_fix.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\FileApis_fix.c
 # End Source File
 # Begin Source File

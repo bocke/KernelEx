@@ -74,6 +74,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("EnterCriticalSection", EnterCriticalSection_fix),
 	DECL_API("EnumUILanguagesA", EnumUILanguagesA_new),
 	DECL_API("EnumUILanguagesW", EnumUILanguagesW_new),
+	DECL_API("ExitProcess", ExitProcess_fix),
 	DECL_API("FindAtomW", FindAtomW_new),
 	DECL_API("FindFirstChangeNotificationW", FindFirstChangeNotificationW_new),
 	DECL_API("FindFirstFileExW", FindFirstFileExW_stub),
