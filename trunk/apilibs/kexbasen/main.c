@@ -71,6 +71,7 @@ static BOOL init()
 static void uninit()
 {
 	uninit_kernel32();
+	uninit_shell32();
 }
 
 static void detach()
