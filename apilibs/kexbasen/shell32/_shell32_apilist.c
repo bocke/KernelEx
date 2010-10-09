@@ -23,6 +23,8 @@
 #include "kexcoresdk.h"
 #include "_shell32_apilist.h"
 
+extern void uninit_SHGetFolderPath();
+
 BOOL init_shell32()
 {
 	return TRUE;
