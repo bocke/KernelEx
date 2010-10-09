@@ -179,7 +179,7 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 		ofnA.nMaxFile = lpofn->nMaxFile * 2;
 		ofnA.lpstrFile = StrAllocA(ofnA.nMaxFile);
 		WideCharToMultiByte(CP_ACP, 0, lpofn->lpstrFile, -1,
-				ofnA.lpstrFile, ofnA.nMaxFile, NULL, NULL);
+				ofnA.lpstrFile, ofnA.nMaxFile, "_", NULL);
 	}
 	//File title buffer - same
 	if (lpofn->lpstrFileTitle)
@@ -247,6 +247,12 @@ static BOOL WINAPI GetOpenOrSaveFileNameW(LPOPENFILENAMEW lpofn, BOOL IsSave)
 		if (ofnA.lpstrFileTitle)
 			MultiByteToWideChar(CP_ACP, 0, ofnA.lpstrFileTitle, -1, 
 					lpofn->lpstrFileTitle, lpofn->nMaxFileTitle);			
+	}
+	else //function failed
+	{
+		//buffer too small? lpstrFile contains proper size
+		if ( CommDlgExtendedError() == FNERR_BUFFERTOOSMALL )
+			*(WORD*)lpofn->lpstrFile = *(WORD*)ofnA.lpstrFile;
 	}
 	//free buffers
 	StrFree(ofnA.lpstrCustomFilter);
