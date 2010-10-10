@@ -109,12 +109,13 @@ static PROC LoadShProc(LPCSTR proc)
 	if (!ret)
 	{
 		if (!hShfolder) 
-			hShfolder = LoadLibrary(ShfolderFn);
-		if (hShfolder) 
 		{
-			ret = kexGetProcAddress(hShfolder, proc);
-			protect_shfolder();
+			hShfolder = LoadLibrary(ShfolderFn);
+			if (hShfolder)
+				protect_shfolder();
 		}
+		if (hShfolder) 
+			ret = kexGetProcAddress(hShfolder, proc);
 	}
 	SetLastError(lasterr);
 	return ret;
