@@ -34,7 +34,7 @@ DWORD WINAPI LsaClose_new(IN HANDLE ObjectHandle)
 
 
 /* MAKE_EXPORT LsaNtStatusToWinError_new=LsaNtStatusToWinError */
-ULONG WINAPI LsaNtStatusToWinError_new(DWORD Status)
+ULONG WINAPI LsaNtStatusToWinError_new(LONG Status)
 {
 	return K32_RtlNtStatusToDosError(Status);
 }
