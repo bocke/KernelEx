@@ -172,6 +172,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("LoadLibraryExW", LoadLibraryExW_new),
 	DECL_API("LoadLibraryW", LoadLibraryW_new),
 	DECL_API("LockFileEx", LockFileEx_new),
+	DECL_API("MapViewOfFile", MapViewOfFile_new),
 	DECL_API("MapViewOfFileEx", MapViewOfFileEx_new),
 	DECL_API("Module32FirstW", Module32FirstW_new),
 	DECL_API("Module32NextW", Module32NextW_new),
