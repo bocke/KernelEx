@@ -68,7 +68,7 @@ STUB EncryptFileW_stub;
 STUB DecryptFileA_stub;
 STUB DecryptFileW_stub;
 DWORD WINAPI LsaClose_new(IN HANDLE ObjectHandle);
-ULONG WINAPI LsaNtStatusToWinError_new(DWORD Status);
+ULONG WINAPI LsaNtStatusToWinError_new(LONG Status);
 DWORD WINAPI LsaOpenPolicy_new(IN PVOID SystemName, IN PVOID ObjectAttributes, IN DWORD DesiredAccess, IN OUT PHANDLE PolicyHandle);
 DWORD WINAPI LsaRetrievePrivateData_new(IN HANDLE PolicyHandle, IN PVOID KeyName, OUT HANDLE* PrivateData);
 DWORD WINAPI LsaStorePrivateData_new(IN HANDLE PolicyHandle, IN PVOID KeyName, IN PVOID PrivateData);
