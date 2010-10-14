@@ -284,6 +284,16 @@ typedef struct _TDBX98 {
     DWORD  BlockedOnID;        // 54
 } TDBX98, *PTDBX98;
 
+// File mapping object
+typedef struct _FILEMAPPING {  // Size = 0x28 (from Kernel32)
+    WORD type;                 // 00 WIN98_K32OBJ_MEM_MAPPED_FILE
+    WORD refCount;             // 02 object reference count
+    PVOID kernObj;             // 04 some kernel heap object
+    DWORD Unknown1;            // 08
+    PVOID mapaddr;             // 0C current mapped address
+	DWORD Unknown2[6];         // 10
+} FILEMAPPING, *PFILEMAPPING;
+
 #pragma pack(pop)
 
 #pragma warning (disable:4035)		// turn off no return code warning
