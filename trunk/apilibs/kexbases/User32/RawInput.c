@@ -21,11 +21,14 @@
 
 #include <windows.h>
 
-/* Raw input functions have non-zero return values and output buffers to zero */
+/*	Raw input functions should reset output size buffers to zero.
+ *	While (UINT)-1 is "total failure" return, programs (e.g. mpc-hc)
+ *	don't check for it, and fail hard thinking it's returned buffer size.
+ */
 #define RAWNOTIMPLEMETED(intptr) \
 	if (intptr) *intptr = 0; \
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED); \
-	return (UINT)-1;
+	return 0;
 	
 
 /* MAKE_EXPORT DefRawInputProc_new=DefRawInputProc */
