@@ -44,6 +44,8 @@ static const apilib_named_api shell32_named_apis[] =
 	DECL_API("FindExecutableW", FindExecutableW_fwd),
 	DECL_API("SHBindToParent", SHBindToParent_new),
 	DECL_API("SHBrowseForFolderW", SHBrowseForFolderW_fwd),
+	DECL_API("SHCreateDirectoryExA", SHCreateDirectoryExA_new),
+	DECL_API("SHCreateDirectoryExW", SHCreateDirectoryExW_new),
 	DECL_API("SHFileOperationW", SHFileOperationW_fwd),
 	DECL_API("SHGetFileInfoW", SHGetFileInfoW_fwd),
 	DECL_API("SHGetFolderLocation", SHGetFolderLocation_new),
