@@ -233,6 +233,10 @@ SOURCE=.\shell32\SHBindToParent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\shell32\SHCreateDirectoryEx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\shell32\SHGetFolderLocation.c
 # End Source File
 # Begin Source File
