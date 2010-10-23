@@ -256,7 +256,6 @@ LONG WINAPI GetWindowLongW_NEW(HWND hWnd, int nIndex)
 			SetLastError(ERROR_ACCESS_DENIED);
 			return 0L;
 		}
-		DBGPRINTF(("GetWindowProcW: %p(A) -> %p(W)\n",ret,ConvertWndProcAToW((WNDPROC)ret)));
 		ret = (LONG)ConvertWndProcAToW( (WNDPROC)ret );
 	}
 	return ret;
@@ -273,7 +272,6 @@ LONG WINAPI SetWindowLongW_NEW(HWND hWnd, int nIndex, LONG dwNewLong)
 			SetLastError(ERROR_ACCESS_DENIED);
 			return 0L;
 		}
-		DBGPRINTF(("SetWindowProcW[(%p)new]: %p(W) => %p(A)\n",hWnd,dwNewLong,ConvertWndProcWToA((WNDPROC)dwNewLong)));
 		dwNewLong = (LONG)ConvertWndProcWToA( (WNDPROC)dwNewLong );
 	}
 			
@@ -281,7 +279,6 @@ LONG WINAPI SetWindowLongW_NEW(HWND hWnd, int nIndex, LONG dwNewLong)
 	
 	if ( nIndex == GWL_WNDPROC && ret ) //oh, you're unicode subclassed!
 	{
-		DBGPRINTF(("SetWindowProcW[(%p)old]: %p(A) => %p(W)\n",hWnd,ret,ConvertWndProcAToW((WNDPROC)ret)));
 		SetWindowUnicode( hWnd, TRUE );
 		ret = (LONG)ConvertWndProcAToW( (WNDPROC)ret );
 	}
@@ -466,9 +463,7 @@ HWND WINAPI CreateDialogParamW_NEW( HINSTANCE hInstance, LPCTSTR lpTemplateName,
 	
 	STACK_WtoA(lpTemplateName, lpTemplateNameA);
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DBGPRINTF(("CreateDialogParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = CreateDialogParamA( hInstance, lpTemplateNameA, hWndParent, lpDialogFunc, dwInitParam );
-	DBGPRINTF(("CreateDialogParamW finished: %p\n",ret));
 	UnhookWinEvent(uniEvent);
 	return ret;		
 }
@@ -480,7 +475,6 @@ HWND WINAPI CreateDialogIndirectParamW_NEW( HINSTANCE hInstance, LPCDLGTEMPLATE 
 	HWND ret;
 	
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DBGPRINTF(("CreateDialogIndirectParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = CreateDialogIndirectParamA( hInstance, lpTemplate, hWndParent, lpDialogFunc, lParamInit );
 	UnhookWinEvent(uniEvent);
 	return ret;	
@@ -495,7 +489,6 @@ INT_PTR WINAPI DialogBoxParamW_NEW( HINSTANCE hInstance,  LPCWSTR lpTemplateName
 
 	STACK_WtoA( lpTemplateName, lpTemplateNameA );
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DBGPRINTF(("DialogBoxParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = DialogBoxParamA( hInstance, lpTemplateNameA, hWndParent, lpDialogFunc, dwInitParam );
 	UnhookWinEvent(uniEvent);
 	return ret;	
@@ -509,7 +502,6 @@ INT_PTR WINAPI DialogBoxIndirectParamW_NEW( HINSTANCE hInstance, LPCDLGTEMPLATE 
 	
 
 	uniEvent = SetWinCreateEvent(UnicodeEvent);
-	DBGPRINTF(("DialogBoxIndirectParamW started (proc %p), eventhook %p\n",lpDialogFunc,uniEvent));
 	ret = DialogBoxIndirectParamA( hInstance, hDialogTemplate, hWndParent, lpDialogFunc, dwInitParam );
 	UnhookWinEvent(uniEvent);
 	return ret;
@@ -555,12 +547,11 @@ LRESULT WINAPI DefWindowProcW_NEW( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
 BOOL WINAPI SetWindowTextW_NEW( HWND hWnd, LPCWSTR lpString)
 {
 	if ( !hWnd || !lpString ) return FALSE;
-	if ( !ISOURPROCESSHWND(hWnd) )
-	{
-		SetLastError(ERROR_ACCESS_DENIED);
-		return FALSE;		
-	}
-	return SendMessageW_NEW( hWnd, WM_SETTEXT, 0, (LPARAM)lpString );
+	if ( ISOURPROCESSHWND(hWnd) )
+		return SendMessageW_NEW( hWnd, WM_SETTEXT, 0, (LPARAM)lpString );
+	else
+		return DefWindowProcW_NEW( hWnd, WM_SETTEXT, 0, (LPARAM)lpString );
+
 }
 
 /* MAKE_EXPORT SetDlgItemTextW_NEW=SetDlgItemTextW */
