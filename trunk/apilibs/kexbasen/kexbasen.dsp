@@ -245,7 +245,7 @@ SOURCE=.\shell32\SHGetFolderPath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\shell32\SHGetSpecialFolder_fix.c
+SOURCE=.\shell32\SHGetSpecialFolder.c
 # End Source File
 # Begin Source File
 
