@@ -37,8 +37,8 @@ HRESULT WINAPI SHGetFolderLocation_new(HWND hwndOwner, int nFolder, HANDLE hToke
 HRESULT WINAPI SHGetFolderPathA_new(HWND hwndOwner, int nFolder, HANDLE hToken, DWORD dwFlags, LPSTR pszPath);
 HRESULT WINAPI SHGetFolderPathW_new(HWND hwndOwner, int nFolder, HANDLE hToken, DWORD dwFlags, LPWSTR pszPath);
 HRESULT WINAPI SHGetSpecialFolderLocation_fix(HWND hwndOwner, int nFolder, LPVOID *_ppidl);
-BOOL WINAPI SHGetSpecialFolderPathA_fix(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-BOOL WINAPI SHGetSpecialFolderPathW_fix(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
+BOOL WINAPI SHGetSpecialFolderPathA_new(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
+BOOL WINAPI SHGetSpecialFolderPathW_new(HWND hwndOwner, LPWSTR lpszPathW, int nFolder, BOOL fCreate);
 HRESULT WINAPI SHParseDisplayName_new(PCWSTR pszName, IBindCtx *pbc, LPITEMIDLIST *ppidl, SFGAOF sfgaoIn, SFGAOF *psfgaoOut);
 FWDPROC DragQueryFileW_fwd;
 FWDPROC ExtractIconExW_fwd;
