@@ -1,7 +1,7 @@
 /*
  *  KernelEx Thunking Unicode Layer
  *
- *  Copyright (C) 2009, Tihiy
+ *  Copyright (C) 2009-2010, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -35,7 +35,8 @@ static CRITICAL_SECTION wndproc_cs;
 
 static HMODULE g_hUser32;
 
-#define SetWinCreateEvent(proc) SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_CREATE, g_hUser32, (WINEVENTPROC)(proc), GetCurrentProcessId(), GetCurrentThreadId(), WINEVENT_INCONTEXT)
+#define SetWinCreateEvent(proc) SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_CREATE, g_hUser32, \
+				(WINEVENTPROC)(proc), GetCurrentProcessId(), GetCurrentThreadId(), WINEVENT_INCONTEXT)
 
 BOOL InitUniThunkLayer()
 {
@@ -406,7 +407,7 @@ static void CALLBACK UnicodeEvent( HWINEVENTHOOK hWinEventHook, DWORD event, HWN
 	else
 	{
 		THUNKPROC proc = (THUNKPROC)_GetWindowProc32( pwnd );
-		if ( (DWORD)proc & 0x80000000 || (proc && proc->sign == wtoa_code && IsValidThunk(proc)) ) //shared control or Unicode thunk
+		if ( IS_SHARED(proc) || (proc && proc->sign == wtoa_code && IsValidThunk(proc)) ) //shared control or Unicode thunk
 			isUnicode = TRUE;
 	}
 	if ( isUnicode ) _SetWindowUnicode( pwnd, TRUE );
