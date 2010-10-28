@@ -20,6 +20,7 @@
  */
 
 #include <malloc.h>
+#include "common.h"
 #include "kexcoresdk.h"
 
 /*
@@ -91,16 +92,6 @@ static int strlenWW(LPWSTR strWW)
 	if ( buffer##heap ) HeapFree(GetProcessHeap(),0,buffer##heap); \
 
 //In macros: allocate buffer on stack, convert input
-#define STACK_WtoA(strW,strA) \
-	strA = (LPSTR)strW; \
-	if (HIWORD(strW)) \
-	{ \
-		int c = lstrlenW((LPWSTR)strW); \
-		c = (c+1)*2; \
-		strA = (LPSTR)alloca(c); \
-		WideCharToMultiByte(CP_ACP, 0, (LPWSTR)strW, -1, (LPSTR)strA, c, NULL, NULL); \
-	}
-	
 #define STACK_WWtoAA(strWW,strAA) \
 	strAA = (LPSTR)strWW; \
 	if (HIWORD(strWW)) \
