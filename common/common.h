@@ -118,4 +118,29 @@ size_t lstrlenWnull(LPCWSTR s);
 #define file_ABUFtoW(str, cntsrc, bsize) \
 	MultiByteToWideChar(file_CP, 0, str##A, cntsrc, str##W, bsize)
 
+//In macros: convert A<->W on stack
+#define STACK_WtoA(strW,strA) \
+	strA = (LPSTR)strW; \
+	if (HIWORD(strW)) \
+	{ \
+		int c = lstrlenWnull((LPCWSTR)strW); \
+		if (c) \
+		{ \
+			strA = (LPSTR)alloca(c*2); \
+			WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)strW, -1, (LPSTR)strA, c, NULL, NULL); \
+		} \
+	}
+	
+#define STACK_AtoW(strA,strW) \
+	strW = (LPWSTR)strA; \
+	if (HIWORD(strA)) \
+	{ \
+		int c = lstrlenAnull((LPCSTR)strA); \
+		if (c) \
+		{ \
+			strW = (LPWSTR)alloca(c*sizeof(WCHAR)); \
+			MultiByteToWideChar(CP_ACP, 0, (LPCSTR)strA, -1, (LPWSTR)strW, c); \
+		} \
+	}
+
 #endif
