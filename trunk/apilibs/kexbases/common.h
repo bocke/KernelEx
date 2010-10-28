@@ -42,6 +42,9 @@ int WINAPI CommonUnimpStub(void);
 char* file_fixWprefix(char* in);
 void fatal_error(const char* msg);
 
+size_t lstrlenAnull(LPCSTR s);
+size_t lstrlenWnull(LPCWSTR s);
+
 #ifdef __cplusplus
 };
 #endif
