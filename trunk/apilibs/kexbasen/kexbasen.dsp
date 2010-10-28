@@ -346,7 +346,7 @@ SOURCE=.\ws2_32\addinfo.c
 # End Group
 # Begin Source File
 
-SOURCE=.\common.c
+SOURCE=..\..\common\common.c
 # End Source File
 # Begin Source File
 
@@ -448,7 +448,7 @@ SOURCE=.\unifwd.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\common.h
+SOURCE=..\..\common\common.h
 # End Source File
 # Begin Source File
 
