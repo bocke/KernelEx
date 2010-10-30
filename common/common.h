@@ -64,7 +64,7 @@ size_t lstrlenWnull(LPCWSTR s);
 	{ \
 		__asm xor eax,eax \
 		__asm mov cl, params \
-		__asm jmp CommonUnimpStub \
+		__asm jmp dword ptr [CommonUnimpStub] \
 	}
 #endif
 
