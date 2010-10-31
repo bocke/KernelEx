@@ -344,6 +344,22 @@ SOURCE=.\ws2_32\_ws2_32_apilist.h
 SOURCE=.\ws2_32\addinfo.c
 # End Source File
 # End Group
+# Begin Group "ole32"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ole32\_ole32_apilist.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ole32\_ole32_apilist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ole32\CoWaitForMultipleHandles.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\common.c
