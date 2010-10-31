@@ -425,6 +425,10 @@ SOURCE=.\Gdi32\GetGlyphOutlineA_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Gdi32\GetTextExtentPoint32_fix.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Gdi32\TextOut.c
 # End Source File
 # Begin Source File
