@@ -30,9 +30,11 @@
 
 #define MAXSCRIPTCACHESIZE 10
 
+typedef DWORD FONTUID;
+
 typedef struct
 {
-	HFONT hFont;
+	FONTUID hFont;
 	SCRIPT_CACHE cache;
 } FONTCACHE, *PFONTCACHE;
 
@@ -43,9 +45,8 @@ class ScriptCache
 public:
 		static ScriptCache instance;
 		~ScriptCache();
-		SCRIPT_CACHE GetCache(HFONT hFont);
-		void SetCache(HFONT hFont, SCRIPT_CACHE newcache);
-		void ResetCache(HFONT hFont);
+		SCRIPT_CACHE GetCache(FONTUID hFont);
+		void SetCache(FONTUID hFont, SCRIPT_CACHE newcache);
 		void Lock();
 		void Unlock();
 
