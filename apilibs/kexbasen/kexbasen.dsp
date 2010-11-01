@@ -269,6 +269,10 @@ SOURCE=.\rpcrt4\_rpcrt4_apilist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\rpcrt4\NdrDllGetClassObject.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\rpcrt4\unirpcrt4.c
 # End Source File
 # End Group
