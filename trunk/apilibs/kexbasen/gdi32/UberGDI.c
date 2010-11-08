@@ -327,7 +327,7 @@ DWORD WINAPI GetGlyphOutlineW_new(
 					lpgm->gmBlackBoxY = sz.cy;
 					lpgm->gmptGlyphOrigin.x = 0;
 					lpgm->gmptGlyphOrigin.y = sz.cy;
-					lpgm->gmCellIncX = sz.cx;
+					lpgm->gmCellIncX = (short) sz.cx;
 					lpgm->gmCellIncY = 0;
 					ret = 1;
 				}
