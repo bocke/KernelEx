@@ -34,6 +34,7 @@ BOOL WINAPI GetTextExtentExPointI_new(HDC hdc, LPWORD pgiIn, int cgi, int nMaxEx
 BOOL WINAPI GetTextExtentPointI_new(HDC hdc, LPWORD pgiIn, int cgi, LPSIZE lpSize);
 BOOL WINAPI GetCharWidthI_new(HDC hdc, UINT giFirst, UINT cgi, WORD* pgi, INT* lpBuffer);
 BOOL WINAPI GetCharABCWidthsI_new(HDC hdc, UINT giFirst, UINT cgi, LPWORD pgi, LPABC lpabc);
+BOOL WINAPI GetCharABCWidthsW_new(HDC hdc, UINT uFirstChar, UINT uLastChar, LPABC lpabc);
 DWORD WINAPI GetGlyphOutlineW_new(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRICS lpgm, DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2);
 FWDPROC CopyEnhMetaFileW_fwd;
 FWDPROC CopyMetaFileW_fwd;
@@ -47,7 +48,6 @@ FWDPROC CreateMetaFileW_fwd;
 FWDPROC CreateScalableFontResourceW_fwd;
 FWDPROC EnumFontsW_fwd;
 FWDPROC EnumICMProfilesW_fwd;
-FWDPROC GetCharABCWidthsW_fwd;
 FWDPROC GetCharacterPlacementW_fwd;
 FWDPROC GetEnhMetaFileDescriptionW_fwd;
 FWDPROC GetEnhMetaFileW_fwd;

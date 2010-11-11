@@ -33,7 +33,6 @@ FORWARD_TO_UNICOWS(CreateMetaFileW);
 FORWARD_TO_UNICOWS(CreateScalableFontResourceW);
 FORWARD_TO_UNICOWS(EnumFontsW);
 FORWARD_TO_UNICOWS(EnumICMProfilesW);
-FORWARD_TO_UNICOWS(GetCharABCWidthsW);
 FORWARD_TO_UNICOWS(GetCharacterPlacementW);
 FORWARD_TO_UNICOWS(GetEnhMetaFileDescriptionW);
 FORWARD_TO_UNICOWS(GetEnhMetaFileW);
