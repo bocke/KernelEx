@@ -46,7 +46,6 @@ FWDPROC CreateFontW_fwd;
 FWDPROC CreateICW_fwd;
 FWDPROC CreateMetaFileW_fwd;
 FWDPROC CreateScalableFontResourceW_fwd;
-FWDPROC EnumFontsW_fwd;
 FWDPROC EnumICMProfilesW_fwd;
 FWDPROC GetCharacterPlacementW_fwd;
 FWDPROC GetEnhMetaFileDescriptionW_fwd;
