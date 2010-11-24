@@ -133,6 +133,7 @@ BOOL WINAPI SetWorldTransform_NT(
 	SetViewportExtEx(hdc,vx,vy,NULL);
 	SetViewportOrgEx(hdc,(int)lpXform->eDx,(int)lpXform->eDy,NULL);
 	//set it back
+	dcobj = GetDCObj(hdc);
 	dcobj->mapmode = savemapmode;
 	ReleaseWin16Lock();
 	return TRUE;
@@ -173,10 +174,10 @@ BOOL WINAPI GetTextMetricsA_NT(
 		saved = SaveDC(hdc);
 		ResetMapMode(hdc);
 	}
+	ReleaseWin16Lock();
 	retval = GetTextMetricsA(hdc,lptm);
 	if ( saved )
-		RestoreDC(hdc,-1);
-	ReleaseWin16Lock();
+		RestoreDC(hdc,-1);	
 	return retval;
 }
 
@@ -330,7 +331,10 @@ BOOL WINAPI ExtTextOutW_new(
 	}
 	result = ExtTextOutW(hdc,X,Y,fuOptions,lprc,lpString,cbCount,lpDx);
 	if ( savemapmode )
+	{
+		dcobj = GetDCObj( hdc );
 		dcobj->mapmode = savemapmode;
+	}
 	ReleaseWin16Lock();
 
 	if ( buffer && cbCount>128 )
