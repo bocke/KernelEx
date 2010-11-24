@@ -108,3 +108,58 @@ PMSGQUEUE GetCurrentThreadQueue()
 	return (PMSGQUEUE)MapSL( GetCurrentThreadhQueue() << 16 );
 }
 
+//per-thread keyboard state
+static PQUEUEKEYBUFFER GetCurrentThreadKeyBuffer()
+{	
+	PMSGQUEUE msgq = GetCurrentThreadQueue();
+	if (!msgq) return NULL;
+	PPERQUEUEDATA queuedata = (PPERQUEUEDATA)REBASEUSER(msgq->npPerQueue);
+	if (!queuedata) return NULL;
+	return (PQUEUEKEYBUFFER)MapSL(queuedata->keysbuffer);	
+}
+
+void UpdateLRKeyState(LPMSG msg)
+{
+	switch(msg->message) {
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYDOWN:
+	case WM_SYSKEYUP:
+		if (msg->wParam == VK_SHIFT)
+		{
+			PQUEUEKEYBUFFER keybuffer = GetCurrentThreadKeyBuffer();
+			if (keybuffer)
+			{
+				BYTE scancode = LOBYTE(HIWORD(msg->lParam));
+				if ( scancode == MapVirtualKey(VK_SHIFT,0) ) //left shift
+					keybuffer->keystate[VK_LSHIFT] = keybuffer->keystate[VK_SHIFT];
+				else
+					keybuffer->keystate[VK_RSHIFT] = keybuffer->keystate[VK_SHIFT];
+			}
+		}
+		else if (msg->wParam == VK_CONTROL)
+		{
+			PQUEUEKEYBUFFER keybuffer = GetCurrentThreadKeyBuffer();
+			if (keybuffer)
+			{
+				if ( msg->lParam & 0x1000000 ) //extended bit -> right
+					keybuffer->keystate[VK_RCONTROL] = keybuffer->keystate[VK_CONTROL];
+				else
+					keybuffer->keystate[VK_LCONTROL] = keybuffer->keystate[VK_CONTROL];					
+			}
+		}
+		else if (msg->wParam == VK_MENU)
+		{
+			PQUEUEKEYBUFFER keybuffer = GetCurrentThreadKeyBuffer();
+			if (keybuffer)
+			{
+				if ( msg->lParam & 0x1000000 ) //extended bit -> right
+					keybuffer->keystate[VK_RMENU] = keybuffer->keystate[VK_MENU];
+				else
+					keybuffer->keystate[VK_LMENU] = keybuffer->keystate[VK_MENU];					
+			}
+		}
+		break;
+	}	
+}
+

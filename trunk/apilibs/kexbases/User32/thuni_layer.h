@@ -29,6 +29,7 @@ LRESULT WINAPI CallWindowProc_stdcall( WNDPROC lpPrevWndFunc, HWND hWnd, UINT Ms
 int GetCPFromLocale(LCID Locale);
 UINT GetCurrentKeyboardCP();
 PMSGQUEUE GetCurrentThreadQueue();
+void UpdateLRKeyState(LPMSG msg);
 
 //conv
 WPARAM wparam_AtoW( HWND hwnd, UINT message, WPARAM wParam, BOOL messDBCS );
