@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2010, Tihiy
  *
  *  This file is part of KernelEx source code.
  *
@@ -20,16 +20,20 @@
  */
 
 #include "common.h"
+#include "_kernel32_apilist.h"
 
-UNIMPL_FUNC(CreateHardLinkA, 3);
-UNIMPL_FUNC(CreateHardLinkW, 3);
-UNIMPL_FUNC(IsValidLanguageGroup, 2);
-UNIMPL_FUNC(ReplaceFileA, 6);
-UNIMPL_FUNC(ReplaceFileW, 6);
-UNIMPL_FUNC(HeapSetInformation, 4);
-UNIMPL_FUNC(GetProcessIoCounters, 2);
-UNIMPL_FUNC(RtlCaptureStackBackTrace, 4);
-UNIMPL_FUNC(GetComputerNameExA, 3);
-UNIMPL_FUNC(GetComputerNameExW, 3);
-UNIMPL_FUNC(SetDllDirectoryA, 1);
-UNIMPL_FUNC(SetDllDirectoryW, 1);
+/* MAKE_EXPORT FindFirstFileExA_new=FindFirstFileExA */
+HANDLE WINAPI FindFirstFileExA_new( LPCSTR lpFileNameA, FINDEX_INFO_LEVELS fInfoLevelId, 
+					   LPWIN32_FIND_DATAA lpFindFileDataA, FINDEX_SEARCH_OPS fSearchOp,
+					   LPVOID lpSearchFilter, DWORD dwAdditionalFlags)
+{
+	return FindFirstFileA(lpFileNameA,lpFindFileDataA);
+}
+
+/* MAKE_EXPORT FindFirstFileExW_new=FindFirstFileExW */
+HANDLE WINAPI FindFirstFileExW_new( LPWSTR lpFileNameW, FINDEX_INFO_LEVELS fInfoLevelId, 
+					   LPWIN32_FIND_DATAW lpFindFileDataW, FINDEX_SEARCH_OPS fSearchOp,
+					   LPVOID lpSearchFilter, DWORD dwAdditionalFlags)
+{	
+	return FindFirstFileW_new(lpFileNameW,lpFindFileDataW);
+}
