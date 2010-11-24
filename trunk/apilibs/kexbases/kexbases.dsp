@@ -137,6 +137,10 @@ SOURCE=.\Kernel32\FileApis_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\FindFirstFileEx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\GetConsoleWindow.c
 # End Source File
 # Begin Source File
