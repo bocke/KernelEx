@@ -317,10 +317,6 @@ SOURCE=.\User32\GetNextDlgTabItem_fix.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\User32\hwnd9x.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\User32\IsHungAppWindow.c
 # End Source File
 # Begin Source File
@@ -374,6 +370,10 @@ SOURCE=.\User32\thuni_macro.h
 # Begin Source File
 
 SOURCE=.\User32\thuni_proc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\thuni_stuff.c
 # End Source File
 # Begin Source File
 
@@ -669,6 +669,10 @@ SOURCE=.\main.c
 # Begin Source File
 
 SOURCE=..\..\common\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\User32\hwnd9x.h
 # End Source File
 # Begin Source File
 
