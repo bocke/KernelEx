@@ -110,6 +110,34 @@ typedef struct _MSGQUEUE
 	WORD    block2;     // 5Eh+1Ah      block for SendMessageA (event?)
 } MSGQUEUE, *PMSGQUEUE;
 
+typedef struct _PERQUEUEDATA
+{
+	WORD    npNext;         // 00h a USER heap handle (type == LT_USER_VWININFO)
+	WORD    un2;            // 02h
+	WORD    wSumFlags;      // 04h
+	WORD    npQMsg;         // 06h type == LT_USER_QMSG
+	WORD    un5;            // 08h
+	WORD    un6;            // 0Ah
+	WORD    un7;            // 0Ch
+	WORD    un8;            // 0Eh
+	WORD    un9;            // 10h
+	WORD    un10;           // 12h
+	WORD    somehQueue1;    // 14h a msg queue handle
+	WORD    somehQueue2;    // 16h a msg queue handle
+	DWORD   hWndCapture;    // 18h
+	DWORD   hWndFocus;      // 1Ch
+	DWORD   hWndActive;     // 20h
+	BYTE	filler[0x34];	// 24h
+	DWORD	keysbuffer;		// 58h 16:16 keyboard state ptr
+} PERQUEUEDATA, *PPERQUEUEDATA;
+
+typedef struct _QUEUEKEYBUFFER
+{
+	BYTE filler[0x20];		// 00h sth
+	BYTE keystate[0xFF];	// 20h keys state (0x80-pressed, 0x1-toggled)
+} QUEUEKEYBUFFER, *PQUEUEKEYBUFFER;
+
+
 #pragma pack()
 
 /* IsWindow returns PWND */
