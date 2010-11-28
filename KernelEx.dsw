@@ -3,30 +3,6 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "kexcrt"=.\kexcrt\kexcrt.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "prep"=.\util\prep\prep.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "Core"=.\core\core.dsp - Package Owner=<4>
 
 Package=<5>
@@ -88,6 +64,42 @@ Package=<4>
 ###############################################################################
 
 Project: "kexcontrol"=.\kexcontrol\kexcontrol.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "kexcrt"=.\kexcrt\kexcrt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "prep"=.\util\prep\prep.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "sdbcreate"=.\util\sdbcreate\sdbcreate.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
