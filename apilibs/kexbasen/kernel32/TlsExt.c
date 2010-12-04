@@ -109,14 +109,8 @@ BOOL init_exttls(void)
 
 void detach_exttls(void)
 {
-	TDB98* tdb;
-	LPVOID* ext;
-
-	__asm mov eax, fs:18h;
-	__asm sub eax, 8;
-	__asm mov tdb, eax;
-
-	ext = (LPVOID*) tdb->TlsSlots[TLS_SIZE-1];
+	TDB98* tdb = get_tdb();
+	LPVOID ext = tdb->TlsSlots[TLS_SIZE-1];
 	if (ext)
 	{
 		HeapFree(GetProcessHeap(), 0, ext);
