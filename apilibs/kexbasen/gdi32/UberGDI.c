@@ -48,11 +48,11 @@ FONTUID GetHDCFontUID(HDC hdc)
 
 /* MAKE_EXPORT GetGlyphIndicesW_new=GetGlyphIndicesW */
 int WINAPI GetGlyphIndicesW_new(
-  HDC hdc,       // handle to DC
-  LPWSTR lpstr, // string to convert
-  int c,         // number of characters in string
-  LPWORD pgi,    // array of glyph indices
-  DWORD fl       // glyph options
+	HDC hdc,       // handle to DC
+	LPWSTR lpstr,  // string to convert
+	int c,         // number of characters in string
+	LPWORD pgi,    // array of glyph indices
+	DWORD fl       // glyph options
 )
 {
 	HRESULT result;
@@ -110,11 +110,11 @@ static int WINAPI GdiGetCodePage( HDC hdc )
 
 /* MAKE_EXPORT GetGlyphIndicesA_new=GetGlyphIndicesA */
 int WINAPI GetGlyphIndicesA_new(
-  HDC hdc,       // handle to DC
-  LPCSTR lpstr, // string to convert
-  int c,         // number of characters in string
-  LPWORD pgi,    // array of glyph indices
-  DWORD fl       // glyph options
+	HDC hdc,       // handle to DC
+	LPCSTR lpstr,  // string to convert
+	int c,         // number of characters in string
+	LPWORD pgi,    // array of glyph indices
+	DWORD fl       // glyph options
 )
 {
 	LPWSTR lpstrwide;
@@ -129,13 +129,13 @@ int WINAPI GetGlyphIndicesA_new(
 
 /* MAKE_EXPORT GetTextExtentExPointI_new=GetTextExtentExPointI */
 BOOL WINAPI GetTextExtentExPointI_new(
-  HDC hdc,         // handle to DC
-  LPWORD pgiIn,    // array of glyph indices
-  int cgi,         // number of glyphs in array
-  int nMaxExtent,  // maximum width of formatted string
-  LPINT lpnFit,    // maximum number of characters
-  LPINT alpDx,     // array of partial string widths
-  LPSIZE lpSize    // string dimensions
+	HDC hdc,         // handle to DC
+	LPWORD pgiIn,    // array of glyph indices
+	int cgi,         // number of glyphs in array
+	int nMaxExtent,  // maximum width of formatted string
+	LPINT lpnFit,    // maximum number of characters
+	LPINT alpDx,     // array of partial string widths
+	LPSIZE lpSize    // string dimensions
 )
 {
 	int i;
@@ -186,10 +186,10 @@ BOOL WINAPI GetTextExtentExPointI_new(
 
 /* MAKE_EXPORT GetTextExtentPointI_new=GetTextExtentPointI */
 BOOL WINAPI GetTextExtentPointI_new(
-  HDC hdc,           // handle to DC
-  LPWORD pgiIn,      // glyph indices
-  int cgi,           // number of indices in array
-  LPSIZE lpSize      // string size  
+	HDC hdc,       // handle to DC
+	LPWORD pgiIn,  // glyph indices
+	int cgi,       // number of indices in array
+	LPSIZE lpSize  // string size  
 )
 {
 	return GetTextExtentExPointI_new(hdc,pgiIn,cgi,0,0,0,lpSize);
@@ -197,11 +197,11 @@ BOOL WINAPI GetTextExtentPointI_new(
 
 /* MAKE_EXPORT GetCharWidthI_new=GetCharWidthI */
 BOOL WINAPI GetCharWidthI_new(
-  HDC hdc,         // handle to DC
-  UINT giFirst,    // first glyph index in range
-  UINT cgi,        // number of glyph indices in range
-  WORD* pgi,      // array of glyph indices
-  INT* lpBuffer   // buffer for widths
+	HDC hdc,       // handle to DC
+	UINT giFirst,  // first glyph index in range
+	UINT cgi,      // number of glyph indices in range
+	WORD* pgi,     // array of glyph indices
+	INT* lpBuffer  // buffer for widths
 )
 {
 	ABC abc;
@@ -246,11 +246,11 @@ BOOL WINAPI GetCharWidthI_new(
 
 /* MAKE_EXPORT GetCharABCWidthsI_new=GetCharABCWidthsI */
 BOOL WINAPI GetCharABCWidthsI_new(
-  HDC hdc,         // handle to DC
-  UINT giFirst,    // first glyph index in range
-  UINT cgi,        // count of glyph indices in range
-  LPWORD pgi,      // array of glyph indices
-  LPABC lpabc      // array of character widths
+	HDC hdc,       // handle to DC
+	UINT giFirst,  // first glyph index in range
+	UINT cgi,      // count of glyph indices in range
+	LPWORD pgi,    // array of glyph indices
+	LPABC lpabc    // array of character widths
 )
 {
 	WORD glyph;	
@@ -288,10 +288,10 @@ BOOL WINAPI GetCharABCWidthsI_new(
 
 /* MAKE_EXPORT GetCharABCWidthsW_new=GetCharABCWidthsW */
 BOOL WINAPI GetCharABCWidthsW_new(
-  HDC hdc,         // handle to DC
-  UINT uFirstChar, // first character in range
-  UINT uLastChar,  // last character in range
-  LPABC lpabc      // array of character widths
+	HDC hdc,         // handle to DC
+	UINT uFirstChar, // first character in range
+	UINT uLastChar,  // last character in range
+	LPABC lpabc      // array of character widths
 )
 {
 	if ( !hdc || !lpabc || uFirstChar>uLastChar )
@@ -315,13 +315,13 @@ BOOL WINAPI GetCharABCWidthsW_new(
 
 /* MAKE_EXPORT GetGlyphOutlineW_new=GetGlyphOutlineW */
 DWORD WINAPI GetGlyphOutlineW_new(
-  HDC hdc,             // handle to DC
-  UINT uChar,          // character to query
-  UINT uFormat,        // data format
-  LPGLYPHMETRICS lpgm, // glyph metrics
-  DWORD cbBuffer,      // size of data buffer
-  LPVOID lpvBuffer,    // data buffer
-  CONST MAT2 *lpmat2   // transformation matrix
+	HDC hdc,             // handle to DC
+	UINT uChar,          // character to query
+	UINT uFormat,        // data format
+	LPGLYPHMETRICS lpgm, // glyph metrics
+	DWORD cbBuffer,      // size of data buffer
+	LPVOID lpvBuffer,    // data buffer
+	CONST MAT2 *lpmat2   // transformation matrix
 )
 {
 	UINT glyph = 0;
