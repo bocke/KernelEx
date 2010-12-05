@@ -57,11 +57,11 @@ BOOL WINAPI RemoveFontResourceW_new(LPCWSTR strW)
 
 /* MAKE_EXPORT ExtCreatePen_fix=ExtCreatePen */
 HPEN WINAPI ExtCreatePen_fix(
-  DWORD dwPenStyle,      // pen style
-  DWORD dwWidth,         // pen width
-  CONST LOGBRUSH *lplb,  // brush attributes
-  DWORD dwStyleCount,    // length of custom style array
-  CONST DWORD *lpStyle   // custom style array
+	DWORD dwPenStyle,      // pen style
+	DWORD dwWidth,         // pen width
+	CONST LOGBRUSH *lplb,  // brush attributes
+	DWORD dwStyleCount,    // length of custom style array
+	CONST DWORD *lpStyle   // custom style array
 )
 {
 	dwPenStyle &= ~PS_USERSTYLE;
@@ -70,9 +70,9 @@ HPEN WINAPI ExtCreatePen_fix(
 
 /* MAKE_EXPORT GetObjectW_new=GetObjectW */
 int WINAPI GetObjectW_new(
-  HGDIOBJ hgdiobj,  // handle to graphics object
-  int cbBuffer,     // size of buffer for object information
-  LPVOID lpvObject  // buffer for object information
+	HGDIOBJ hgdiobj,  // handle to graphics object
+	int cbBuffer,     // size of buffer for object information
+	LPVOID lpvObject  // buffer for object information
 )
 {
 	int type = GetObjectType_fix(hgdiobj);

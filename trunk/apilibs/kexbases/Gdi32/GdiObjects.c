@@ -264,12 +264,12 @@ HGDIOBJ WINAPI SelectObject_fix( HDC hdc, HGDIOBJ hgdiobj )
 
 /* MAKE_EXPORT CreateDIBSection_fix=CreateDIBSection */
 HBITMAP WINAPI CreateDIBSection_fix(
-  HDC hdc,                 // handle to DC
-  BITMAPINFO *pbmi,  // bitmap data
-  UINT iUsage,             // data type indicator
-  VOID **ppvBits,          // bit values
-  HANDLE hSection,         // handle to file mapping object
-  DWORD dwOffset           // offset to bitmap bit values
+	HDC hdc,                 // handle to DC
+	BITMAPINFO *pbmi,        // bitmap data
+	UINT iUsage,             // data type indicator
+	VOID **ppvBits,          // bit values
+	HANDLE hSection,         // handle to file mapping object
+	DWORD dwOffset           // offset to bitmap bit values
 )
 {
 	if (pbmi && pbmi->bmiHeader.biSize == sizeof(BITMAPINFO)) //9x does not forgive
