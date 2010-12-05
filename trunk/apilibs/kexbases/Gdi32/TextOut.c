@@ -129,10 +129,12 @@ BOOL WINAPI SetWorldTransform_NT(
 	//hack DC mode to anisotropic to make Set*ExtEx work
 	savemapmode = dcobj->mapmode;
 	dcobj->mapmode = MM_ANISOTROPIC;
+	ReleaseWin16Lock();
 	SetWindowExtEx(hdc,wx,wy,NULL);
 	SetViewportExtEx(hdc,vx,vy,NULL);
 	SetViewportOrgEx(hdc,(int)lpXform->eDx,(int)lpXform->eDy,NULL);
 	//set it back
+	GrabWin16Lock();
 	dcobj = GetDCObj(hdc);
 	dcobj->mapmode = savemapmode;
 	ReleaseWin16Lock();
@@ -171,10 +173,12 @@ BOOL WINAPI GetTextMetricsA_NT(
 	}
 	if ( dcobj->ViewportExtX != 1 || dcobj->ViewportExtY != 1 || dcobj->WindowExtX != 1 || dcobj->WindowExtY != 1 )
 	{
+		ReleaseWin16Lock();
 		saved = SaveDC(hdc);
 		ResetMapMode(hdc);
 	}
-	ReleaseWin16Lock();
+	else
+		ReleaseWin16Lock();	
 	retval = GetTextMetricsA(hdc,lptm);
 	if ( saved )
 		RestoreDC(hdc,-1);	
@@ -329,14 +333,15 @@ BOOL WINAPI ExtTextOutW_new(
 		savemapmode = dcobj->mapmode;
 		dcobj->mapmode = MM_ANISOTROPIC;
 	}
+	ReleaseWin16Lock();
 	result = ExtTextOutW(hdc,X,Y,fuOptions,lprc,lpString,cbCount,lpDx);
 	if ( savemapmode )
 	{
+		GrabWin16Lock();
 		dcobj = GetDCObj( hdc );
 		dcobj->mapmode = savemapmode;
+		ReleaseWin16Lock();
 	}
-	ReleaseWin16Lock();
-
 	if ( buffer && cbCount>128 )
 		HeapFree(GetProcessHeap(),0,buffer);
 	return result;
