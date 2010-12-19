@@ -32,6 +32,9 @@ public:
 	Setup(char* _backup_file);
 	int get_signature_ver();
 	void install();
+	void set_reboot_flag();
+	void register_verify();
+	void reboot();
 
 private:
 	sstring backup_file;

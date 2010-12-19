@@ -208,24 +208,38 @@ Section "Install"
     Abort
 
   SetOutPath "$INSTDIR"
-    
-  SetOverwrite on
-  File setup\${FLAVOUR}\setupkex.exe
-  SetOverwrite lastused
+
+  GetTempFileName $R0 "$INSTDIR"
+  File /oname=$R0 "setup\${FLAVOUR}\setupkex.exe"
+  
+  StrCpy $R1 "none"
+  IfFileExists "$INSTDIR\kernel32.bak" 0 +6
+    StrCpy $R1 "copy"
+    ClearErrors
+    CopyFiles /SILENT "$INSTDIR\kernel32.bak" "$WINDIR\SYSBCKUP\KERNEL32.DLL"
+    IfErrors 0 +2
+      StrCpy $R1 "exist" ;File already exists
   
 !ifdef _DEBUG
-  nsExec::ExecToLog '"$INSTDIR\setupkex.exe" "$INSTDIR\kernel32.bak"'
+  nsExec::ExecToLog '"$R0"'
   Pop $0
 !else
-  ExecWait '"$INSTDIR\setupkex.exe" "$INSTDIR\kernel32.bak"' $0
+  ExecWait '"$R0"' $0
   StrCmp $0 "" 0 +2
     StrCpy $0 "error"
 !endif
   DetailPrint "    setup returned: $0"
-  Delete "$INSTDIR\setupkex.exe"
-  StrCmp $0 "0" +3
+  StrCmp $0 "0" +6
+    Delete $R0 ;delete temporary setupkex.exe
+    StrCmp $R1 "copy" 0 +2 ;undo copy
+      Delete "$WINDIR\SYSBCKUP\KERNEL32.DLL"
     RMDir "$INSTDIR"
     Abort
+  
+  Rename /REBOOTOK $R0  "$INSTDIR\setupkex.exe"
+  StrCmp $R1 "copy" +2 0
+  StrCmp $R1 "exist" 0 +2
+    Delete /REBOOTOK "$INSTDIR\kernel32.bak" ;delete deprecated update file
   
   ;Files to install
   
@@ -341,7 +355,6 @@ Section "Install"
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
   SetRebootFlag true
 
 SectionEnd
@@ -361,10 +374,10 @@ Section "Uninstall"
     Abort
   
   ;Files to uninstall
-  IfFileExists "$INSTDIR\kernel32.bak" 0 +5
+  IfFileExists "$WINDIR\SYSBCKUP\KERNEL32.DLL" 0 +5
     GetTempFileName $0 "$SYSDIR"
     Delete $0
-    Rename "$INSTDIR\kernel32.bak" $0
+    CopyFiles /SILENT "$WINDIR\SYSBCKUP\KERNEL32.DLL" $0
     Rename /REBOOTOK $0 "$SYSDIR\kernel32.dll"
 
   Delete /REBOOTOK "$INSTDIR\KernelEx.dll"
