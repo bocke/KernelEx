@@ -899,8 +899,6 @@ int resolver_init()
 	system_path_len = GetSystemDirectory(system_path, sizeof(system_path));
 	RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\KernelEx\\KnownDLLs", &known_dlls_key);
 
-	SettingsDB::instance.flush_all();
-
 	return 1;
 }
 
