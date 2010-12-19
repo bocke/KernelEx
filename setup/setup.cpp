@@ -271,14 +271,82 @@ void Setup::install()
 	Wininit.save();
 }
 
+void Setup::set_reboot_flag()
+{
+	HKEY hkey;
+	if (RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\"
+			"CurrentVersion\\RunServicesOnce", &hkey) == ERROR_SUCCESS)
+	{
+		RegSetValueEx(hkey, "KexNeedsReboot", 0, REG_SZ, (const BYTE*) "", 1);
+		RegCloseKey(hkey);
+	}
+}
+
+void Setup::register_verify()
+{
+	HKEY hkey;
+	DWORD type;
+	char verify_path[MAX_PATH];
+	DWORD size = sizeof(verify_path);
+	LONG res;
+
+	res = RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\KernelEx", &hkey);
+	if (res != ERROR_SUCCESS)
+		return;
+	res = RegQueryValueEx(hkey, "InstallDir", 0, &type, (BYTE*) verify_path, &size);
+	RegCloseKey(hkey);
+	if (res != ERROR_SUCCESS)
+		return;
+
+	strcat(verify_path, "\\verify.exe");
+
+	if (RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\"
+			"CurrentVersion\\Run", &hkey) == ERROR_SUCCESS)
+	{
+		RegSetValueEx(hkey, "KexVerify", 0, REG_SZ, (BYTE*) verify_path,
+				strlen(verify_path) + 1);
+		RegCloseKey(hkey);
+	}
+}
+
+void Setup::reboot()
+{
+	char out[512];
+	
+	if (!LoadString(GetModuleHandle(NULL), IDS_REBOOT, out, sizeof(out)))
+		sprintf(out, "ERROR: Missing string resource %d", IDS_REBOOT);
+
+	int res = MessageBox(NULL, out, "KernelEx Setup", MB_OKCANCEL | MB_ICONQUESTION);
+	if (res == IDOK)
+	{
+		DBGPRINTF(("Rebooting...\n"));
+		ExitWindowsEx(EWX_REBOOT, 0);
+	}
+}
+
 int main(int argc, char** argv)
 {
+	bool reboot = false;
 	DBGPRINTF(("KernelEx setup program running\n"));
-	if (argc != 2)
+	if (argc != 1 && argc != 2)
 		return 1;
+	if (argc == 2 && !strcmp(argv[1], "/R"))
+		reboot = true;
 
-	Setup setup(argv[1]);
+	char backup_path[MAX_PATH];
+	GetWindowsDirectory(backup_path, MAX_PATH);
+	if (backup_path[strlen(backup_path)-1] != '\\')
+		strcat(backup_path, "\\");
+	strcat(backup_path, "SYSBCKUP\\KERNEL32.DLL");
+
+	Setup setup(backup_path);
 	setup.install();
+
 	DBGPRINTF(("Setup finished\n"));
+	if (reboot)
+		setup.reboot();
+
+	setup.set_reboot_flag();
+	setup.register_verify();
 	return 0;
 }
