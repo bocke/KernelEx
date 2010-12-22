@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright(C) 2010, Tihiy
+ *  Copyright(C) 2010, Tihiy, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -28,13 +28,14 @@
 
 using namespace std;
 
-typedef void (*STRPROC) (LPWSTR);
+typedef void (*STRPROC) (wchar_t*);
 
 static int sections;
 static PDB pdb;
-static LPWSTR sdbfile;
-static WCHAR inifile[MAX_PATH];
-static FILE *regfile;
+static wchar_t* sdbfile;
+static wchar_t inifile[MAX_PATH];
+static FILE *regfilei;
+static FILE *regfileu;
 static map<wstring, TAGID> tagidmap;
 
 void fail()
@@ -44,12 +45,12 @@ void fail()
 	exit(-1);
 }
 
-void WriteTransform(LPWSTR section)
+void WriteTransform(wchar_t* section)
 {
 	//query file name
-	WCHAR filebuf[MAX_PATH];
-	WCHAR filepath[MAX_PATH];
-	WCHAR name[MAX_PATH];
+	wchar_t filebuf[MAX_PATH];
+	wchar_t filepath[MAX_PATH];
+	wchar_t name[MAX_PATH];
 
 	if (!GetPrivateProfileStringW(section, L"Transform", NULL, filebuf, MAX_PATH, inifile))
 	{
@@ -62,7 +63,7 @@ void WriteTransform(LPWSTR section)
 	PathRemoveFileSpecW(filepath);
 	PathAppendW(filepath, filebuf);
 	
-	LPWSTR filename = PathFindFileNameW(filepath);
+	wchar_t* filename = PathFindFileNameW(filepath);
 
 	lstrcpyW(name, filepath);
 	PathRemoveExtensionW(name);
@@ -96,12 +97,12 @@ void WriteTransform(LPWSTR section)
 	tagidmap[name] = transfid;
 }
 
-void WritePackage(LPWSTR section)
+void WritePackage(wchar_t* section)
 {
 	//query file name
-	WCHAR filebuf[MAX_PATH];
-	WCHAR filepath[MAX_PATH];
-	WCHAR name[MAX_PATH];
+	wchar_t filebuf[MAX_PATH];
+	wchar_t filepath[MAX_PATH];
+	wchar_t name[MAX_PATH];
 
 	GetPrivateProfileStringW(section, L"Transform", NULL, filebuf, MAX_PATH, inifile);
 
@@ -110,7 +111,7 @@ void WritePackage(LPWSTR section)
 	PathRemoveFileSpecW(filepath);
 	PathAppendW(filepath, filebuf);
 
-	LPWSTR filename = PathFindFileNameW(filepath);
+	wchar_t* filename = PathFindFileNameW(filepath);
 
 	lstrcpyW(name, filepath);
 	PathRemoveExtensionW(name);
@@ -119,8 +120,8 @@ void WritePackage(LPWSTR section)
 	TAGID transfid = tagidmap[name];
 
 	//query attributes
-	WCHAR appname[200];
-	WCHAR packagecode[100];
+	wchar_t appname[200];
+	wchar_t packagecode[100];
 	GUID guid;
 
 	GetPrivateProfileStringW(section, L"AppName", section, appname, 200, inifile);
@@ -147,27 +148,32 @@ void WritePackage(LPWSTR section)
 	SdbEndWriteListTag(pdb, tagid);
 
 	//write registry
-	if (regfile)
+	if (regfilei)
 	{
-		fprintf(regfile, "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\"
+		fprintf(regfilei, "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\"
 				"CurrentVersion\\AppCompatFlags\\Custom\\%ls]\n", packagecode);
-		fprintf(regfile, "\"%ls\"=\"%ls\"\n", PathFindFileNameW(sdbfile), appname);
-		fprintf(regfile, "\n");
+		fprintf(regfilei, "\"%ls\"=\"%ls\"\n", PathFindFileNameW(sdbfile), appname);
+		fprintf(regfilei, "\n");
+	}
+	
+	if (regfileu)
+	{
+		fprintf(regfileu, "[-HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\"
+				"CurrentVersion\\AppCompatFlags\\Custom\\%ls]\n\n", packagecode);
 	}
 }
 
-
 void ForEachSection(STRPROC proc)
 {
-	WCHAR sections[0x10000] = { 0 };
-	LPWSTR strW = sections;
+	wchar_t sections[0x10000] = { 0 };
+	wchar_t* strW = sections;
 
 	GetPrivateProfileSectionNamesW(strW, 0x10000, inifile);
 	for(; *strW; strW += lstrlenW(strW) + 1)
 		proc(strW);
 }
 
-void CountSection(LPWSTR section)
+void CountSection(wchar_t* section)
 {
 	sections++;
 }
@@ -217,7 +223,7 @@ void WriteDatabase()
 	SdbStopIndexing(pdb, idx3);
 }
 
-int wmain(int argc, WCHAR * argv[])
+int wmain(int argc, wchar_t* argv[])
 {
 	if (argc != 3 && argc != 4)
 	{
@@ -244,11 +250,23 @@ int wmain(int argc, WCHAR * argv[])
 	}
 
 	//create reg
-	regfile = NULL;
 	if (argc == 4)
 	{
-		regfile = _wfopen(argv[3], L"w");
-		fprintf(regfile, "REGEDIT4\n\n");
+		wchar_t regpath[MAX_PATH];
+
+		lstrcpyW(regpath, argv[3]);
+		PathRemoveExtensionW(regpath);
+		lstrcatW(regpath, L".i.reg");
+
+		regfilei = _wfopen(regpath, L"w");
+		fprintf(regfilei, "REGEDIT4\n\n");
+
+		lstrcpyW(regpath, argv[3]);
+		PathRemoveExtensionW(regpath);
+		lstrcatW(regpath, L".u.reg");
+
+		regfileu = _wfopen(regpath, L"w");
+		fprintf(regfileu, "REGEDIT4\n\n");
 	}
 
 	//write
@@ -256,8 +274,10 @@ int wmain(int argc, WCHAR * argv[])
 
 	//close
 	SdbCloseDatabaseWrite(pdb);
-	if (regfile)
-		fclose(regfile);
+	if (regfilei)
+		fclose(regfilei);
+	if (regfileu)
+		fclose(regfilei);
 
 	printf("Finished.");
 	return 0;
