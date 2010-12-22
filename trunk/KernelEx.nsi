@@ -332,6 +332,12 @@ Section "Install"
   
   ExecWait '"$WINDIR\regedit.exe" /s "$INSTDIR\settings.reg"'
   Delete "$INSTDIR\settings.reg"
+  
+  CreateDirectory $WINDIR\AppPatch\Custom
+  File /oname=$WINDIR\AppPatch\Custom\KernelEx.sdb "util\sdbcreate\sdbdb\KernelEx.sdb"  
+  File "util\sdbcreate\sdbdb\kexsdb.i.reg"
+  ExecWait '"$WINDIR\regedit.exe" /s "$INSTDIR\kexsdb.i.reg"'
+  Delete "$INSTDIR\kexsdb.i.reg"
 
   ;Store installation folder
   WriteRegStr HKLM "Software\KernelEx" "InstallDir" $INSTDIR
@@ -402,6 +408,12 @@ Section "Uninstall"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "WTSAPI32"
   Delete /REBOOTOK "$INSTDIR\userenv.dll"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "USERENV"
+  
+  File "util\sdbcreate\sdbdb\kexsdb.u.reg"
+  ExecWait '"$WINDIR\regedit.exe" /s "$INSTDIR\kexsdb.u.reg"'
+  Delete "$INSTDIR\kexsdb.u.reg"
+  Delete /REBOOTOK "$WINDIR\AppPatch\Custom\KernelEx.sdb"
+  RMDir "$WINDIR\AppPatch\Custom"
   
   Delete "$INSTDIR\verify.exe"
   DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "KexVerify"
