@@ -37,6 +37,7 @@
 
   Var ENABLEBUTTON
   Var WARNING_TEXT
+  Var StartMenuFolder
 
 ;--------------------------------
 ;Interface Settings
@@ -50,6 +51,13 @@
 
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "License.txt"
+
+  ;Start Menu Folder Page Configuration
+  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\KernelEx" 
+  !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "SMDir"
+  !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
+
   !insertmacro MUI_PAGE_INSTFILES
   Page custom PageDefConfig PageLeaveDefConfig
   !insertmacro MUI_PAGE_FINISH
@@ -285,6 +293,7 @@ Section "Install"
   File apilibs\core.ini
   File apilibs\settings.reg
   File license.txt
+  File "Release Notes.txt"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\msimg32.dll
@@ -361,6 +370,15 @@ Section "Install"
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
+  ;Create shortcuts
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Release Notes.lnk" "$INSTDIR\Release Notes.txt"  
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Verify Installation.lnk" "$INSTDIR\verify.exe"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Home Page.lnk" "http://kernelex.sourceforge.net/"  
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Wiki.lnk" "http://kernelex.sourceforge.net/wiki/"  
+  !insertmacro MUI_STARTMENU_WRITE_END
+
   SetRebootFlag true
 
 SectionEnd
@@ -395,6 +413,7 @@ Section "Uninstall"
   UnRegDLL "$INSTDIR\kexCOM.dll"
   Delete /REBOOTOK "$INSTDIR\kexCOM.dll"
   Delete "$INSTDIR\license.txt"
+  Delete "$INSTDIR\Release Notes.txt"
   
   Delete /REBOOTOK "$INSTDIR\msimg32.dll"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "MSIMG32"
@@ -422,6 +441,10 @@ Section "Uninstall"
 
   RMDir /r "$INSTDIR\MSLU"
   WriteINIStr $WINDIR\wininit.ini Rename DIRNUL $INSTDIR
+
+  ;remove Start Menu shortcuts
+  !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
+  RMDir /r "$SMPROGRAMS\$StartMenuFolder"
 
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(DESC_SETTINGS_PRESERVE)" IDYES +2 IDNO 0
     DeleteRegKey HKLM "Software\KernelEx"
