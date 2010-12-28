@@ -373,10 +373,11 @@ Section "Install"
   ;Create shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Release Notes.lnk" "$INSTDIR\Release Notes.txt"  
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Release Notes.lnk" "$INSTDIR\Release Notes.txt"
     CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Verify Installation.lnk" "$INSTDIR\verify.exe"
-    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Home Page.lnk" "http://kernelex.sourceforge.net/"  
-    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Wiki.lnk" "http://kernelex.sourceforge.net/wiki/"  
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Home Page.lnk" "http://kernelex.sourceforge.net/"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\KernelEx Wiki.lnk" "http://kernelex.sourceforge.net/wiki/"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 
   SetRebootFlag true
