@@ -1,3 +1,25 @@
+KernelEx v4.5 Final by Xeno86
+2010-12-30
+
+What's new:
+----------------------------------
+* Reworked installer (should be more compatible with kernel32 updates)
+* New welcome screen
+* Fixed stability of extended TLS code
+* Fixed hang issues with printers
+* Added Windows Installer compatibility database for MSI files patching
+
+Apps fixed / now working:
+-------------------------
+* Fixed: Foxit Reader 3.1 drag-and-drop crash
+* Fixed: Qt 4.6+ hotkey issues
+* Fixed: Opera 11 'about:' pages
+* Fixed: Firefox displaying file save dialog twice
+* Fixed: caret not showing on some configurations (Opera)
+* Now working: Google Earth 5.2 (6.0 beta experimentally)
+
+#################################################
+
 KernelEx v4.5 RC 5 by Xeno86
 2010-11-02
 
