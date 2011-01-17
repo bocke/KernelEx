@@ -102,20 +102,11 @@ SOURCE=.\apiconfmgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\apilib.cpp
+SOURCE=.\apihook.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\apilog.cpp
-
-!IF  "$(CFG)" == "Core - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "Core - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=.\apilib.cpp
 # End Source File
 # Begin Source File
 
@@ -184,19 +175,6 @@ SOURCE=.\debugproto.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\DebugWindow.cpp
-
-!IF  "$(CFG)" == "Core - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "Core - Win32 Debug"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=.\internals.cpp
 # End Source File
 # Begin Source File
@@ -253,11 +231,11 @@ SOURCE=.\apiconfmgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\apilib.h
+SOURCE=.\apihook.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\apilog.h
+SOURCE=.\apilib.h
 # End Source File
 # Begin Source File
 
@@ -266,10 +244,6 @@ SOURCE=.\debug.h
 # Begin Source File
 
 SOURCE=.\debugproto.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DebugWindow.h
 # End Source File
 # Begin Source File
 
