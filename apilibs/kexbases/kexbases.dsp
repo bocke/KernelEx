@@ -437,6 +437,10 @@ SOURCE=.\Gdi32\GetTextExtentPoint32_fix.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Gdi32\MaskBlt.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Gdi32\Orhpans.cpp
 # End Source File
 # Begin Source File
