@@ -140,11 +140,11 @@ PROC apihook::hook(BOOL is_static, LPCSTR caller, LPCSTR target, LPCSTR api, PRO
 
 	if (!ah_reg)
 	{
+		//to avoid recursion in hook dll, disable the hook first
+		ps->set(psidx, (void*) -1);
 		ah_reg = (apihook_register_t) prepare(is_static);
 		if (!ah_reg)
 		{
-			//remember that we failed once
-			ps->set(psidx, (void*) -1);
 			OutputDebugString("KernelEx: Couldn't locate API HOOK DLL or DLL failed to init.");
 			ah_reg = (apihook_register_t)-1;
 		}
