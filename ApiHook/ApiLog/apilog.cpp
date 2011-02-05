@@ -30,6 +30,9 @@
 #include "apilog_params.h"
 #include "writer.h"
 
+extern "C" void * _AddressOfReturnAddress(void);
+#pragma intrinsic(_AddressOfReturnAddress)
+
 #define countof(x) (sizeof(x)/sizeof(x[0]))
 
 #ifdef _DEBUG
@@ -105,7 +108,7 @@ void __stdcall log_stub::pre_log(log_data* lgd)
 	DWORD last_err;
 	DWORD caller_addr;
 	
-	caller_addr = *((DWORD*) &lgd + 9);
+	caller_addr = *((DWORD*) _AddressOfReturnAddress() + 10);
 	last_err = GetLastError();
 	
 	ThreadAddrStack::push_ret_addr(caller_addr);
@@ -137,7 +140,7 @@ void __stdcall log_stub::pre_log(log_data* lgd)
 void __stdcall log_stub::post_log(log_data* lgd, DWORD retval)
 {
 	DWORD last_err;
-	DWORD& caller_addr = *((DWORD*) &retval + 9);
+	DWORD& caller_addr = *((DWORD*) _AddressOfReturnAddress() + 11);
 	
 	last_err = GetLastError();
 	
