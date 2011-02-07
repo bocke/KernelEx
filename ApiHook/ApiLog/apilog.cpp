@@ -190,6 +190,38 @@ void load_signature()
 	OutputDebugString(res ? "done.\n" : "error.\n");
 }
 
+bool filter_out(const char* target, const char* api)
+{
+	static const char* filtered_apis[] = 
+	{
+		"HeapAlloc",
+		"HeapFree",
+		"HeapReAlloc",
+		"HeapSize",
+		"TlsGetValue",
+		"TlsSetValue",
+		"InitializeCriticalSection",
+		"ReinitializeCriticalSection",
+		"DeleteCriticalSection",
+		"EnterCriticalSection",
+		"LeaveCriticalSection",
+		"InterlockedIncrement",
+		"InterlockedDecrement",
+		"InterlockedExchange",
+		"InterlockedExchangeAdd",
+		"InterlockedCompareExchange",
+	};
+	if (HIWORD(api) && !strcmp(target, "KERNEL32.DLL"))
+	{
+		for (int i = 0 ; i < countof(filtered_apis) ; i++)
+		{
+			if (!strcmp(api, filtered_apis[i]))
+				return true;
+		}
+	}
+	return false;
+}
+
 /*
  * This function is called before any call to _register and BEFORE DllMain
  * in order to let you prepare your API hooks.
@@ -234,6 +266,17 @@ PROC kexApiHook_register(const char* caller, const char* target, const char* api
 	char* new_api;
 	if (orig == NULL)
 		return orig;
+
+	//extract DLL file names
+	char* p;
+	p = strrchr(caller, '\\');
+	if (p) caller = p + 1;
+	p = strrchr(target, '\\');
+	if (p) target = p + 1;
+
+	if (filter_out(target, api))
+		return orig;
+
 	if (HIWORD(api)) //named export
 	{
 		new_api = strdup(api);
@@ -244,11 +287,6 @@ PROC kexApiHook_register(const char* caller, const char* target, const char* api
 		snprintf(ord_name, sizeof(ord_name), "Ordinal:%u", (unsigned) api);
 		new_api = strdup(ord_name);
 	}
-	char* p;
-	p = strrchr(caller, '\\');
-	if (p) caller = p + 1;
-	p = strrchr(target, '\\');
-	if (p) target = p + 1;
 	return (PROC) new log_stub(caller, target, new_api, (unsigned long) orig);
 }
 
