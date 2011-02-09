@@ -74,6 +74,8 @@ static const apilib_named_api advapi32_named_apis[] =
 	DECL_API("GetFileSecurityA", GetFileSecurityA_new),
 	DECL_API("GetFileSecurityW", GetFileSecurityW_new),
 	DECL_API("GetLengthSid", GetLengthSid_new),
+	DECL_API("GetNamedSecurityInfoA", GetNamedSecurityInfoA_new),
+	DECL_API("GetNamedSecurityInfoW", GetNamedSecurityInfoW_new),
 	DECL_API("GetSecurityDescriptorControl", GetSecurityDescriptorControl_new),
 	DECL_API("GetSecurityDescriptorDacl", GetSecurityDescriptorDacl_new),
 	DECL_API("GetSecurityDescriptorGroup", GetSecurityDescriptorGroup_new),

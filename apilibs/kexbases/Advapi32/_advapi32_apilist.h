@@ -23,6 +23,7 @@
 #define _ADVAPI32_APILIST_H
 
 #include "kexcoresdk.h"
+#include <accctrl.h>
 
 BOOL init_advapi32();
 extern const apilib_api_table apitable_advapi32;
@@ -114,6 +115,8 @@ BOOL WINAPI LookupAccountSidA_new(IN LPCSTR system, IN PSID sid, OUT LPSTR accou
 BOOL WINAPI LookupAccountSidW_new(IN LPCWSTR system, IN PSID sid, OUT LPWSTR account, IN OUT LPDWORD accountSize, OUT LPWSTR domain, IN OUT LPDWORD domainSize, OUT PSID_NAME_USE name_use);
 BOOL WINAPI SetFileSecurityA_new(LPCSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR pSecurityDescriptor);
 BOOL WINAPI SetFileSecurityW_new(LPCWSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR pSecurityDescriptor);
+DWORD WINAPI GetNamedSecurityInfoW_new(LPWSTR name, SE_OBJECT_TYPE type, SECURITY_INFORMATION info, PSID* owner, PSID* group, PACL* dacl, PACL* sacl, PSECURITY_DESCRIPTOR* descriptor);
+DWORD WINAPI GetNamedSecurityInfoA_new(LPSTR pObjectName, SE_OBJECT_TYPE ObjectType, SECURITY_INFORMATION SecurityInfo, PSID* ppsidOwner, PSID* ppsidGroup, PACL* ppDacl, PACL* ppSacl, PSECURITY_DESCRIPTOR* ppSecurityDescriptor);
 BOOL WINAPI RevertToSelf_new(void);
 BOOL WINAPI ImpersonateSelf_new(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel);
 BOOL WINAPI AccessCheck_new(PSECURITY_DESCRIPTOR SecurityDescriptor, HANDLE ClientToken, DWORD DesiredAccess, PGENERIC_MAPPING GenericMapping, PPRIVILEGE_SET PrivilegeSet, LPDWORD PrivilegeSetLength, LPDWORD GrantedAccess, LPBOOL AccessStatus);
