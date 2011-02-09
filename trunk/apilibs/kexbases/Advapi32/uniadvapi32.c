@@ -187,13 +187,18 @@ LONG WINAPI RegSetValueExW_new(
 {
 	LPSTR strA;
 	LPSTR dataA;
+	
 	STACK_WtoA(lpValueName, strA);
+	
 	if (dwType == REG_SZ || dwType == REG_EXPAND_SZ || dwType == REG_MULTI_SZ)
 	{
-		STACK_WtoA(lpData, dataA);
-		if (HIWORD(dataA))
-			cbData = strlen(dataA);
-		lpData = (BYTE*) dataA;
+		if (HIWORD(lpData))
+		{
+			cbData = WideCharToMultiByte(CP_ACP, 0, (LPWSTR) lpData, -1, NULL, 0, NULL, NULL);
+			dataA = (LPSTR) alloca(cbData);
+			WideCharToMultiByte(CP_ACP, 0, (LPWSTR) lpData, -1, dataA, cbData, NULL, NULL);
+			lpData = (CONST BYTE*) dataA;
+		}
 	}
 	
 	return RegSetValueExA_fix(hKey, strA, Reserved, dwType, lpData, cbData); 
