@@ -489,6 +489,10 @@ SOURCE=.\Advapi32\RegOpenCurrentUser.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Advapi32\RegSetValueExA_fix.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Advapi32\RtlGenRandom.c
 # End Source File
 # Begin Source File

@@ -21,10 +21,17 @@
  */
 
 #include "common.h"
+#include "_advapi32_apilist.h"
 
 //MAKE_EXPORT RegQueryValueExW_new=RegQueryValueExW
-LONG WINAPI RegQueryValueExW_new(HKEY hKey, LPCWSTR lpValueNameW, LPDWORD lpReserved, 
-	LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData)
+LONG WINAPI RegQueryValueExW_new(
+	HKEY hKey,
+	LPCWSTR lpValueNameW,
+	LPDWORD lpReserved, 
+	LPDWORD lpType,
+	LPBYTE lpData,
+	LPDWORD lpcbData
+)
 {
 	LONG ret;
 	DWORD type;
@@ -166,4 +173,28 @@ LONG WINAPI RegEnumValueW_new(
 
 	if (heapbuf) HeapFree(GetProcessHeap(), 0, heapbuf);
 	return ret;
+}
+
+/* MAKE_EXPORT RegSetValueExW_new=RegSetValueExW */
+LONG WINAPI RegSetValueExW_new(
+	HKEY hKey,
+	LPCWSTR lpValueName,
+	DWORD Reserved,
+	DWORD dwType,
+	CONST BYTE *lpData,
+	DWORD cbData
+)
+{
+	LPSTR strA;
+	LPSTR dataA;
+	STACK_WtoA(lpValueName, strA);
+	if (dwType == REG_SZ || dwType == REG_EXPAND_SZ || dwType == REG_MULTI_SZ)
+	{
+		STACK_WtoA(lpData, dataA);
+		if (HIWORD(dataA))
+			cbData = strlen(dataA);
+		lpData = (BYTE*) dataA;
+	}
+	
+	return RegSetValueExA_fix(hKey, strA, Reserved, dwType, lpData, cbData); 
 }

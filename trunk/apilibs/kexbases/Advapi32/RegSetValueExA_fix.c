@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2008, Xeno86
+ *  Copyright (C) 2011, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -19,24 +19,26 @@
  *
  */
 
-#include "unifwd.h"
+#include <windows.h>
 
-FORWARD_TO_UNICOWS(GetUserNameW);
-FORWARD_TO_UNICOWS(IsTextUnicode);
-FORWARD_TO_UNICOWS(RegConnectRegistryW);
-FORWARD_TO_UNICOWS(RegCreateKeyExW);
-FORWARD_TO_UNICOWS(RegCreateKeyW);
-FORWARD_TO_UNICOWS(RegDeleteKeyW);
-FORWARD_TO_UNICOWS(RegDeleteValueW);
-FORWARD_TO_UNICOWS(RegEnumKeyExW);
-FORWARD_TO_UNICOWS(RegEnumKeyW);
-FORWARD_TO_UNICOWS(RegLoadKeyW);
-FORWARD_TO_UNICOWS(RegOpenKeyExW);
-FORWARD_TO_UNICOWS(RegOpenKeyW);
-FORWARD_TO_UNICOWS(RegQueryInfoKeyW);
-FORWARD_TO_UNICOWS(RegQueryMultipleValuesW);
-FORWARD_TO_UNICOWS(RegQueryValueW);
-FORWARD_TO_UNICOWS(RegReplaceKeyW);
-FORWARD_TO_UNICOWS(RegSaveKeyW);
-FORWARD_TO_UNICOWS(RegSetValueW);
-FORWARD_TO_UNICOWS(RegUnLoadKeyW);
+/* MAKE_EXPORT RegSetValueExA_fix=RegSetValueExA */
+LONG WINAPI RegSetValueExA_fix(
+	HKEY hKey,
+	LPCSTR lpValueName,
+	DWORD Reserved,
+	DWORD dwType,
+	CONST BYTE *lpData,
+	DWORD cbData
+)
+{
+	if (!lpData && cbData)
+		return ERROR_INVALID_PARAMETER;
+
+	if (dwType == REG_SZ || dwType == REG_EXPAND_SZ || dwType == REG_MULTI_SZ)
+	{
+		if (!lpData)
+			lpData = (CONST BYTE*) "";
+	}
+	
+	return RegSetValueExA(hKey, lpValueName, Reserved, dwType, lpData, cbData);
+}
