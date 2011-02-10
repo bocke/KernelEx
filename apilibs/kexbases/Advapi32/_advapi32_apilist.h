@@ -118,6 +118,7 @@ BOOL WINAPI SetFileSecurityA_new(LPCSTR lpFileName, SECURITY_INFORMATION Request
 BOOL WINAPI SetFileSecurityW_new(LPCWSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR pSecurityDescriptor);
 DWORD WINAPI GetNamedSecurityInfoW_new(LPWSTR name, SE_OBJECT_TYPE type, SECURITY_INFORMATION info, PSID* owner, PSID* group, PACL* dacl, PACL* sacl, PSECURITY_DESCRIPTOR* descriptor);
 DWORD WINAPI GetNamedSecurityInfoA_new(LPSTR pObjectName, SE_OBJECT_TYPE ObjectType, SECURITY_INFORMATION SecurityInfo, PSID* ppsidOwner, PSID* ppsidGroup, PACL* ppDacl, PACL* ppSacl, PSECURITY_DESCRIPTOR* ppSecurityDescriptor);
+LONG WINAPI RegGetKeySecurity_new(IN HKEY hKey, IN SECURITY_INFORMATION SecurityInformation, OUT PSECURITY_DESCRIPTOR pSecurityDescriptor, IN OUT LPDWORD lpcbSecurityDescriptor);
 BOOL WINAPI RevertToSelf_new(void);
 BOOL WINAPI ImpersonateSelf_new(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel);
 BOOL WINAPI AccessCheck_new(PSECURITY_DESCRIPTOR SecurityDescriptor, HANDLE ClientToken, DWORD DesiredAccess, PGENERIC_MAPPING GenericMapping, PPRIVILEGE_SET PrivilegeSet, LPDWORD PrivilegeSetLength, LPDWORD GrantedAccess, LPBOOL AccessStatus);
