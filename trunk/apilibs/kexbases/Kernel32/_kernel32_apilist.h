@@ -133,6 +133,7 @@ void* WINAPI GetEnvironmentStringsW_new(void);
 BOOL WINAPI GetFileAttributesExW_new(LPCWSTR lpFileNameW, GET_FILEEX_INFO_LEVELS fInfoLevelId, LPVOID lpFileInformation);
 DWORD WINAPI GetFileAttributesW_new(LPCWSTR lpFileNameW);
 DWORD WINAPI GetFullPathNameW_new(LPCWSTR lpFileNameW, DWORD nBufferLength, LPWSTR lpBufferW, LPWSTR *lpFilePartW);
+int WINAPI GetLocaleInfoW_new(LCID Locale, LCTYPE LCType, LPWSTR lpLCData, int cchData);
 DWORD WINAPI GetLongPathNameW_new(LPCWSTR lpszShortPathW, LPWSTR lpszLongPathW, DWORD cchBuffer);
 DWORD WINAPI GetModuleFileNameW_new(HMODULE hModule, LPWSTR lpFilenameW, DWORD nSize);
 HMODULE WINAPI GetModuleHandleW_new(LPCWSTR lpModuleNameW);

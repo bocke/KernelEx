@@ -101,6 +101,7 @@ static const apilib_named_api kernel32_named_apis[] =
 	DECL_API("GetFileAttributesW", GetFileAttributesW_new),
 	DECL_API("GetFileSizeEx", GetFileSizeEx_new),
 	DECL_API("GetFullPathNameW", GetFullPathNameW_new),
+	DECL_API("GetLocaleInfoW", GetLocaleInfoW_new),
 	DECL_API("GetLongPathNameW", GetLongPathNameW_new),
 	DECL_API("GetModuleFileNameW", GetModuleFileNameW_new),
 	DECL_API("GetModuleHandleExA", GetModuleHandleExA_new),
