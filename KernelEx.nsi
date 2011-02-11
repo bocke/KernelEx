@@ -24,7 +24,7 @@
   ;Name and file
   Name "KernelEx"
   Caption "KernelEx ${VERSION} Setup"
-  OutFile "..\KernelEx-dev.exe"
+  OutFile "KernelEx-dev.exe"
 
   ;Default installation folder
   InstallDir "$WINDIR\KernelEx"
