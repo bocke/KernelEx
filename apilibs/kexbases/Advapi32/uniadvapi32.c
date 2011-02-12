@@ -198,8 +198,9 @@ LONG WINAPI RegSetValueExW_new(
 
 			cbData = (cbData + 1) / 2;
 			cbDataA = WideCharToMultiByte(CP_ACP, 0, (LPWSTR) lpData, cbData, NULL, 0, NULL, NULL);
-			lpDataA = (LPSTR) alloca(cbDataA);
+			lpDataA = (LPSTR) alloca(cbDataA + 1);
 			WideCharToMultiByte(CP_ACP, 0, (LPWSTR) lpData, cbData, lpDataA, cbDataA, NULL, NULL);
+			lpDataA[cbDataA] = 0;
 			lpData = (CONST BYTE*) lpDataA;
 		}
 	}
