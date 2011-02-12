@@ -198,6 +198,7 @@ bool filter_out(const char* target, const char* api)
 		"HeapFree",
 		"HeapReAlloc",
 		"HeapSize",
+		"GetProcessHeap",
 		"TlsGetValue",
 		"TlsSetValue",
 		"InitializeCriticalSection",
