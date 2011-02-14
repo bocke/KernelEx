@@ -347,6 +347,10 @@ SOURCE=.\ws2_32\_ws2_32_apilist.h
 
 SOURCE=.\ws2_32\addinfo.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\ws2_32\select_fix.c
+# End Source File
 # End Group
 # Begin Group "ole32"
 
