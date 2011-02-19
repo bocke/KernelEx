@@ -109,6 +109,7 @@ LANGID WINAPI GetUserDefaultUILanguage_new(void);
 LANGID WINAPI GetSystemDefaultUILanguage_new(void);
 BOOL WINAPI EnumUILanguagesA_new(UILANGUAGE_ENUMPROCA pUILangEnumProc, DWORD dwFlags, LONG_PTR lParam);
 BOOL WINAPI EnumUILanguagesW_new(UILANGUAGE_ENUMPROCW pUILangEnumProc, DWORD dwFlags, LONG_PTR lParam);
+LANGID WINAPI SetThreadUILanguage_new(LANGID LangId);
 ATOM WINAPI AddAtomW_new(LPCWSTR strW);
 BOOL WINAPI CopyFileExW_new(LPCWSTR lpExistingFileNameW, LPCWSTR lpNewFileNameW, LPPROGRESS_ROUTINE lpProgressRoutine, LPVOID lpData, LPBOOL pbCancel, DWORD dwCopyFlags);
 BOOL WINAPI CopyFileW_new(LPCWSTR lpExistingFileNameW, LPCWSTR lpNewFileNameW, BOOL bFailIfExists);
