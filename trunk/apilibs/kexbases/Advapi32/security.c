@@ -1570,10 +1570,7 @@ LONG WINAPI RegGetKeySecurity_new(
 			pSecurityDescriptor?*pSecurityDescriptor:0);
 
     if (!lpcbSecurityDescriptor)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
+        return ERROR_INVALID_PARAMETER;
 
 	return FillSecurityDescriptor(SecurityInformation, pSecurityDescriptor,
 			*lpcbSecurityDescriptor, lpcbSecurityDescriptor);
