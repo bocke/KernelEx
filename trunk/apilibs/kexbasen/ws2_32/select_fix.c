@@ -26,7 +26,7 @@
 /* fixes 100% cpu usage when timeout < 1ms */
 
 /* MAKE_EXPORT select_new=select */
-int select_new(
+int FAR PASCAL select_new(
 	int nfds,	
 	fd_set FAR * readfds,	
 	fd_set FAR * writefds,	
