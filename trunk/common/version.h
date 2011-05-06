@@ -23,7 +23,7 @@
 #define __VERSION_H
 
 #define VERSION_STR      "4.5.1"
-#define VERSION_CODE     0x04050100
+#define VERSION_CODE     0x0405006E
 #define RCVERSION        4, 5, 11, 0
 #define _RCVERSION_      "4, 5, 11, 0"
 
