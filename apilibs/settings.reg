@@ -89,4 +89,6 @@ REGEDIT4
 "*\\DXWEBSETUP.EXE"=dword:00000001
 ;-OpenOffice.org
 "*\\PROGRAM\\CRASHREP.EXE"=dword:00000001
+;Canon PageComposer Queue Manager
+"*\\CPC10Q.EXE"=dword:00000001
 
