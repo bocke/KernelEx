@@ -775,6 +775,8 @@ PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	DBGASSERT(ppmteModTable != NULL);
 
 	MODREF* mr = MRFromHLib(hModule);
+	if (mr == NULL)
+		return NULL;
 	IMTE* imte = (*ppmteModTable)[mr->mteIndex];
 	IMAGE_NT_HEADERS* nt_hdr = imte->pNTHdr;
 
