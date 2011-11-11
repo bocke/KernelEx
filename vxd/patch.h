@@ -1,6 +1,6 @@
 /*
  *  KernelEx
- *  Copyright (C) 2010, Xeno86
+ *  Copyright (C) 2010-2011, Xeno86
  *
  *  This file is part of KernelEx source code.
  *
@@ -22,51 +22,31 @@
 #ifndef __PATCH_H
 #define __PATCH_H
 
-class PEmanip;
+enum MessageID
+{
+	IDS_NOPAT,
+	IDS_MULPAT,
+	IDS_FAILSEC,
+	IDS_ERRCHECK,
+	IDS_WINVER,
+	IDS_DOWNGRADE,
+};
 
 class Patch
 {
 public:
-	Patch(PEmanip& pem);
-	void apply();
+	Patch() {}
+	virtual bool apply() = 0;
+	
+protected:
+	void ShowError(MessageID id, ...);
 	static int find_pattern(DWORD offset, int size, const short* pattern, int pat_len, DWORD* found_loc);
-
-private:
 	void set_pattern(DWORD loc, const short* new_pattern, int pat_len);
-	void prepare_subsystem_check();
-	void find_resource_check1();
-	void find_resource_check2();
-	void disable_named_and_rcdata_resources_mirroring();
-	void mod_imte_alloc();
-	void mod_mr_alloc();
-	void mod_pdb_alloc();
-	void find_ExportFromX();
-	void find_IsKnownDLL();
-	void find_FLoadTreeNotify1();
-	void find_FLoadTreeNotify2();
 	DWORD decode_call(DWORD addr, int len = 0);
 	DWORD decode_jmp(DWORD addr, int len = 0);
 	bool is_call_ref(DWORD loc, DWORD target);
 	void set_call_ref(DWORD loc, DWORD target);
-	void set_jmp_ref(DWORD loc, DWORD target);
-	bool is_fixupc(DWORD addr);
-
-	PEmanip& pefile;
-	DWORD _GetOrdinal;
-	DWORD _ExportFromOrdinal;
-	DWORD _ExportFromName;
-	DWORD _IsKnownDLL;
-	DWORD _FLoadTreeNotify;
-	DWORD _SubsysCheckPerform;
-	DWORD GetOrdinal_call1;
-	DWORD GetOrdinal_call2;
-	DWORD gpa_ExportFromOrdinal_call;
-	DWORD gpa_ExportFromName_call;
-	DWORD EFN_EFO_call;
-	DWORD IsKnownDLL_call;
-	DWORD FLoadTreeNotify_call1;
-	DWORD FLoadTreeNotify_call2;
-	DWORD SubsysCheck_jmp;
+	void set_jmp_ref(DWORD loc, DWORD target);	
 };
 
 #endif

@@ -22,6 +22,7 @@
 #ifndef _SETUP_PEMANIP_H
 #define _SETUP_PEMANIP_H
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winnt.h>
 
@@ -38,14 +39,15 @@ public:
 	void* RvaToPointer(DWORD Rva);
 	DWORD PointerToRva(void* pointer);
 	void* GetSectionByName(const char* name);
-	int GetSectionSize(const char* name);
+	DWORD GetSectionSize(const char* name);
 	bool AllocSectionSpace(const char* name, int needed_space, void** ptr, int align = 1);
 	DWORD GetExportedAPI(const char* func);
 	DWORD GetImageBase();
+	void* CreateBackup();
+	static unsigned long ALIGN(unsigned long x, unsigned long y);
 
 private:
 	void ZeroInit();
-	static unsigned long ALIGN(unsigned long x, unsigned long y);
 	IMAGE_SECTION_HEADER* FindSectionByName(const char* name);
 
 	bool has_target;

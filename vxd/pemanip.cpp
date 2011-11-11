@@ -121,7 +121,7 @@ void* PEmanip::GetSectionByName(const char* name)
 	return NULL;
 }
 
-int PEmanip::GetSectionSize(const char* name)
+DWORD PEmanip::GetSectionSize(const char* name)
 {
 	IMAGE_SECTION_HEADER* section = FindSectionByName(name);
 
@@ -146,12 +146,12 @@ bool PEmanip::AllocSectionSpace(const char* name, int needed_space, void** ptr, 
 	DWORD max_size = (Section + 1)->VirtualAddress - Section->VirtualAddress;
 	int available_space = max_size - current_size;
 
-	DBGPRINTF(("Bytes available: %d, ", available_space));
-	DBGPRINTF(("Bytes needed: %d\n", needed_space));
+	DBGPRINTF(("Allocating space in section '%s' avail: %d  needed: %d",
+			name, available_space, needed_space));
 
 	if (available_space < needed_space)
 	{
-		DBGPRINTF(("Not enough space in section!\n"));
+		DBGPRINTF(("Not enough space in section!"));
 		return false;
 	}
 
@@ -188,4 +188,13 @@ DWORD PEmanip::GetExportedAPI(const char* func)
 	}
 
 	return 0;
+}
+
+void* PEmanip::CreateBackup()
+{
+	if (!has_target)
+		return NULL;
+	void* mem = _HeapAllocate(target_len, HEAPSWAP);
+	memcpy(mem, MZh, target_len);
+	return mem;
 }

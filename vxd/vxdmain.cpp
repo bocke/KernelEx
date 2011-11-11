@@ -19,21 +19,25 @@
  *
  */
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 extern "C" {
 #define WANTVXDWRAPS
 #include <vmm.h>
 #include <debug.h>
-#include <vxdldr.h>
 #include <vxdwraps.h>
 #include <vwin32.h>
 };
 #include <winerror.h>
 #include "vxdmain.h"
+#include "debug.h"
 #include "pemanip.h"
-#include "patch.h"
+#include "patch_kernel32.h"
 
-_Declare_Virtual_Device(VKRNLEX, 1, 0, ControlDispatcher, UNDEFINED_DEVICE_ID, UNDEFINED_INIT_ORDER, 0, 0, 0);
+#define V_MAJOR		1
+#define V_MINOR		0
+
+_Declare_Virtual_Device(VKRNLEX, V_MAJOR, V_MINOR, ControlDispatcher, UNDEFINED_DEVICE_ID, UNDEFINED_INIT_ORDER, 0, 0, 0);
 
 DWORD ( _stdcall *CVxD_W32_Proc[] )(DWORD, PDIOCPARAMETERS) = {
         VKernelEx_W32_Proc1};
@@ -50,6 +54,8 @@ BOOL __stdcall ControlDispatcher(
 {
 	switch(dwControlMessage)
 	{
+	case SYS_CRITICAL_INIT:
+		return VKernelEx_Critical_Init();
 	case DEVICE_INIT:
 		return VKernelEx_Dynamic_Init();
 	case SYS_DYNAMIC_DEVICE_INIT:
@@ -64,11 +70,6 @@ BOOL __stdcall ControlDispatcher(
 		return VKernelEx_Create_Process(EDX);
 	case DESTROY_PROCESS:
 		return VKernelEx_Destroy_Process(EDX);
-	case SYS_VM_INIT:
-	case SYS_VM_TERMINATE:
-	case KERNEL32_INITIALIZED:
-	case KERNEL32_SHUTDOWN:
-		__asm int 3
 	default:
 		return TRUE;
 	}
@@ -78,6 +79,13 @@ extern "C"
 void __cdecl abort(void)
 {
 	__asm int 3
+}
+
+extern "C"
+int __cdecl _purecall (void)
+{
+	abort();
+	return 0;
 }
 
 extern "C"
@@ -112,7 +120,7 @@ DWORD _stdcall VKernelEx_W32_DeviceIOControl(
     //  (this happens just after SYS_DYNAMIC_INIT)
     if ( dwService == DIOC_OPEN )
     {
-        Out_Debug_String("VKRNLEX: WIN32 DEVIOCTL supported here!\n\r");
+        DBGPRINTF(("WIN32 DEVIOCTL supported here!"));
         // Must return 0 to tell WIN32 that this VxD supports DEVIOCTL
         dwRetVal = 0;
     }
@@ -143,7 +151,7 @@ DWORD _stdcall VKernelEx_W32_Proc1(DWORD hDevice, PDIOCPARAMETERS lpDIOCParms)
     PDWORD pdw;
 	HVM hSysVM;
 
-    Out_Debug_String("VKRNLEX: VKernelEx_W32_Proc1\n\r");
+    DBGPRINTF(("VKernelEx_W32_Proc1"));
 
     pdw = (PDWORD)lpDIOCParms->lpvOutBuffer;
     hSysVM = Get_Sys_VM_Handle();
@@ -166,58 +174,89 @@ BOOL _stdcall VKernelEx_Destroy_Process(DWORD pid)
 BOOL _stdcall VKernelEx_Begin_PM_App(HVM hVM)
 {
 	WORD version;
-	DWORD k32addr;
+	void* k32ptr;
+	void* backup = NULL;
+	bool allOK = false;
 
 	if (!Test_Sys_VM_Handle(hVM))
-		return FALSE;
+		return TRUE;
 
 	version = Get_VMM_Version();
 
 	if (version >= 0x045A)
-		k32addr = 0xBFF60000; //WINME
+		k32ptr = (void*) 0xBFF60000; //WINME
 	else
-		k32addr = 0xBFF70000; //WIN98
+		k32ptr = (void*) 0xBFF70000; //WIN98
 
 	__try
 	{
-		if (*(WORD*)k32addr == 'ZM')
+		WORD sign = 0;
+
+		__try
 		{
-			PEmanip pem((void*) k32addr);
-			Patch patch(pem);
-			patch.apply();
+			sign = *(WORD*) k32ptr;
 		}
+		__except(EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+
+		if (sign == 'ZM')
+		{
+			DBGPRINTF(("KERNEL32 located @ 0x%08x", k32ptr));
+			PEmanip pem;
+			pem.OpenMemory(k32ptr);
+			backup = pem.CreateBackup();
+			Patch_kernel32 patch(pem);
+			if (patch.apply())
+				allOK = true;
+		}
+		else
+			DBGPRINTF(("couldn't locate KERNEL32"));
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		Out_Debug_String("VKRNLEX: Kernel32 fail!\n\r");
-		return TRUE;
 	}
 
-	Out_Debug_String("VKRNLEX: Kernel32 win!\n\r");
+	if (!allOK)
+	{
+		DBGPRINTF(("KERNEL32 patch failed!"));
+		if (backup != NULL)
+			memcpy(k32ptr, backup, _HeapGetSize(backup, 0));
+	}
+
+	if (backup != NULL)
+		_HeapFree(backup, 0);
+
 	return TRUE;
 }
 
 BOOL _stdcall VKernelEx_Dynamic_Exit(void)
 {
-    Out_Debug_String("VKRNLEX: Dynamic Exit\n\r");
+    DBGPRINTF(("Exit"));
 
     return VXD_SUCCESS;
 }
 
 DWORD _stdcall VKernelEx_CleanUp(void)
 {
-    Out_Debug_String("VKRNLEX: Cleaning Up\n\r");
+    DBGPRINTF(("Cleaning Up"));
     return VXD_SUCCESS;
 }
 
 #pragma VxD_ICODE_SEG
 #pragma VxD_IDATA_SEG
 
-BOOL _stdcall VKernelEx_Dynamic_Init(void)
+BOOL _stdcall VKernelEx_Critical_Init(void)
 {
-    Out_Debug_String("VKRNLEX: Dynamic Init\n\r");
+	DBGPRINTF(("KernelEx Virtual Device v" STR(V_MAJOR) "." STR(V_MINOR)));
+    DBGPRINTF(("Critical Init"));
 
     return VXD_SUCCESS;
 }
 
+BOOL _stdcall VKernelEx_Dynamic_Init(void)
+{
+    DBGPRINTF(("Init"));
 
+    return VXD_SUCCESS;
+}
