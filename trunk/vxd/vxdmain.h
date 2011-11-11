@@ -22,6 +22,9 @@
 #ifndef __VXDMAIN_H
 #define __VXDMAIN_H
 
+#define __STR(x)		#x
+#define STR(x)			__STR(x)
+
 #define EXTERNC extern "C"
 
 #define	_Declare_Virtual_Device(name, ver_major, ver_minor, ctrl_proc, device_num, init_order, V86_proc, PM_proc, ref_data) \
@@ -48,6 +51,7 @@ EXTERNC struct VxD_Desc_Block name##_DDB = \
 	'Rsv1', 'Rsv2', 'Rsv3' \
 }
 
+BOOL _stdcall VKernelEx_Critical_Init(void);
 BOOL _stdcall VKernelEx_Dynamic_Init(void);
 BOOL _stdcall VKernelEx_Dynamic_Exit(void);
 DWORD _stdcall VKernelEx_W32_DeviceIOControl(DWORD, DWORD, PDIOCPARAMETERS);

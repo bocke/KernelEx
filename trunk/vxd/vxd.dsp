@@ -90,11 +90,28 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\debug.cpp
+
+!IF  "$(CFG)" == "VxD - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "VxD - Win32 Debug"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\KernelEx.def
 # End Source File
 # Begin Source File
 
 SOURCE=.\patch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\patch_kernel32.cpp
 # End Source File
 # Begin Source File
 
@@ -111,6 +128,10 @@ SOURCE=.\vxdmain.cpp
 # Begin Source File
 
 SOURCE=.\patch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\patch_kernel32.h
 # End Source File
 # Begin Source File
 
