@@ -27,7 +27,7 @@ BOOL _stdcall VKernelEx_Dynamic_Init(void);
 BOOL _stdcall VKernelEx_Dynamic_Exit(void);
 DWORD _stdcall VKernelEx_W32_DeviceIOControl(DWORD, DWORD, PDIOCPARAMETERS);
 DWORD _stdcall VKernelEx_CleanUp(void);
-DWORD _stdcall VKernelEx_W32_Proc1(DWORD, PDIOCPARAMETERS);
+DWORD _stdcall VKernelEx_IOCTL_Connect(DWORD, PDIOCPARAMETERS);
 BOOL _stdcall VKernelEx_Create_Process(DWORD pid);
 BOOL _stdcall VKernelEx_Destroy_Process(DWORD pid);
 BOOL _stdcall VKernelEx_Begin_PM_App(HVM hVM);

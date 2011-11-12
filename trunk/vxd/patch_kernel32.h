@@ -31,6 +31,7 @@ class Patch_kernel32 : public Patch
 public:
 	Patch_kernel32(PEmanip& pem);
 	bool apply();
+	static DWORD stub_address;
 
 private:
 	bool find_signature();

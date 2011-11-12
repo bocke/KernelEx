@@ -35,16 +35,18 @@ extern "C" {
 #include "pemanip.h"
 #include "patch_kernel32.h"
 #include "patch_ifsmgr.h"
+#include "interface.h"
 
 #define V_MAJOR		1
 #define V_MINOR		0
 
 _Declare_Virtual_Device(VKRNLEX, V_MAJOR, V_MINOR, ControlDispatcher, UNDEFINED_DEVICE_ID, UNDEFINED_INIT_ORDER, 0, 0, 0);
 
-DWORD ( _stdcall *CVxD_W32_Proc[] )(DWORD, PDIOCPARAMETERS) = {
-        VKernelEx_W32_Proc1};
+DWORD ( _stdcall *VKernelEx_W32_Proc[] )(DWORD, PDIOCPARAMETERS) = {
+        VKernelEx_IOCTL_Connect
+};
 
-#define MAX_CVXD_W32_API (sizeof(CVxD_W32_Proc)/sizeof(DWORD))
+#define MAX_VKERNELEX_W32_API (sizeof(VKernelEx_W32_Proc)/sizeof(DWORD))
 
 BOOL __stdcall ControlDispatcher(
     DWORD dwControlMessage,
@@ -83,13 +85,14 @@ BOOL __stdcall ControlDispatcher(
 DWORD _stdcall VKernelEx_W32_DeviceIOControl(
 	DWORD  dwService,
 	DWORD  hDevice,
-    PDIOCPARAMETERS lpDIOCParms)
+    PDIOCPARAMETERS lpDIOCParms
+)
 {
     DWORD dwRetVal = 0;
 
     // DIOC_OPEN is sent when VxD is loaded w/ CreateFile 
     //  (this happens just after SYS_DYNAMIC_INIT)
-    if ( dwService == DIOC_OPEN )
+    if (dwService == DIOC_OPEN)
     {
         DBGPRINTF(("WIN32 DEVIOCTL supported here!"));
         // Must return 0 to tell WIN32 that this VxD supports DEVIOCTL
@@ -97,12 +100,12 @@ DWORD _stdcall VKernelEx_W32_DeviceIOControl(
     }
     // DIOC_CLOSEHANDLE is sent when VxD is unloaded w/ CloseHandle
     //  (this happens just before SYS_DYNAMIC_EXIT)
-    else if ( dwService == DIOC_CLOSEHANDLE )
+    else if (dwService == DIOC_CLOSEHANDLE)
     {
         // Dispatch to cleanup proc
         dwRetVal = VKernelEx_CleanUp();
     }
-    else if ( dwService > MAX_CVXD_W32_API )
+    else if (dwService > MAX_VKERNELEX_W32_API)
     {
         // Returning a positive value will cause the WIN32 DeviceIOControl
         // call to return FALSE, the error code can then be retrieved
@@ -112,22 +115,26 @@ DWORD _stdcall VKernelEx_W32_DeviceIOControl(
     else
     {
         // CALL requested service
-        dwRetVal = (CVxD_W32_Proc[dwService-1])(hDevice, lpDIOCParms);
+        dwRetVal = (VKernelEx_W32_Proc[dwService-1])(hDevice, lpDIOCParms);
     }
     return dwRetVal;
 }
 
-DWORD _stdcall VKernelEx_W32_Proc1(DWORD hDevice, PDIOCPARAMETERS lpDIOCParms)
+DWORD _stdcall VKernelEx_IOCTL_Connect(DWORD hDevice, PDIOCPARAMETERS lpDIOCParms)
 {
-    PDWORD pdw;
-	HVM hSysVM;
+    ioctl_connect_params* p;
 
-    DBGPRINTF(("VKernelEx_W32_Proc1"));
+    DBGPRINTF(("VKernelEx_IOCTL_Connect"));
 
-    pdw = (PDWORD)lpDIOCParms->lpvOutBuffer;
-    hSysVM = Get_Sys_VM_Handle();
-    pdw[0] = hSysVM;
-    pdw[1] = Get_Execution_Focus();
+	if (lpDIOCParms->cbOutBuffer < sizeof(ioctl_connect_params))
+		return ERROR_INVALID_PARAMETER;
+
+    p = (ioctl_connect_params*) lpDIOCParms->lpvOutBuffer;
+	p->vxd_version = MAKEWORD(V_MINOR, V_MAJOR);
+	p->status = true;
+	p->stub_ptr = (KernelEx_dataseg*) Patch_kernel32::stub_address;
+
+	*(DWORD*) lpDIOCParms->lpcbBytesReturned = sizeof(ioctl_connect_params);
 
     return NO_ERROR;
 }
