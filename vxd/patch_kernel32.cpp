@@ -23,12 +23,14 @@
 #include <windows.h>
 #include "pemanip.h"
 #include "patch_kernel32.h"
-#include "loadstub.h"
+#include "interface.h"
 #include "debug.h"
 
 #define CODE_SEG ".text"
 #define DATA_SEG ".data"
 #define INIT_SEG "_INIT"
+
+DWORD Patch_kernel32::stub_address;
 
 Patch_kernel32::Patch_kernel32(PEmanip& pem) : pefile(pem)
 {
@@ -396,6 +398,8 @@ bool Patch_kernel32::create_stubs()
 		ShowError(IDS_FAILSEC, DATA_SEG);
 		return false;
 	}
+
+	stub_address = (DWORD) dseg;
 
 	memcpy(cseg->signature, "KrnlEx", 6);
 	cseg->version = KEX_STUB_VER;

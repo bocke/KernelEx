@@ -26,7 +26,7 @@
 #include "apiconf.h"
 #include "apiconfmgr.h"
 #include "internals.h"
-#include "../setup/loadstub.h"
+#include "../vxd/interface.h"
 #include "thunks.h"
 #include "SettingsDB.h"
 #include "ModInit.h"
@@ -785,25 +785,6 @@ PROC WINAPI iGetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 	return OriExportFromName(nt_hdr, 0, lpProcName);
 }
 
-static IMAGE_SECTION_HEADER* get_data_section()
-{
-	int i;
-	IMAGE_DOS_HEADER* MZh = (IMAGE_DOS_HEADER*) GetModuleHandle("kernel32");
-	IMAGE_NT_HEADERS* PEh = (IMAGE_NT_HEADERS*) ((int)MZh + MZh->e_lfanew);
-	IMAGE_SECTION_HEADER* section = (IMAGE_SECTION_HEADER*) 
-		((int)PEh 
-		+ PEh->FileHeader.SizeOfOptionalHeader 
-		+ sizeof(IMAGE_FILE_HEADER) 
-		+ sizeof(DWORD));
-	for (i = 0 ; i < PEh->FileHeader.NumberOfSections ; i++)
-	{
-		if (!strcmpi((char*) section->Name, ".data"))
-			return section;
-		section++;
-	}
-	return NULL;
-}
-
 static void reset_imtes()
 {
 	DBGPRINTF(("Reseting IMTEs\n"));
@@ -865,41 +846,28 @@ void dump_imtes(void)
 int resolver_init()
 {
 	DBGPRINTF(("resolver_init()\n"));
-	DWORD ptr;
-	KernelEx_dataseg* dseg = NULL;
-	IMAGE_SECTION_HEADER* section = get_data_section();
-	DWORD sign_len = sizeof(KEX_SIGNATURE) - 1;
 
-	if (!section)
-		return 0;
-	
-	ptr = (DWORD) h_kernel32 + section->VirtualAddress + section->Misc.VirtualSize - sign_len;
-	while (ptr >= (DWORD) h_kernel32 + section->VirtualAddress)
+	ioctl_connect_params params;
+	if (!VKernelEx_ioctl(IOCTL_CONNECT, &params, sizeof(params)))
 	{
-		if (!memcmp((void*)ptr, KEX_SIGNATURE, sign_len))
-		{
-			dseg = (KernelEx_dataseg*) ptr;
-			break;
-		}
-		ptr--;
+		DBGPRINTF(("IOCTL_Connect failed!\n"));
+		return 0;
 	}
+
+	KernelEx_dataseg* dseg = params.stub_ptr;
 
 	if (!dseg)
 	{
-		DBGPRINTF(("Signature not found\n"));
-		if (!rerun_setup())
-			ShowError(IDS_NOTREADY);
+		DBGPRINTF(("Stub not found\n"));
 		return 0;
 	}
 	else
-		DBGPRINTF(("Signature found @ 0x%08x\n", ptr));
+		DBGPRINTF(("Stub found @ 0x%08x\n", dseg));
 
 	if (dseg->version != KEX_STUB_VER)
 	{
 		DBGPRINTF(("Wrong stub version, expected: %d, got: %d\n", 
 				KEX_STUB_VER, dseg->version));
-		if (!rerun_setup())
-			ShowError(IDS_STUBMISMATCH, KEX_STUB_VER, dseg->version);
 		return 0;
 	}
 
