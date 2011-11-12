@@ -24,7 +24,7 @@
 
 #define KEX_SIGNATURE "KrnlEx"
 /* Update this whenever patching functions are changed. */
-#define KEX_STUB_VER 10
+#define KEX_STUB_VER 11
 
 enum
 {
