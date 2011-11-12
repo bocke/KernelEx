@@ -111,11 +111,19 @@ SOURCE=.\patch.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\patch_ifsmgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\patch_kernel32.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\pemanip.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\util.c
 # End Source File
 # Begin Source File
 
@@ -131,11 +139,19 @@ SOURCE=.\patch.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\patch_ifsmgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\patch_kernel32.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\pemanip.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\util.h
 # End Source File
 # Begin Source File
 

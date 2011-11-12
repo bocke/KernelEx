@@ -30,9 +30,11 @@ extern "C" {
 };
 #include <winerror.h>
 #include "vxdmain.h"
+#include "util.h"
 #include "debug.h"
 #include "pemanip.h"
 #include "patch_kernel32.h"
+#include "patch_ifsmgr.h"
 
 #define V_MAJOR		1
 #define V_MINOR		0
@@ -73,37 +75,6 @@ BOOL __stdcall ControlDispatcher(
 	default:
 		return TRUE;
 	}
-}
-
-extern "C"
-void __cdecl abort(void)
-{
-	__asm int 3
-}
-
-extern "C"
-int __cdecl _purecall (void)
-{
-	abort();
-	return 0;
-}
-
-extern "C"
-void __cdecl _assert(const char* expr, const char* file, unsigned line)
-{
-	_Debug_Printf_Service("Assertion failed: '%s' in %s line %d", expr, file, line);
-	abort();
-}
-
-extern "C"
-void __declspec(naked) _stdcall RtlUnwind(
-	PVOID TargetFrame,
-	PVOID TargetIp,
-	PVOID ExceptionRecord,
-	PVOID ReturnValue
-)
-{
-	VMMJmp(ObsoleteRtlUnwind);
 }
 
 /****************************************************************************
@@ -250,6 +221,9 @@ BOOL _stdcall VKernelEx_Critical_Init(void)
 {
 	DBGPRINTF(("KernelEx Virtual Device v" STR(V_MAJOR) "." STR(V_MINOR)));
     DBGPRINTF(("Critical Init"));
+
+	Patch_ifsmgr patch;
+	patch.apply();
 
     return VXD_SUCCESS;
 }
