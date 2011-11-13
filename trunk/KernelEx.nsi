@@ -219,12 +219,13 @@ Section "Install"
   
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
 
-  ;Revert KERNEL32.DLL patch in case of upgrade
-  IfFileExists "$WINDIR\SYSBCKUP\KERNEL32.DLL" 0 +6
+  ;Revert KERNEL32.DLL file patch in case of upgrade
+  IfFileExists "$WINDIR\SYSBCKUP\KERNEL32.DLL" 0 +7
     GetTempFileName $0 "$SYSDIR"
     Delete $0
-    CopyFiles /SILENT "$WINDIR\SYSBCKUP\KERNEL32.DLL" $0
+    Rename /REBOOTOK "$WINDIR\SYSBCKUP\KERNEL32.DLL" $0
     Rename /REBOOTOK $0 "$SYSDIR\kernel32.dll"
+    Delete "$INSTDIR\kernel32.bak"
     Goto Revert_Done
 
   IfFileExists "$INSTDIR\kernel32.bak" 0 +6
