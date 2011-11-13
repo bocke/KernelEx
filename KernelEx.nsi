@@ -207,14 +207,7 @@ SectionEnd
 Section "Install"
 
   SetDetailsView show
-
-  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
-  IfErrors +5
-    DetailPrint "Detected unfinished previous installation."
-    DetailPrint "You have to restart the system in order to complete it before you can proceed."
-    MessageBox MB_ICONSTOP|MB_OK "You have to restart the system first."
-    Abort
-
+  
   SetOutPath "$INSTDIR"
   
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
@@ -384,13 +377,6 @@ Section "Uninstall"
 
   SetDetailsView show
 
-  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
-  IfErrors +5
-    DetailPrint "Detected unfinished previous installation."
-    DetailPrint "You have to restart the system in order to complete it before you can proceed."
-    MessageBox MB_ICONSTOP|MB_OK "You have to restart the system first."
-    Abort
-  
   ;Files to uninstall
   IfFileExists "$WINDIR\SYSBCKUP\KERNEL32.DLL" 0 +5
     GetTempFileName $0 "$SYSDIR"
@@ -457,6 +443,22 @@ Section "Uninstall"
 SectionEnd
 
 ;--------------------------------
+; Detect obsolete pre-4.0 KUP or KEX
+Function DetectOldKex
+
+  System::Call "kernel32::KUPVersion(m .r0)"
+  StrCmp $0 "" 0 +4
+    System::Call "kernel32::KEXVersion(m .r0)"
+    StrCmp $0 "" 0 +2
+      Return
+  StrCpy $1 $0 1 0
+  IntCmp $1 4 +3 0 +3
+    MessageBox MB_ICONSTOP|MB_OK "Setup has detected previous version of KernelEx ($0) installed on this computer. Please uninstall it before proceeding further."
+    Abort
+
+FunctionEnd
+
+;--------------------------------
 ;.onInit
 
 Function .onInit
@@ -471,4 +473,22 @@ Function .onInit
   
   lbl_Ok:
 
- FunctionEnd
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
+  IfErrors +3
+    MessageBox MB_ICONSTOP|MB_OK "Detected unfinished previous installation.$\n\
+      You have to restart the system in order to complete it before you can proceed further."
+    Abort
+
+  Call DetectOldKex
+
+FunctionEnd
+
+Function un.onInit
+
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot"
+  IfErrors +3
+    MessageBox MB_ICONSTOP|MB_OK "Detected unfinished previous installation.$\n\
+      You have to restart the system in order to complete it before you can proceed further."
+    Abort
+  
+FunctionEnd
