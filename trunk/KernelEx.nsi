@@ -1,4 +1,5 @@
   !define _VERSION '4.5.2'
+  !define _VERSION_CODE 0x04050078
   
   !ifndef _DEBUG
     !define FLAVOUR 'Release'
@@ -453,7 +454,20 @@ Function DetectOldKex
       Return
   StrCpy $1 $0 1 0
   IntCmp $1 4 +3 0 +3
-    MessageBox MB_ICONSTOP|MB_OK "Setup has detected previous version of KernelEx ($0) installed on this computer. Please uninstall it before proceeding further."
+    MessageBox MB_ICONSTOP|MB_OK "Setup has detected previous version of KernelEx ($0) installed on this computer. Please uninstall it before continuing."
+    Abort
+
+FunctionEnd
+
+;--------------------------------
+; We can't predict future... downgrading from higher version is forbidden
+Function DetectDowngrade
+
+  System::Call "kernelex::kexGetKEXVersion() i.r0 ? u"
+  StrCmp $0 "" 0 +2
+    Return
+  IntCmp $0 ${_VERSION_CODE} +3 +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Can't downgrade. Please uninstall currently installed version of KernelEx before continuing."
     Abort
 
 FunctionEnd
@@ -480,6 +494,7 @@ Function .onInit
     Abort
 
   Call DetectOldKex
+  Call DetectDowngrade
 
 FunctionEnd
 
