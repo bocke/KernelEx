@@ -399,6 +399,10 @@ bool Patch_kernel32::create_stubs()
 		return false;
 	}
 
+	pagelock(pefile.GetImageBase(), 1);
+	pagelock((DWORD) cseg, sizeof(KernelEx_codeseg));
+	pagelock((DWORD) dseg, sizeof(KernelEx_dataseg));
+
 	stub_address = dseg;
 
 	memcpy(cseg->signature, "KrnlEx", 6);
