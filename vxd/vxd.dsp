@@ -135,6 +135,10 @@ SOURCE=.\vxdmain.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\interface.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\patch.h
 # End Source File
 # Begin Source File

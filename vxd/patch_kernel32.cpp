@@ -30,10 +30,10 @@
 #define DATA_SEG ".data"
 #define INIT_SEG "_INIT"
 
-DWORD Patch_kernel32::stub_address;
-
 Patch_kernel32::Patch_kernel32(PEmanip& pem) : pefile(pem)
 {
+	stub_address = 0;
+
 	code_seg_start = (DWORD) pefile.GetSectionByName(CODE_SEG);
 	code_seg_size = pefile.GetSectionSize(CODE_SEG);
 
@@ -399,7 +399,7 @@ bool Patch_kernel32::create_stubs()
 		return false;
 	}
 
-	stub_address = (DWORD) dseg;
+	stub_address = dseg;
 
 	memcpy(cseg->signature, "KrnlEx", 6);
 	cseg->version = KEX_STUB_VER;

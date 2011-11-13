@@ -48,6 +48,8 @@ DWORD ( _stdcall *VKernelEx_W32_Proc[] )(DWORD, PDIOCPARAMETERS) = {
 
 #define MAX_VKERNELEX_W32_API (sizeof(VKernelEx_W32_Proc)/sizeof(DWORD))
 
+static ioctl_connect_params s_connect_params;
+
 BOOL __stdcall ControlDispatcher(
     DWORD dwControlMessage,
     DWORD EBX,
@@ -122,19 +124,13 @@ DWORD _stdcall VKernelEx_W32_DeviceIOControl(
 
 DWORD _stdcall VKernelEx_IOCTL_Connect(DWORD hDevice, PDIOCPARAMETERS lpDIOCParms)
 {
-    ioctl_connect_params* p;
-
     DBGPRINTF(("VKernelEx_IOCTL_Connect"));
 
-	if (lpDIOCParms->cbOutBuffer < sizeof(ioctl_connect_params))
+	if (lpDIOCParms->cbOutBuffer < sizeof(s_connect_params))
 		return ERROR_INVALID_PARAMETER;
 
-    p = (ioctl_connect_params*) lpDIOCParms->lpvOutBuffer;
-	p->vxd_version = MAKEWORD(V_MINOR, V_MAJOR);
-	p->status = true;
-	p->stub_ptr = (KernelEx_dataseg*) Patch_kernel32::stub_address;
-
-	*(DWORD*) lpDIOCParms->lpcbBytesReturned = sizeof(ioctl_connect_params);
+    memcpy((void*) lpDIOCParms->lpvOutBuffer, &s_connect_params, sizeof(s_connect_params));
+	*(DWORD*) lpDIOCParms->lpcbBytesReturned = sizeof(s_connect_params);
 
     return NO_ERROR;
 }
@@ -186,7 +182,12 @@ BOOL _stdcall VKernelEx_Begin_PM_App(HVM hVM)
 			backup = pem.CreateBackup();
 			Patch_kernel32 patch(pem);
 			if (patch.apply())
+			{
 				allOK = true;
+				s_connect_params.status = true;
+				s_connect_params.vxd_version = MAKEWORD(V_MINOR, V_MAJOR);
+				s_connect_params.stub_ptr = patch.stub_address;
+			}
 		}
 		else
 			DBGPRINTF(("couldn't locate KERNEL32"));

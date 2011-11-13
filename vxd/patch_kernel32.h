@@ -23,6 +23,7 @@
 #define __PATCH_KERNEL32_H
 
 #include "patch.h"
+#include "interface.h"
 
 class PEmanip;
 
@@ -31,7 +32,8 @@ class Patch_kernel32 : public Patch
 public:
 	Patch_kernel32(PEmanip& pem);
 	bool apply();
-	static DWORD stub_address;
+	
+	KernelEx_dataseg* stub_address;
 
 private:
 	bool find_signature();

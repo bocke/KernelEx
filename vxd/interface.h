@@ -22,9 +22,10 @@
 #ifndef __INTERFACE_H
 #define __INTERFACE_H
 
-#define KEX_SIGNATURE "KrnlEx"
 /* Update this whenever patching functions are changed. */
 #define KEX_STUB_VER 11
+
+#define KEX_SIGNATURE "KrnlEx"
 
 enum
 {

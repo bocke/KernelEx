@@ -857,6 +857,13 @@ int resolver_init()
 
 	KernelEx_dataseg* dseg = params.stub_ptr;
 
+	if (!params.status)
+	{
+		DBGPRINTF(("VKRNLEX failed to initialize!\n"));
+		ShowError(IDS_DRIVERINITFAIL);
+		return 0;
+	}
+
 	if (!dseg)
 	{
 		DBGPRINTF(("Stub not found\n"));
