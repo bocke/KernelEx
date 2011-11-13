@@ -46,7 +46,8 @@ protected:
 	DWORD decode_jmp(DWORD addr, int len = 0);
 	bool is_call_ref(DWORD loc, DWORD target);
 	void set_call_ref(DWORD loc, DWORD target);
-	void set_jmp_ref(DWORD loc, DWORD target);	
+	void set_jmp_ref(DWORD loc, DWORD target);
+	void pagelock(DWORD addr, DWORD count);
 };
 
 #endif

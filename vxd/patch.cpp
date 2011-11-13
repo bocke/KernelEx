@@ -114,6 +114,8 @@ void Patch::set_pattern(DWORD loc, const short* new_pattern, int pat_len)
 		offset++;
 		pat_ptr++;
 	}
+
+	pagelock(loc, pat_len);
 }
 
 DWORD Patch::decode_call(DWORD addr, int len)
@@ -191,6 +193,7 @@ void Patch::set_call_ref(DWORD loc, DWORD target)
 
 	rel = target - (loc + 5);
 	*(DWORD*)(loc + 1) = rel;
+	pagelock(loc + 1, sizeof(DWORD));
 }
 
 // Both addresses have to be from the same section!
@@ -203,11 +206,18 @@ void Patch::set_jmp_ref(DWORD loc, DWORD target)
 	{
 		rel = target - (loc + 5);
 		*(DWORD*)(loc + 1) = rel;
+		pagelock(loc + 1, sizeof(DWORD));
 	}
 	else if (code[0] == 0x0f && code[1] >= 0x80 && code[1] <= 0x8f)
 	{
 		rel = target - (loc + 6);
 		*(DWORD*)(loc + 2) = rel;
+		pagelock(loc + 2, sizeof(DWORD));
 	}
 	else assert(false);
+}
+
+void Patch::pagelock(DWORD addr, DWORD count)
+{
+	_LinPageLock(PAGE(addr), NPAGES((addr & PAGEMASK) + count), 0);
 }
