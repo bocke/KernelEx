@@ -216,39 +216,25 @@ Section "Install"
     Abort
 
   SetOutPath "$INSTDIR"
+  
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\RunServicesOnce" "KexNeedsReboot" ""
 
-  GetTempFileName $R0 "$INSTDIR"
-  File /oname=$R0 "setup\${FLAVOUR}\setupkex.exe"
-  
-  StrCpy $R1 "none"
+  ;Revert KERNEL32.DLL patch in case of upgrade
+  IfFileExists "$WINDIR\SYSBCKUP\KERNEL32.DLL" 0 +6
+    GetTempFileName $0 "$SYSDIR"
+    Delete $0
+    CopyFiles /SILENT "$WINDIR\SYSBCKUP\KERNEL32.DLL" $0
+    Rename /REBOOTOK $0 "$SYSDIR\kernel32.dll"
+    Goto Revert_Done
+
   IfFileExists "$INSTDIR\kernel32.bak" 0 +6
-    StrCpy $R1 "copy"
-    ClearErrors
-    CopyFiles /SILENT "$INSTDIR\kernel32.bak" "$WINDIR\SYSBCKUP\KERNEL32.DLL"
-    IfErrors 0 +2
-      StrCpy $R1 "exist" ;File already exists
+    GetTempFileName $0 "$SYSDIR"
+    Delete $0
+    Rename /REBOOTOK "$INSTDIR\kernel32.bak" $0
+    Rename /REBOOTOK $0 "$SYSDIR\kernel32.dll"
+    Goto Revert_Done
   
-!ifdef _DEBUG
-  nsExec::ExecToLog '"$R0"'
-  Pop $0
-!else
-  ExecWait '"$R0"' $0
-  StrCmp $0 "" 0 +2
-    StrCpy $0 "error"
-!endif
-  DetailPrint "    setup returned: $0"
-  StrCmp $0 "0" +6
-    Delete $R0 ;delete temporary setupkex.exe
-    StrCmp $R1 "copy" 0 +2 ;undo copy
-      Delete "$WINDIR\SYSBCKUP\KERNEL32.DLL"
-    RMDir "$INSTDIR"
-    Abort
-  
-  Rename /REBOOTOK $R0  "$INSTDIR\setupkex.exe"
-  StrCmp $R1 "copy" +2 0
-  StrCmp $R1 "exist" 0 +2
-    Delete /REBOOTOK "$INSTDIR\kernel32.bak" ;delete deprecated update file
-  
+  Revert_Done:
   ;Files to install
   
   ;UpdateDLL_Func params:
@@ -294,6 +280,11 @@ Section "Install"
   File apilibs\settings.reg
   File license.txt
   File "Release Notes.txt"
+  
+  GetTempFileName $0 "$INSTDIR"
+  File /oname=$0 "vxd\${FLAVOUR}\VKrnlEx.vxd"
+  Delete "$INSTDIR\VKrnlEx.vxd"
+  Rename /REBOOTOK $0 "$INSTDIR\VKrnlEx.vxd"
   
   GetTempFileName $0 "$INSTDIR"
   File /oname=$0 auxiliary\msimg32.dll
@@ -352,6 +343,7 @@ Section "Install"
   WriteRegStr HKLM "Software\KernelEx" "InstallDir" $INSTDIR
   
   ;Store run key
+  WriteRegStr HKLM "System\CurrentControlSet\Services\VxD\VKRNLEX" "StaticVxD" "$INSTDIR\VKrnlEx.vxd"
   WriteRegStr HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx" "DLLName" "$INSTDIR\KernelEx.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx" "EntryPoint" "_MprStart@4"
   WriteRegDWORD HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx" "StackSize" 0x1000
@@ -416,6 +408,8 @@ Section "Uninstall"
   Delete "$INSTDIR\license.txt"
   Delete "$INSTDIR\Release Notes.txt"
   
+  Delete /REBOOTOK "$INSTDIR\VKrnlEx.vxd"
+  
   Delete /REBOOTOK "$INSTDIR\msimg32.dll"
   DeleteRegValue HKLM "Software\KernelEx\KnownDLLs" "MSIMG32"
   Delete /REBOOTOK "$INSTDIR\pdh.dll"
@@ -450,6 +444,7 @@ Section "Uninstall"
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(DESC_SETTINGS_PRESERVE)" IDYES +2 IDNO 0
     DeleteRegKey HKLM "Software\KernelEx"
   
+  DeleteRegKey HKLM "System\CurrentControlSet\Services\VxD\VKRNLEX"
   DeleteRegKey HKLM "System\CurrentControlSet\Control\MPRServices\KernelEx"
   DeleteRegKey /ifempty HKLM "System\CurrentControlSet\Control\MPRServices"
   
