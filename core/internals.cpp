@@ -27,6 +27,8 @@
 #include "pemanip.h"
 #include "ModInit.h"
 
+extern "C" int snprintf(char*, size_t, const char*, ...);
+
 #ifdef _DEBUG
 #define _D(x) x
 #else
@@ -78,8 +80,11 @@ bool VKernelEx_ioctl(DWORD command, PVOID buffer, DWORD buffer_size)
 	DWORD retlen;
     HANDLE VKernelEx;
 
-	VKernelEx = CreateFile("\\\\.\\VKRNLEX.VXD", 0, 0, 0,
-		CREATE_NEW, FILE_FLAG_DELETE_ON_CLOSE, 0);
+	char vxdpath[MAX_PATH];
+	snprintf(vxdpath, sizeof(vxdpath), "\\\\.\\%sVKRNLEX.VXD", 
+		(const char*) kernelex_dir);
+
+	VKernelEx = CreateFile(vxdpath, 0, 0, 0, 0, FILE_FLAG_DELETE_ON_CLOSE, 0);
 
 	if (VKernelEx == INVALID_HANDLE_VALUE)
 	{

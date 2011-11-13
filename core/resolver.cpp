@@ -851,6 +851,7 @@ int resolver_init()
 	if (!VKernelEx_ioctl(IOCTL_CONNECT, &params, sizeof(params)))
 	{
 		DBGPRINTF(("IOCTL_Connect failed!\n"));
+		ShowError(IDS_NODRIVER);
 		return 0;
 	}
 
@@ -859,6 +860,7 @@ int resolver_init()
 	if (!dseg)
 	{
 		DBGPRINTF(("Stub not found\n"));
+		ShowError(IDS_DRIVERINITFAIL);
 		return 0;
 	}
 	else
@@ -868,6 +870,7 @@ int resolver_init()
 	{
 		DBGPRINTF(("Wrong stub version, expected: %d, got: %d\n", 
 				KEX_STUB_VER, dseg->version));
+		ShowError(IDS_STUBMISMATCH, KEX_STUB_VER, dseg->version);
 		return 0;
 	}
 
