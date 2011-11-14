@@ -230,6 +230,9 @@ Section "Install"
     Goto Revert_Done
   
   Revert_Done:
+  
+  Delete /REBOOTOK "$INSTDIR\setupkex.exe"
+
   ;Files to install
   
   ;UpdateDLL_Func params:
