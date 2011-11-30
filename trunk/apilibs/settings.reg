@@ -55,6 +55,8 @@ REGEDIT4
 ;-Opera
 "*\\OPERA_11*_SETUP.EXE"="WINXP"
 "*\\OPERA.EXE"="NT2K"
+;-Pidgin
+"*\\PIDGIN.EXE"="NT2K"
 
 [HKEY_LOCAL_MACHINE\Software\KernelEx\AppSettings\Flags]
 ;DISABLE KERNELEX FOR:
