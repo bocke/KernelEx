@@ -494,7 +494,9 @@ HRESULT STDMETHODCALLTYPE CShellLink::SetPath(
 HRESULT STDMETHODCALLTYPE CShellLink::GetClassID(
 /* [out] */ CLSID *pClassID)
 {
-	return m_PersistFile->GetClassID(pClassID);
+	if (m_PersistFile)
+		return m_PersistFile->GetClassID(pClassID);
+	return m_PersistStream->GetClassID(pClassID);
 }
 
 
