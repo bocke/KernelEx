@@ -79,6 +79,8 @@ HANDLE WINAPI OpenThread_new(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD d
 BOOL WINAPI ProcessIdToSessionId_new(DWORD dwProcessId, DWORD *pSessionId);
 DWORD WINAPI WTSGetActiveConsoleSessionId_new(void);
 void WINAPI RtlCaptureContext_new(void* cr);
+BOOL WINAPI SetDllDirectoryA_new(LPCSTR lpPathName);
+BOOL WINAPI SetDllDirectoryW_new(LPCWSTR lpPathNameW);
 BOOL WINAPI SetFilePointerEx_new(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod);
 BOOL WINAPI TryEnterCriticalSection_new(CRITICAL_SECTION* cs);
 LPVOID WINAPI VirtualAllocEx_new(HANDLE hProcess, LPVOID lpAddress, DWORD dwSize, DWORD flAllocationType, DWORD flProtect);
@@ -93,8 +95,6 @@ STUB GetProcessIoCounters_stub;
 STUB RtlCaptureStackBackTrace_stub;
 STUB GetComputerNameExA_stub;
 STUB GetComputerNameExW_stub;
-STUB SetDllDirectoryA_stub;
-STUB SetDllDirectoryW_stub;
 INT WINAPI CompareStringW_new(LCID lcid, DWORD style, LPCWSTR str1, INT len1, LPCWSTR str2, INT len2);
 BOOL WINAPI GetStringTypeW_new(DWORD type, LPCWSTR src, INT count, LPWORD chartype);
 BOOL WINAPI GetStringTypeExW_new(LCID locale, DWORD type, LPCWSTR src, INT count, LPWORD chartype);

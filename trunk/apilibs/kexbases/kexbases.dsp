@@ -245,6 +245,10 @@ SOURCE=.\Kernel32\RtlCaptureContext.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kernel32\DllDirectory.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kernel32\SetFilePointerEx.c
 # End Source File
 # Begin Source File

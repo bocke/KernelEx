@@ -31,5 +31,3 @@ UNIMPL_FUNC(GetProcessIoCounters, 2);
 UNIMPL_FUNC(RtlCaptureStackBackTrace, 4);
 UNIMPL_FUNC(GetComputerNameExA, 3);
 UNIMPL_FUNC(GetComputerNameExW, 3);
-UNIMPL_FUNC(SetDllDirectoryA, 1);
-UNIMPL_FUNC(SetDllDirectoryW, 1);
