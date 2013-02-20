@@ -1,5 +1,5 @@
 To compile you need Microsoft Visual C++ 6.0 SP6 
-with updated xtree header (http://www.dinkumware.com/xtree.txt) 
+with updated headers (use msvc6chk utility under the "util" directory to upgrade compiler headers)
 and supplied with Platform SDK 2003.
 
 You can use batch build feature to automate builds.
